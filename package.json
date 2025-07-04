@@ -1,0 +1,32 @@
+{
+  "name": "dharma",
+  "version": "1.0.0",
+  "description": "Dharma - Full-stack application with NestJS backend and React frontend",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "db:reset": "cd backend && npm run db:reset",
+    "db:sync": "cd backend && npm run db:sync",
+    "db:seed": "cd backend && npm run seed",
+    "codegen": "cd frontend && npm run codegen",
+    "clean": "rm -rf backend/dist frontend/dist",
+    "docker:dev": "docker-compose --profile dev up -d",
+    "docker:prod": "docker-compose --profile prod up -d"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "keywords": [
+    "nestjs",
+    "react",
+    "graphql",
+    "typescript",
+    "fullstack"
+  ],
+  "author": "",
+  "license": "ISC"
+}

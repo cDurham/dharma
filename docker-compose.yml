@@ -1,0 +1,99 @@
+#############################
+# Infrastructure – runs in
+# every profile
+#############################
+services:
+  db:
+    image: postgres:17
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports: ["${DB_PORT:-5432}:5432"]
+    volumes: [db_data:/var/lib/postgresql/data]
+    networks: [app-net]
+
+  zookeeper:
+    image: zookeeper:3.8
+    ports: [2181:2181]
+    networks: [app-net]
+
+  kafka:
+    image: wurstmeister/kafka:2.12-2.5.0
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: [9092:9092]
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks: [app-net]
+
+  #############################
+  # Production profile
+  #############################
+  backend:
+    profiles: ["prod"]
+    build:
+      context: .
+      target: runtime_backend
+    env_file: .env
+    depends_on:
+      db: { condition: service_started }
+      kafka: { condition: service_healthy }
+    ports: [3000:3000]
+    networks: [app-net]
+
+  frontend:
+    profiles: ["prod"]
+    build:
+      context: .
+      target: runtime_frontend
+    depends_on: [backend]
+    ports: [8080:80] # host:container (nginx serves on 80)
+    networks: [app-net]
+
+  #############################
+  # Development profile
+  #############################
+  backend-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: dev_backend
+    env_file: .env
+    volumes:
+      - ./backend:/usr/src/backend # hot‑reload bind‑mount
+      - /usr/src/backend/node_modules # keep container deps
+    ports: [3000:3000, 9229:9229]
+    depends_on:
+      db: { condition: service_started }
+      kafka: { condition: service_healthy }
+    networks: [app-net]
+
+  frontend-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: dev_frontend
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    ports: [8080:8080] # webpack dev‑server
+    depends_on: [backend-dev]
+    networks: [app-net]
+
+#############################
+# Global network / volume
+#############################
+networks:
+  app-net: { driver: bridge }
+
+volumes:
+  db_data: { driver: local }

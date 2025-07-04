@@ -8,26 +8,17 @@
   "keywords": [],
   "author": "",
   "scripts": {
-    "build": "tsc",
-    "d:build": "docker build -t backend .",
-    "d:dev:down": "docker-compose -f docker-compose.dev.yml down",
-    "d:dev:rebuild": "docker-compose -f docker-compose.dev.yml down && docker-compose -f docker-compose.dev.yml build --no-cache && docker-compose -f docker-compose.dev.yml up -d",
-    "d:dev:up": "docker-compose -f docker-compose.dev.yml up",
-    "d:down": "docker-compose down",
-    "d:rebuild": "docker-compose down && docker-compose build --no-cache && docker-compose up -d",
-    "d:restart": "docker-compose down && docker-compose up --build",
-    "d:up": "docker-compose up",
-    "dev:win": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/index.ts",
-    "dev": "npx nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
-    "devold": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "seed": "ts-node src/db/seed.ts",
     "start:prod": "node dist/index.js",
-    "start": "ts-node src/index.ts",
     "test:watch": "jest --watchAll",
     "test": "jest",
     "db:drop": "npx ts-node ./node_modules/typeorm/cli.js schema:drop -d src/db/data-source-cli.ts",
     "db:sync": "npx ts-node ./node_modules/typeorm/cli.js schema:sync -d src/db/data-source-cli.ts",
-    "db:reset": "npm run db:drop && npm run db:sync && npm run seed"
+    "db:reset": "npm run db:drop && npm run db:sync && npm run seed",
+
+    "dev": "nodemon --watch 'src/**/*.ts' --exec \"node --inspect=0.0.0.0:9229 -r ts-node/register src/index.ts\"",
+    "build": "nest build",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@apollo/subgraph": "^2.9.3",
