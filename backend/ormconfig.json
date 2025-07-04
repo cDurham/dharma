@@ -1,0 +1,14 @@
+[
+  {
+    "database": "dharma",
+    "dropSchema": true,
+    "entities": ["src/**/*.entity.ts"],
+    "host": "localhost",
+    "logging": true,
+    "password": "postgres",
+    "port": 5432,
+    "synchronize": true,
+    "type": "postgres",
+    "username": "postgres"
+  }
+]
