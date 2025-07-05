@@ -13,8 +13,11 @@
     "db:seed": "cd backend && npm run seed",
     "codegen": "cd frontend && npm run codegen",
     "clean": "rm -rf backend/dist frontend/dist",
-    "docker:dev": "docker-compose --profile dev up -d",
-    "docker:prod": "docker-compose --profile prod up -d"
+    "d:dev": "docker compose --profile dev up -d",
+    "d:prod": "docker compose --profile prod up -d",
+    "d:dev:rebuild": "docker compose --profile dev down && docker compose --profile dev build --no-cache && docker compose --profile dev up -d",
+    "d:dev:rebuild:backend": "docker compose --profile dev down && docker compose --profile dev build backend-dev --no-cache && docker compose --profile dev up -d",
+    "d:dev:restart": "docker compose --profile dev down && docker compose --profile dev up -d"
   },
   "engines": {
     "node": ">=20.0.0",
