@@ -2,7 +2,7 @@ name: Deploy (CDK + ECS + S3/CloudFront)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "infra" ]   # testing on infra branch before merging
   workflow_dispatch: {}
 
 permissions:
