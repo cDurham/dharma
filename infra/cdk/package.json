@@ -1,0 +1,24 @@
+{
+  "name": "dharma-infra",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "cdk:bootstrap": "cdk bootstrap",
+    "cdk:diff": "cdk diff",
+    "cdk:synth": "cdk synth",
+    "deploy:repo": "cdk deploy DharmaRepoStack --require-approval never",
+    "deploy:ci": "cdk deploy DharmaCiOidcStack --require-approval never",
+    "deploy:app": "cdk deploy DharmaAppStack --require-approval never"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.214.0",
+    "constructs": "10.3.0"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.13.5",
+    "aws-cdk": "2.1027.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.6.3"
+  }
+}
