@@ -10,10 +10,8 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: us-west-2         # change to us-west-1 if you prefer
+  AWS_REGION: us-east-1
   ECR_REPO: dharma-backend
-  # Set this in your repo > Settings > Actions > Variables:
-  # AWS_ACCOUNT_ID=123456789012
 
 jobs:
   deploy:
