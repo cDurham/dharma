@@ -1,0 +1,67 @@
+mutation CreateUser($data: CreateUserInput!) {
+  createUser(data: $data) {
+    uuid
+    email
+    firstName
+    lastName
+    verificationToken
+  }
+}
+
+mutation UpdateUser($uuid: String!, $data: UpdateUserInput!) {
+  updateUser(uuid: $uuid, data: $data) {
+    uuid
+    email
+    firstName
+    lastName
+    verificationToken
+  }
+}
+
+mutation DeleteUser($uuid: String!) {
+  deleteUser(uuid: $uuid)
+}
+
+mutation VerifyEmail($token: String!) {
+  verifyEmail(token: $token)
+}
+
+query GetUser($uuid: String!) {
+  user(uuid: $uuid) {
+    uuid
+    email
+    firstName
+    lastName
+    verificationToken
+  }
+}
+
+query GetUsers {
+  users {
+    uuid
+    email
+    firstName
+    lastName
+    verificationToken
+  }
+}
+
+query GetUserByEmail($email: String!) {
+  getUserByEmail(email: $email) {
+    uuid
+    email
+    firstName
+    lastName
+    verificationToken
+  }
+}
+
+query Me {
+  me {
+    uuid
+    email
+    firstName
+    lastName
+    verificationToken
+  }
+}

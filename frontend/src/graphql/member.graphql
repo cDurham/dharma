@@ -1,0 +1,20 @@
+query Members {
+  members {
+    uuid
+    firstName
+    lastName
+  }
+}
+
+mutation CreateMember($data: CreateMemberInput!) {
+  createMember(data: $data) {
+    uuid
+    firstName
+    lastName
+    joinDate
+    user {
+      uuid
+      email
+    }
+  }
+}
