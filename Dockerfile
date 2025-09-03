@@ -41,7 +41,6 @@ CMD ["npm","run","dev"]
 FROM deps AS build_backend
 WORKDIR /usr/src
 COPY backend ./backend
-# requires @nestjs/cli as a devDependency in the repo (backend or root)
 RUN npm run -w backend build
 
 FROM deps AS build_frontend
@@ -59,9 +58,6 @@ ENV NODE_ENV=production
 # App code (compiled)
 COPY --from=build_backend /usr/src/backend/dist ./dist
 
-# Runtime deps:
-#   - hoisted workspace deps live at /usr/src/node_modules
-#   - any backend-local (non-hoisted) deps live at /usr/src/backend/node_modules
 # Copy both so nothing is missing.
 COPY --from=deps /usr/src/node_modules ./node_modules
 COPY --from=deps /usr/src/backend/node_modules ./node_modules
@@ -70,7 +66,6 @@ COPY --from=deps /usr/src/backend/node_modules ./node_modules
 COPY backend/package.json ./package.json
 
 EXPOSE 3000
-# Keep your original entry; change to main.js if that's your Nest entry point
 CMD ["node","dist/index.js"]
 
 FROM nginx:1.27-alpine AS runtime_frontend
