@@ -1,0 +1,89 @@
+name: Deploy (CDK + ECS + S3/CloudFront)
+
+on:
+  push:
+    branches: [ "infra" ]   # testing on infra branch before merging
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: dharma-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/GithubActionsDharmaDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install CDK deps
+        working-directory: infra/cdk
+        run: |
+          npm ci
+
+      - name: CDK Bootstrap (first run only; safe to keep)
+        working-directory: infra/cdk
+        run: |
+          npm run cdk:bootstrap
+
+      - name: Ensure Repo Stack (first run creates ECR)
+        working-directory: infra/cdk
+        run: |
+          npm run deploy:repo
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region $AWS_REGION \
+            | docker login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: Build backend image
+        run: |
+          docker build --target runtime_backend -t $ECR_REPO:${{ github.sha }} .
+
+      - name: Tag & push backend image
+        run: |
+          docker tag $ECR_REPO:${{ github.sha }} ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:${{ github.sha }}
+          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:${{ github.sha }}
+
+      - name: Deploy App Stack (imageTag = commit SHA)
+        working-directory: infra/cdk
+        run: |
+          npx cdk deploy DharmaAppStack --require-approval never -c imageTag=${{ github.sha }}
+
+      - name: Build frontend
+        run: |
+          npm ci --workspaces
+          npm run build --workspace frontend
+
+      - name: Lookup stack outputs
+        id: cf
+        run: |
+          STACK="DharmaAppStack"
+          BUCKET=$(aws cloudformation describe-stacks --stack-name $STACK --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" --output text)
+          DIST=$(aws cloudformation describe-stacks --stack-name $STACK --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" --output text)
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "dist=$DIST" >> $GITHUB_OUTPUT
+
+      - name: Upload frontend to S3
+        run: |
+          aws s3 sync frontend/dist s3://${{ steps.cf.outputs.bucket }} --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ steps.cf.outputs.dist }} --paths "/*"

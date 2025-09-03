@@ -7,12 +7,13 @@ import { ThrottlerModule } from "@nestjs/throttler";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Request, Response } from "express";
 import { AuthModule } from "./Auth";
+import { prodDataSourceOptions } from "./db/data-source";
+import { HealthController } from "./health.controller";
 import { KafkaModule } from "./kafka/kafka.module";
 import { MemberModule } from "./Member/member.module";
 import { RetreatModule } from "./Retreat";
 import { UserModule } from "./User";
 import { VerificationController } from "./Verify/verify.controller";
-import { prodDataSourceOptions } from "./db/data-source";
 
 @Module({
   imports: [
@@ -41,7 +42,7 @@ import { prodDataSourceOptions } from "./db/data-source";
     ]),
     TypeOrmModule.forRoot(prodDataSourceOptions),
   ],
-  controllers: [VerificationController],
+  controllers: [VerificationController, HealthController],
   providers: [],
 })
 export class AppModule {}
