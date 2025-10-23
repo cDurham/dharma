@@ -1,0 +1,66 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "api",
+  "projectType": "application",
+  "sourceRoot": "apps/api/src",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "api:build",
+        "watch": true,
+        "buildTargetOptions": { "watch": true }
+      }
+    },
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/api",
+        "main": "apps/api/src/index.ts",
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "assets": [
+          "apps/api/src/**/*.graphql"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["apps/api/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/api"],
+      "options": {
+        "jestConfig": "apps/api/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "codegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo 'No API code generation configured.'"
+      }
+    },
+    "db-reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx ts-node --project apps/api/tsconfig.app.json node_modules/typeorm/cli.js schema:drop -d apps/api/src/db/data-source.ts && npx ts-node --project apps/api/tsconfig.app.json node_modules/typeorm/cli.js schema:sync -d apps/api/src/db/data-source.ts && npx ts-node apps/api/src/db/seed.ts"
+      }
+    },
+    "db-sync": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx ts-node --project apps/api/tsconfig.app.json node_modules/typeorm/cli.js schema:sync -d apps/api/src/db/data-source.ts"
+      }
+    },
+    "db-seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx ts-node apps/api/src/db/seed.ts"
+      }
+    }
+  }
+}

@@ -38,11 +38,11 @@ services:
   #############################
   # Production profile
   #############################
-  backend:
+  api:
     profiles: ["prod"]
     build:
       context: .
-      target: runtime_backend
+      target: runtime_api
     env_file: .env
     depends_on:
       db: { condition: service_started }
@@ -50,43 +50,43 @@ services:
     ports: [3000:3000]
     networks: [app-net]
 
-  frontend:
+  web:
     profiles: ["prod"]
     build:
       context: .
-      target: runtime_frontend
-    depends_on: [backend]
+      target: runtime_web
+    depends_on: [api]
     ports: [8080:80] # host:container (nginx serves on 80)
     networks: [app-net]
 
   #############################
   # Development profile
   #############################
-  backend-dev:
+  api-dev:
     profiles: ["dev"]
     build:
       context: .
-      target: dev_backend
+      target: dev_api
     env_file: .env
     volumes:
-      - ./backend:/usr/src/backend # hot‑reload bind‑mount
-      - /usr/src/backend/node_modules # keep container deps
+      - ./apps/api:/workspace/apps/api # hot‑reload bind‑mount
+      - /workspace/node_modules
     ports: [3000:3000, 9229:9229]
     depends_on:
       db: { condition: service_started }
       kafka: { condition: service_healthy }
     networks: [app-net]
 
-  frontend-dev:
+  web-dev:
     profiles: ["dev"]
     build:
       context: .
-      target: dev_frontend
+      target: dev_web
     volumes:
-      - ./frontend:/usr/src/frontend
-      - /usr/src/frontend/node_modules
-    ports: [8080:8080] # webpack dev‑server
-    depends_on: [backend-dev]
+      - ./apps/web:/workspace/apps/web
+      - /workspace/node_modules
+    ports: [4200:4200] # Vite dev server
+    depends_on: [api-dev]
     networks: [app-net]
 
 #############################

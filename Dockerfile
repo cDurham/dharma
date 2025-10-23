@@ -1,69 +1,37 @@
 # syntax=docker/dockerfile:1.6
-########################
-# 0) Base layer
-########################
-FROM node:20-slim AS base
-WORKDIR /usr/src
 
-# ########################
-# # 1) Dependencies
-# ########################
-# FROM base AS deps_backend
-# WORKDIR /usr/src/backend
-# COPY backend/package*.json ./
-# RUN npm ci
+FROM node:22-slim AS base
+WORKDIR /workspace
 
-# FROM base AS deps_frontend
-# WORKDIR /usr/src/frontend
-# COPY frontend/package*.json ./
-# RUN npm ci
-
-########################
-# 1) Install all deps in one go
-########################
 FROM base AS deps
 COPY package*.json ./
-COPY backend/package.json    backend/
-COPY frontend/package.json   frontend/
+RUN npm install --legacy-peer-deps
 
-# reproducible, workspace-aware install
-RUN npm ci --workspaces --include-workspace-root
-
-##############################################
-# 2) Development images (hot reload)
-##############################################
-FROM deps AS dev_backend
-COPY backend .
+FROM deps AS dev_api
+COPY . .
 EXPOSE 3000 9229
-CMD ["npm","run","dev"]                 # nodemon + ts-node
+CMD ["npm", "run", "api:serve"]
 
-FROM deps AS dev_frontend
-COPY frontend .
-EXPOSE 8080
-CMD ["npm","run","dev"]                 # webpack serve
+FROM deps AS dev_web
+COPY . .
+EXPOSE 4200
+CMD ["npm", "run", "web:serve"]
 
-##############################################
-# 3) Build artefacts
-##############################################
-FROM deps AS build_backend
-COPY backend .
-RUN npm run build                       # → dist/
+FROM deps AS build_api
+COPY . .
+RUN npm run api:build
 
-FROM deps AS build_frontend
-COPY frontend .
-RUN npm run build                       # → dist/
+FROM deps AS build_web
+COPY . .
+RUN npm run web:build
 
-##############################################
-# 4) Runtime images (lean)
-##############################################
-FROM node:20-slim AS runtime_backend
+FROM node:22-slim AS runtime_api
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build_backend   /usr/src/backend/dist         ./dist
-COPY --from=deps_backend    /usr/src/backend/node_modules ./node_modules
+COPY --from=build_api /workspace/dist/apps/api ./dist/apps/api
+COPY --from=deps /workspace/node_modules ./node_modules
 EXPOSE 3000
-CMD ["node","dist/index.js"]
+CMD ["node", "dist/apps/api/index.js"]
 
-FROM nginx:1.27-alpine AS runtime_frontend
-COPY --from=build_frontend /usr/src/frontend/dist /usr/share/nginx/html
-# keeps nginx’s default entrypoint
+FROM nginx:1.27-alpine AS runtime_web
+COPY --from=build_web /workspace/dist/apps/web /usr/share/nginx/html

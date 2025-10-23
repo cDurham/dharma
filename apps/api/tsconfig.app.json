@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc/apps/api",
+    "declaration": true,
+    "declarationMap": true,
+    "types": ["node"],
+    "module": "CommonJS",
+    "target": "ES2021"
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    "**/__test__/**"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}
