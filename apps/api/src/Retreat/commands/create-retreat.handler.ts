@@ -1,8 +1,11 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Inject } from "@nestjs/common";
 import { v7 as uuidv7 } from "uuid";
+import { eq } from "drizzle-orm";
 
+import { DB_TOKEN } from "../../db/database.module";
+import { db as DbType } from "../../db/data-source";
+import { retreat } from "../../db/schema";
 import { RetreatCreatedEvent } from "../events/retreat-created.event";
 import { Retreat } from "../retreat.entity";
 import { CreateRetreatCommand } from "./create-retreat.command";
@@ -12,28 +15,31 @@ export class CreateRetreatHandler
   implements ICommandHandler<CreateRetreatCommand>
 {
   constructor(
-    @InjectRepository(Retreat)
-    private readonly retreatRepo: Repository<Retreat>,
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType,
     private readonly eventBus: EventBus
   ) {}
 
   async execute(command: CreateRetreatCommand): Promise<Retreat> {
     const { name, startAt, endAt } = command.input;
 
-    const newRetreat = this.retreatRepo.create({
-      uuid: uuidv7(),
+    const newRetreatId = uuidv7();
+
+    await this.db.insert(retreat).values({
+      uuid: newRetreatId,
       name,
       startAt,
       endAt,
-      createdAt: new Date(),
     });
 
-    const savedRetreat = await this.retreatRepo.save(newRetreat);
+    // Fetch the created retreat
+    const [savedRetreat] = await this.db
+      .select()
+      .from(retreat)
+      .where(eq(retreat.uuid, newRetreatId));
 
     // after saving, emit an event
-    this.eventBus.publish(
-      new RetreatCreatedEvent(savedRetreat.uuid, savedRetreat.name)
-    );
+    this.eventBus.publish(new RetreatCreatedEvent(savedRetreat.uuid, savedRetreat.name));
 
     return savedRetreat;
   }

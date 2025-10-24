@@ -1,27 +1,38 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Inject } from "@nestjs/common";
+import { eq } from "drizzle-orm";
+
+import { DB_TOKEN } from "../../db/database.module";
+import { db as DbType } from "../../db/data-source";
+import { user } from "../../db/schema";
 import { UserUpdatedEvent } from "../event/user-updated.event";
-import { User } from "../user.entity";
 import { VerifyEmailCommand } from "./verify-email.command";
 
 @CommandHandler(VerifyEmailCommand)
 export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType,
     private readonly eventBus: EventBus
   ) {}
 
   async execute({ token }: VerifyEmailCommand): Promise<boolean> {
-    const user = await this.userRepo.findOneBy({ verificationToken: token });
-    if (!user) {
+    const [userToVerify] = await this.db
+      .select()
+      .from(user)
+      .where(eq(user.verificationToken, token));
+
+    if (!userToVerify) {
       return false;
     }
-    user.verificationToken = null;
 
-    await this.userRepo.save(user);
-    this.eventBus.publish(new UserUpdatedEvent(user.uuid));
+    // Set verification token to null
+    await this.db
+      .update(user)
+      .set({ verificationToken: null, updatedAt: new Date() })
+      .where(eq(user.uuid, userToVerify.uuid));
+
+    this.eventBus.publish(new UserUpdatedEvent(userToVerify.uuid));
 
     return true;
   }

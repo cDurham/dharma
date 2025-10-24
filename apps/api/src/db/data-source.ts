@@ -1,49 +1,75 @@
-import { DataSourceOptions, DataSource } from "typeorm";
-import { RefreshToken } from "../Auth/refresh-token.entity";
-import { Member } from "../Member";
-import { Retreat } from "../Retreat";
-import { User } from "../User";
-import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as schema from "./schema";
 
-const baseDataSourceOptions: DataSourceOptions = {
-  database: process.env.DB_DATABASE,
-  entities: [Member, Retreat, User, RefreshToken],
-  logger: "advanced-console",
-  synchronize: process.env.NODE_ENV !== "production", // Only true for development
-  dropSchema: process.env.NODE_ENV !== "production", // Drop schema in development
-  type: "postgres",
+/**
+ * Database connection configuration
+ * Convert "db" hostname to "localhost" when running from host machine
+ */
+const dbHost = process.env.DB_HOST || process.env.DB_WRITE_HOST || "localhost";
+const poolConfig = {
+  host: dbHost === "db" ? "localhost" : dbHost,
+  port: parseInt(
+    process.env.DB_PORT || process.env.DB_WRITE_PORT || "5432",
+    10
+  ),
+  user: process.env.DB_USER || process.env.DB_WRITE_USER || "postgres",
+  password:
+    process.env.DB_PASSWORD || process.env.DB_WRITE_PASSWORD || "postgres",
+  database: process.env.DB_DATABASE || "dharma_db",
+  max: 20, // Maximum pool size
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 };
 
-const readWriteSplitStrategy: Pick<PostgresConnectionOptions, "replication"> = {
-  replication: {
-    master: {
-      host: process.env.DB_WRITE_HOST,
-      port: process.env.DB_WRITE_PORT
-        ? parseInt(process.env.DB_WRITE_PORT, 10)
-        : 5432,
-      password: process.env.DB_WRITE_PASSWORD,
-      username: process.env.DB_WRITE_USER,
-    },
-    slaves: [
-      {
-        host: process.env.DB_READ_HOST,
-        port: process.env.DB_READ_PORT
-          ? parseInt(process.env.DB_READ_PORT, 10)
-          : 5432,
-        password: process.env.DB_READ_PASSWORD,
-        username: process.env.DB_READ_USER,
-      },
-    ],
-  },
+/**
+ * PostgreSQL connection pool
+ */
+export const pool = new Pool(poolConfig);
+
+/**
+ * Drizzle database instance with schema
+ */
+export const db = drizzle(pool, { schema });
+
+/**
+ * Read-only database connection pool (for read replicas if configured)
+ */
+const readDbHost = process.env.DB_READ_HOST || process.env.DB_HOST || "localhost";
+const readPoolConfig = {
+  host: readDbHost === "db" ? "localhost" : readDbHost,
+  port: parseInt(
+    process.env.DB_READ_PORT || process.env.DB_PORT || "5432",
+    10
+  ),
+  user: process.env.DB_READ_USER || process.env.DB_USER || "postgres",
+  password:
+    process.env.DB_READ_PASSWORD || process.env.DB_PASSWORD || "postgres",
+  database: process.env.DB_DATABASE || "dharma_db",
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 };
 
-export const prodDataSourceOptions: DataSourceOptions = {
-  ...baseDataSourceOptions,
-  database: process.env.DB_DATABASE,
-  host: process.env.DB_HOST,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
-  username: process.env.DB_USER,
-};
+/**
+ * Read-only pool (falls back to write pool if no read replica configured)
+ */
+export const readPool =
+  process.env.DB_READ_HOST && process.env.DB_READ_HOST !== process.env.DB_HOST
+    ? new Pool(readPoolConfig)
+    : pool;
 
-export const AppDataSource = new DataSource(prodDataSourceOptions);
+/**
+ * Read-only Drizzle database instance
+ */
+export const readDb = drizzle(readPool, { schema });
+
+/**
+ * Graceful shutdown
+ */
+export const closeConnections = async () => {
+  await pool.end();
+  if (readPool !== pool) {
+    await readPool.end();
+  }
+};

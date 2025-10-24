@@ -1,6 +1,11 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Inject } from "@nestjs/common";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+
+import { DB_TOKEN } from "../../db/database.module";
+import { db as DbType } from "../../db/data-source";
+import { user } from "../../db/schema";
 import { User } from "../user.entity";
 import { UpdateUserCommand } from "./update-user.command";
 import { UserUpdatedEvent } from "../event/user-updated.event";
@@ -8,26 +13,45 @@ import { UserUpdatedEvent } from "../event/user-updated.event";
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType,
     private readonly eventBus: EventBus
   ) {}
 
   async execute({ userUuid, data }: UpdateUserCommand): Promise<User | null> {
     const { email, password } = data;
 
-    const user = await this.userRepo.findOneBy({ uuid: userUuid });
+    // Check if user exists
+    const [existingUser] = await this.db
+      .select()
+      .from(user)
+      .where(eq(user.uuid, userUuid));
 
-    if (!user) {
+    if (!existingUser) {
       return null;
     }
 
-    Object.assign(user, { email, password });
+    // Hash password if provided
+    const updateData: any = { updatedAt: new Date() };
+    if (email !== undefined) updateData.email = email;
+    if (password !== undefined) {
+      updateData.password = await bcrypt.hash(password, 12);
+    }
 
-    await this.userRepo.save(user);
+    // Update user
+    await this.db
+      .update(user)
+      .set(updateData)
+      .where(eq(user.uuid, userUuid));
 
-    this.eventBus.publish(new UserUpdatedEvent(user.uuid));
+    // Fetch updated user
+    const [updatedUser] = await this.db
+      .select()
+      .from(user)
+      .where(eq(user.uuid, userUuid));
 
-    return user;
+    this.eventBus.publish(new UserUpdatedEvent(updatedUser.uuid));
+
+    return updatedUser;
   }
 }

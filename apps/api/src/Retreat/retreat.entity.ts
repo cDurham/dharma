@@ -1,19 +1,23 @@
-import { Field, ObjectType } from "@nestjs/graphql";
-import { Column, Entity } from "typeorm";
-import { BaseEntity } from "../BaseEntity/base.entity";
+import { Field, ID, ObjectType } from "@nestjs/graphql";
+import { RetreatRow } from "../db/types";
 
-@Entity()
 @ObjectType({ description: "Retreat" })
-export class Retreat extends BaseEntity {
-  @Field((type) => String)
-  @Column()
+export class Retreat implements RetreatRow {
+  @Field(() => ID)
+  uuid!: string;
+
+  @Field(() => String)
   name!: string;
 
-  @Field((type) => Date)
-  @Column()
+  @Field(() => Date)
   startAt!: Date;
 
-  @Field((type) => Date)
-  @Column()
+  @Field(() => Date)
   endAt!: Date;
+
+  @Field()
+  createdAt!: Date;
+
+  @Field()
+  updatedAt!: Date;
 }

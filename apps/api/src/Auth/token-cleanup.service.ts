@@ -1,16 +1,18 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, Inject } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { InjectRepository } from "@nestjs/typeorm";
-import { LessThan, Repository } from "typeorm";
-import { RefreshToken } from "./refresh-token.entity";
+import { and, or, lt, eq } from "drizzle-orm";
+
+import { DB_TOKEN } from "../db/database.module";
+import { db as DbType } from "../db/data-source";
+import { refreshToken } from "../db/schema";
 
 @Injectable()
 export class TokenCleanupService {
   private readonly logger = new Logger(TokenCleanupService.name);
 
   constructor(
-    @InjectRepository(RefreshToken)
-    private readonly refreshTokenRepository: Repository<RefreshToken>
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType
   ) {}
 
   // Run every Sunday at 3:00 AM
@@ -23,22 +25,21 @@ export class TokenCleanupService {
 
     try {
       // Delete tokens that expired more than 7 days ago OR are revoked and older than 7 days
-      const result = await this.refreshTokenRepository
-        .createQueryBuilder()
-        .delete()
-        .where("expiresAt < :sevenDaysAgo", { sevenDaysAgo })
-        .orWhere("isRevoked = :isRevoked AND createdAt < :sevenDaysAgo", {
-          isRevoked: true,
-          sevenDaysAgo,
-        })
-        .execute();
+      await this.db
+        .delete(refreshToken)
+        .where(
+          or(
+            lt(refreshToken.expiresAt, sevenDaysAgo),
+            and(
+              eq(refreshToken.isRevoked, true),
+              lt(refreshToken.createdAt, sevenDaysAgo)
+            )
+          )
+        );
 
-      this.logger.log(
-        `Cleanup complete. Deleted ${result.affected} refresh token(s).`
-      );
+      this.logger.log("Cleanup complete.");
     } catch (error) {
       this.logger.error("Error during token cleanup:", error);
     }
   }
 }
-

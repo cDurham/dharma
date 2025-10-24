@@ -1,11 +1,15 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
-import { InjectRepository } from "@nestjs/typeorm";
+import { Inject } from "@nestjs/common";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { Repository } from "typeorm";
-import { RefreshToken } from "../refresh-token.entity";
+import { v7 as uuidv7 } from "uuid";
+import { eq } from "drizzle-orm";
+
+import { DB_TOKEN } from "../../db/database.module";
+import { db as DbType } from "../../db/data-source";
+import { refreshToken, user } from "../../db/schema";
 import { AuthRefreshAccessTokenCommand } from "./auth-refresh-access-token.command";
 import { hashToken } from "../utils";
 import {
@@ -18,8 +22,8 @@ export class AuthRefreshAccessTokenHandler
   implements ICommandHandler<AuthRefreshAccessTokenCommand>
 {
   constructor(
-    @InjectRepository(RefreshToken)
-    private readonly refreshTokenRepository: Repository<RefreshToken>,
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType,
     private readonly jwtService: JwtService,
     private readonly commandBus: CommandBus
   ) {}
@@ -29,32 +33,38 @@ export class AuthRefreshAccessTokenHandler
     refresh_token: string;
   }> {
     const tokenHash = hashToken(command.refreshTokenString);
-    const oldRefreshToken = await this.refreshTokenRepository.findOne({
-      where: { tokenHash },
-      relations: ["user"],
-    });
+
+    // Find refresh token with user
+    const [oldRefreshToken] = await this.db
+      .select({
+        token: refreshToken,
+        user: user,
+      })
+      .from(refreshToken)
+      .innerJoin(user, eq(refreshToken.userUuid, user.uuid))
+      .where(eq(refreshToken.tokenHash, tokenHash));
 
     const isValid =
       oldRefreshToken &&
       (await bcrypt.compare(
         command.refreshTokenString,
-        oldRefreshToken.hashedToken
+        oldRefreshToken.token.hashedToken
       ));
 
     if (
       !oldRefreshToken ||
       !isValid ||
-      oldRefreshToken.expiresAt < new Date() ||
-      oldRefreshToken.isRevoked
+      oldRefreshToken.token.expiresAt < new Date() ||
+      oldRefreshToken.token.isRevoked
     ) {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
     // Revoke the old refresh token
-    await this.refreshTokenRepository.update(
-      { tokenHash },
-      { isRevoked: true }
-    );
+    await this.db
+      .update(refreshToken)
+      .set({ isRevoked: true })
+      .where(eq(refreshToken.tokenHash, tokenHash));
 
     const payload = {
       email: oldRefreshToken.user.email,
@@ -72,15 +82,14 @@ export class AuthRefreshAccessTokenHandler
     const hashedToken = await bcrypt.hash(plainToken, 12);
     const expiresDate = new Date(Date.now() + getRefreshTokenExpiresInMs());
 
-    const newRefreshToken = this.refreshTokenRepository.create({
-      user: { uuid: oldRefreshToken.user.uuid },
+    await this.db.insert(refreshToken).values({
+      uuid: uuidv7(),
+      userUuid: oldRefreshToken.user.uuid,
       tokenHash: newTokenHash,
       hashedToken,
       expiresAt: expiresDate,
       isRevoked: false,
     });
-
-    await this.refreshTokenRepository.save(newRefreshToken);
 
     return {
       access_token: newAccessToken,

@@ -1,6 +1,10 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Inject } from "@nestjs/common";
+import { eq } from "drizzle-orm";
+
+import { DB_TOKEN } from "../../db/database.module";
+import { db as DbType } from "../../db/data-source";
+import { retreat } from "../../db/schema";
 import { RetreatUpdatedEvent } from "../events/retreat-updated.event";
 import { Retreat } from "../retreat.entity";
 import { UpdateRetreatCommand } from "./update-retreat.command";
@@ -10,8 +14,8 @@ export class UpdateRetreatHandler
   implements ICommandHandler<UpdateRetreatCommand>
 {
   constructor(
-    @InjectRepository(Retreat)
-    private readonly retreatRepo: Repository<Retreat>,
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType,
     private readonly eventBus: EventBus
   ) {}
 
@@ -21,18 +25,30 @@ export class UpdateRetreatHandler
   }: UpdateRetreatCommand): Promise<Retreat | null> {
     const { name, startAt, endAt } = data;
 
-    const retreat = await this.retreatRepo.findOneBy({ uuid: retreatUuid });
+    // Check if retreat exists
+    const [existingRetreat] = await this.db
+      .select()
+      .from(retreat)
+      .where(eq(retreat.uuid, retreatUuid));
 
-    if (!retreat) {
+    if (!existingRetreat) {
       return null;
     }
 
-    Object.assign(retreat, { name, startAt, endAt });
+    // Update retreat
+    await this.db
+      .update(retreat)
+      .set({ name, startAt, endAt, updatedAt: new Date() })
+      .where(eq(retreat.uuid, retreatUuid));
 
-    await this.retreatRepo.save(retreat);
+    // Fetch updated retreat
+    const [updatedRetreat] = await this.db
+      .select()
+      .from(retreat)
+      .where(eq(retreat.uuid, retreatUuid));
 
-    this.eventBus.publish(new RetreatUpdatedEvent(retreat.uuid));
+    this.eventBus.publish(new RetreatUpdatedEvent(updatedRetreat.uuid));
 
-    return retreat;
+    return updatedRetreat;
   }
 }

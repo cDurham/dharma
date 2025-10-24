@@ -1,6 +1,10 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Inject } from "@nestjs/common";
+import { eq } from "drizzle-orm";
+
+import { DB_TOKEN } from "../../db/database.module";
+import { db as DbType } from "../../db/data-source";
+import { user } from "../../db/schema";
 import { UserDeletedEvent } from "../event/user-deleted.event";
 import { User } from "../user.entity";
 import { DeleteUserCommand } from "./delete-user.command";
@@ -8,22 +12,27 @@ import { DeleteUserCommand } from "./delete-user.command";
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand> {
   constructor(
-    @InjectRepository(User)
-    private userRepo: Repository<User>,
+    @Inject(DB_TOKEN)
+    private readonly db: typeof DbType,
     private readonly eventBus: EventBus
   ) {}
 
-  async execute({ userUuid }: DeleteUserCommand) {
-    const user = await this.userRepo.findOneBy({ uuid: userUuid });
+  async execute({ userUuid }: DeleteUserCommand): Promise<User> {
+    // Fetch user before deleting
+    const [userToDelete] = await this.db
+      .select()
+      .from(user)
+      .where(eq(user.uuid, userUuid));
 
-    if (!user) {
+    if (!userToDelete) {
       throw new Error("User not found");
     }
 
-    await this.userRepo.delete(user.uuid);
+    // Delete user
+    await this.db.delete(user).where(eq(user.uuid, userUuid));
 
-    this.eventBus.publish(new UserDeletedEvent(user.uuid));
+    this.eventBus.publish(new UserDeletedEvent(userToDelete.uuid));
 
-    return user;
+    return userToDelete;
   }
 }
