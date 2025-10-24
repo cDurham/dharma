@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "npmScope": "dharma",
+  "defaultProject": "web",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": ["default"]
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "codegen"],
+        "parallel": 3
+      }
+    }
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production"],
+      "outputs": ["{options.outputPath}"]
+    },
+    "lint": {
+      "inputs": ["default"],
+      "outputs": []
+    },
+    "test": {
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/coverage"]
+    },
+    "codegen": {
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/src/graphql/generated.ts"]
+    }
+  }
+}
