@@ -1,29 +1,29 @@
-import bcrypt from "bcryptjs";
-import { Field, ObjectType } from "@nestjs/graphql";
-import { BeforeInsert, Column, Entity, OneToMany, Unique } from "typeorm";
-import { RefreshToken } from "../Auth/refresh-token.entity";
-import { Person } from "../Person/person.entity";
+import { Field, ID, ObjectType } from "@nestjs/graphql";
+import { UserRow } from "../db/types";
 
-@Entity()
 @ObjectType()
-@Unique(["email"])
-export class User extends Person {
-  @Field((_returns) => String)
-  @Column({ unique: true })
+export class User implements UserRow {
+  @Field(() => ID)
+  uuid!: string;
+
+  @Field(() => String)
+  firstName!: string;
+
+  @Field(() => String)
+  lastName!: string;
+
+  @Field(() => String)
   email!: string;
 
-  @Column({ nullable: false })
+  // Password is not exposed in GraphQL
   password!: string;
 
-  @Field((_returns) => String, { nullable: true })
-  @Column({ type: "varchar", nullable: true })
-  verificationToken!: string | null; // if null, the email is verified
+  @Field(() => String, { nullable: true })
+  verificationToken!: string | null;
 
-  @BeforeInsert()
-  async hashPassword(): Promise<void> {
-    if (this.password) this.password = await bcrypt.hash(this.password, 12);
-  }
+  @Field()
+  createdAt!: Date;
 
-  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshTokens!: RefreshToken[];
+  @Field()
+  updatedAt!: Date;
 }

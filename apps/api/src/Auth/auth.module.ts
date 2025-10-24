@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { TypeOrmModule } from "@nestjs/typeorm";
 import { EmailModule } from "../Email/email.module";
 import { MemberModule } from "../Member/member.module";
 import { UserModule } from "../User/user.module";
@@ -15,7 +14,6 @@ import { AuthRevokeRefreshTokenHandler } from "./command/auth-revoke-refresh-tok
 import { ValidateUserHandler } from "./command/auth-validate-user.handler";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { JwtStrategy } from "./jwt.strategy";
-import { RefreshToken } from "./refresh-token.entity";
 import { TokenCleanupService } from "./token-cleanup.service";
 import { authConfig } from "../config/auth.config";
 
@@ -43,7 +41,6 @@ import { authConfig } from "../config/auth.config";
     EmailModule,
     UserModule,
     MemberModule,
-    TypeOrmModule.forFeature([RefreshToken]),
   ],
   providers: [
     AuthCreateRefreshTokenHandler,

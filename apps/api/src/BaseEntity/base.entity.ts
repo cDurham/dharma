@@ -1,22 +1,17 @@
 import { Field, ID, ObjectType } from "@nestjs/graphql";
-import {
-  CreateDateColumn,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
-import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Base entity with common fields
+ * Not tied to DB schema - just GraphQL abstraction
+ */
 @ObjectType()
 export abstract class BaseEntity {
   @Field(() => ID)
-  @PrimaryGeneratedColumn("uuid")
-  uuid: string = uuidv4();
+  uuid!: string;
 
   @Field()
-  @CreateDateColumn({ name: "created_at", type: "timestamp" })
   createdAt!: Date;
 
   @Field()
-  @UpdateDateColumn({ name: "updated_at", type: "timestamp" })
   updatedAt!: Date;
 }

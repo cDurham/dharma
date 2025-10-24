@@ -1,15 +1,23 @@
-import { Entity, Column } from "typeorm";
-import { Field, ObjectType } from "@nestjs/graphql";
-import { BaseEntity } from "../BaseEntity/base.entity";
+import { Field, ID, ObjectType } from "@nestjs/graphql";
 
+/**
+ * Person entity - GraphQL abstraction only
+ * Not backed by a database table (using concrete table inheritance)
+ */
 @ObjectType()
-@Entity()
-export class Person extends BaseEntity {
-  @Field((type) => String)
-  @Column({ name: "first_name" })
+export class Person {
+  @Field(() => ID)
+  uuid!: string;
+
+  @Field(() => String)
   firstName!: string;
 
-  @Field((type) => String)
-  @Column({ name: "last_name" })
+  @Field(() => String)
   lastName!: string;
+
+  @Field()
+  createdAt!: Date;
+
+  @Field()
+  updatedAt!: Date;
 }

@@ -1,22 +1,31 @@
 import { Field, ObjectType } from "@nestjs/graphql";
-import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
-import { Person } from "../Person/person.entity";
+import { MemberRow } from "../db/types";
 import { User } from "../User/user.entity";
 
-@Entity()
 @ObjectType({ description: "Member" })
-export class Member extends Person {
-  @Field((type) => Date)
-  @Column({
-    name: "join_date",
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    nullable: false,
-  })
+export class Member implements Omit<MemberRow, "userUuid"> {
+  @Field(() => String)
+  uuid!: string;
+
+  @Field(() => String)
+  firstName!: string;
+
+  @Field(() => String)
+  lastName!: string;
+
+  @Field(() => Date)
   joinDate!: Date;
 
+  // GraphQL exposes User, DB stores userUuid
   @Field(() => User, { nullable: true })
-  @OneToOne(() => User, { nullable: true })
-  @JoinColumn()
-  user?: User;
+  user?: User | null;
+
+  @Field()
+  createdAt!: Date;
+
+  @Field()
+  updatedAt!: Date;
+
+  // Not exposed in GraphQL but exists in DB
+  userUuid?: string | null;
 }

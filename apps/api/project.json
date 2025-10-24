@@ -44,22 +44,53 @@
         "command": "echo 'No API code generation configured.'"
       }
     },
+    "db-generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate --config=apps/api/drizzle.config.ts",
+        "cwd": "."
+      }
+    },
+    "db-push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit push --config=apps/api/drizzle.config.ts",
+        "cwd": "."
+      }
+    },
+    "db-migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit migrate --config=apps/api/drizzle.config.ts",
+        "cwd": "."
+      }
+    },
+    "db-studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit studio --config=apps/api/drizzle.config.ts",
+        "cwd": "."
+      }
+    },
+    "db-drop": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit drop --config=apps/api/drizzle.config.ts",
+        "cwd": "."
+      }
+    },
     "db-reset": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx ts-node --project apps/api/tsconfig.app.json node_modules/typeorm/cli.js schema:drop -d apps/api/src/db/data-source.ts && npx ts-node --project apps/api/tsconfig.app.json node_modules/typeorm/cli.js schema:sync -d apps/api/src/db/data-source.ts && npx ts-node apps/api/src/db/seed.ts"
-      }
-    },
-    "db-sync": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npx ts-node --project apps/api/tsconfig.app.json node_modules/typeorm/cli.js schema:sync -d apps/api/src/db/data-source.ts"
+        "command": "drizzle-kit drop --config=apps/api/drizzle.config.ts && drizzle-kit push --config=apps/api/drizzle.config.ts && npx tsx apps/api/src/db/seed.ts",
+        "cwd": "."
       }
     },
     "db-seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx ts-node apps/api/src/db/seed.ts"
+        "command": "npx tsx apps/api/src/db/seed.ts",
+        "cwd": "."
       }
     }
   }
