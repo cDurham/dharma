@@ -1,4 +1,4 @@
-import { ApolloProvider } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client/react";
 import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

@@ -1,5 +1,7 @@
+import { UseGuards } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { CurrentUser, JwtAuthGuard } from "../Auth";
 import { CreateUserInput, UpdateUserInput, User } from ".";
 import { CreateUserCommand } from "./command/create-user.command";
 import { DeleteUserCommand } from "./command/delete-user.command";
@@ -61,5 +63,11 @@ export class UserResolver {
   async verifyEmail(@Args("token") token: string): Promise<boolean> {
     const result = await this.commandBus.execute(new VerifyEmailCommand(token));
     return result;
+  }
+
+  @Query((returns) => User)
+  @UseGuards(JwtAuthGuard)
+  async me(@CurrentUser() user: User): Promise<User> {
+    return user;
   }
 }

@@ -7,7 +7,7 @@
     "serve": {
       "executor": "@nx/vite:dev-server",
       "options": {
-        "configFile": "apps/web/vite.config.ts"
+        "buildTarget": "web:build"
       }
     },
     "build": {
@@ -33,7 +33,15 @@
     "codegen": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "graphql-codegen --config apps/web/codegen.yml"
+        "command": "graphql-codegen --config codegen.yml",
+        "cwd": "apps/web"
+      }
+    },
+    "codegen:watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "graphql-codegen --config codegen.yml --watch",
+        "cwd": "apps/web"
       }
     }
   }

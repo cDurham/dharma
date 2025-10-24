@@ -8,7 +8,8 @@ export default defineConfig({
   plugins: [nxViteTsPaths(), react()],
   server: {
     port: 4200,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    sourcemapIgnoreList: false
   },
   preview: {
     port: 4300,
@@ -17,6 +18,7 @@ export default defineConfig({
   build: {
     outDir: '../../dist/apps/web',
     reportCompressedSize: true,
+    sourcemap: true,
     commonjsOptions: {
       transformMixedEsModules: true
     }

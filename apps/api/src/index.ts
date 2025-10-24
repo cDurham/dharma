@@ -8,7 +8,12 @@ import { AppModule } from "./app.module";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(cookieParser()); // Use cookie-parser middleware
+  // Use cookie-parser middleware with signing secret
+  const cookieSecret = process.env.COOKIE_SECRET;
+  if (!cookieSecret) {
+    throw new Error("COOKIE_SECRET environment variable is required but not set");
+  }
+  app.use(cookieParser(cookieSecret));
   const corsOptions = {
     origin: process.env.FRONTEND_URL || "http://localhost:4200",
     credentials: true,

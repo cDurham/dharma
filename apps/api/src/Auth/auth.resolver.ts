@@ -62,15 +62,26 @@ export class AuthResolver {
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token not found");
     }
-    const newAccessToken = await this.commandBus.execute(
+    const { access_token, refresh_token } = await this.commandBus.execute(
       new AuthRefreshAccessTokenCommand(refreshToken)
     );
-    context.res.cookie("access_token", newAccessToken, {
+
+    // Set new access token cookie
+    context.res.cookie("access_token", access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "development",
       sameSite: "strict",
       maxAge: authConfig.cookie.accessTokenMaxAgeMs,
     });
+
+    // Set new refresh token cookie (rotation)
+    context.res.cookie("refresh_token", refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: authConfig.cookie.refreshTokenMaxAgeMs,
+    });
+
     return true;
   }
 

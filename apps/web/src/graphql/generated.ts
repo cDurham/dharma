@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import * as Apollo from '@apollo/client/react';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -340,7 +340,6 @@ export const CreateMemberDocument = gql`
   }
 }
     `;
-export type CreateMemberMutationFn = Apollo.MutationFunction<CreateMemberMutation, CreateMemberMutationVariables>;
 
 /**
  * __useCreateMemberMutation__
@@ -365,7 +364,6 @@ export function useCreateMemberMutation(baseOptions?: Apollo.MutationHookOptions
       }
 export type CreateMemberMutationHookResult = ReturnType<typeof useCreateMemberMutation>;
 export type CreateMemberMutationResult = Apollo.MutationResult<CreateMemberMutation>;
-export type CreateMemberMutationOptions = Apollo.BaseMutationOptions<CreateMemberMutation, CreateMemberMutationVariables>;
 export const LoginDocument = gql`
     mutation login($data: ValidateUserInput!) {
   login(data: $data) {
@@ -373,7 +371,6 @@ export const LoginDocument = gql`
   }
 }
     `;
-export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
  * __useLoginMutation__
@@ -398,13 +395,11 @@ export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginM
       }
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
-export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const LogoutDocument = gql`
     mutation logout {
   logout
 }
     `;
-export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
 
 /**
  * __useLogoutMutation__
@@ -428,7 +423,6 @@ export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<Logou
       }
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const CreateUserDocument = gql`
     mutation CreateUser($data: CreateUserInput!) {
   createUser(data: $data) {
@@ -440,7 +434,6 @@ export const CreateUserDocument = gql`
   }
 }
     `;
-export type CreateUserMutationFn = Apollo.MutationFunction<CreateUserMutation, CreateUserMutationVariables>;
 
 /**
  * __useCreateUserMutation__
@@ -465,7 +458,6 @@ export function useCreateUserMutation(baseOptions?: Apollo.MutationHookOptions<C
       }
 export type CreateUserMutationHookResult = ReturnType<typeof useCreateUserMutation>;
 export type CreateUserMutationResult = Apollo.MutationResult<CreateUserMutation>;
-export type CreateUserMutationOptions = Apollo.BaseMutationOptions<CreateUserMutation, CreateUserMutationVariables>;
 export const UpdateUserDocument = gql`
     mutation UpdateUser($uuid: String!, $data: UpdateUserInput!) {
   updateUser(uuid: $uuid, data: $data) {
@@ -477,7 +469,6 @@ export const UpdateUserDocument = gql`
   }
 }
     `;
-export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
 
 /**
  * __useUpdateUserMutation__
@@ -503,13 +494,11 @@ export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<U
       }
 export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
 export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
-export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
 export const DeleteUserDocument = gql`
     mutation DeleteUser($uuid: String!) {
   deleteUser(uuid: $uuid)
 }
     `;
-export type DeleteUserMutationFn = Apollo.MutationFunction<DeleteUserMutation, DeleteUserMutationVariables>;
 
 /**
  * __useDeleteUserMutation__
@@ -534,13 +523,11 @@ export function useDeleteUserMutation(baseOptions?: Apollo.MutationHookOptions<D
       }
 export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutation>;
 export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
-export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
 export const VerifyEmailDocument = gql`
     mutation VerifyEmail($token: String!) {
   verifyEmail(token: $token)
 }
     `;
-export type VerifyEmailMutationFn = Apollo.MutationFunction<VerifyEmailMutation, VerifyEmailMutationVariables>;
 
 /**
  * __useVerifyEmailMutation__
@@ -565,7 +552,6 @@ export function useVerifyEmailMutation(baseOptions?: Apollo.MutationHookOptions<
       }
 export type VerifyEmailMutationHookResult = ReturnType<typeof useVerifyEmailMutation>;
 export type VerifyEmailMutationResult = Apollo.MutationResult<VerifyEmailMutation>;
-export type VerifyEmailMutationOptions = Apollo.BaseMutationOptions<VerifyEmailMutation, VerifyEmailMutationVariables>;
 export const GetUserDocument = gql`
     query GetUser($uuid: String!) {
   user(uuid: $uuid) {

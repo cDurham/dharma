@@ -11,5 +11,4 @@ export const App = () => {
       <Route path="/verified" element={<div>Verified</div>} />
     </Routes>
   );
-  return <LoginForm />;
 };
