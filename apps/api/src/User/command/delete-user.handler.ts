@@ -6,7 +6,6 @@ import { DB_TOKEN } from "../../db/database.module";
 import { db as DbType } from "../../db/data-source";
 import { user } from "../../db/schema";
 import { UserDeletedEvent } from "../event/user-deleted.event";
-import { User } from "../user.entity";
 import { DeleteUserCommand } from "./delete-user.command";
 
 @CommandHandler(DeleteUserCommand)
@@ -17,7 +16,7 @@ export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand> {
     private readonly eventBus: EventBus
   ) {}
 
-  async execute({ userUuid }: DeleteUserCommand): Promise<User> {
+  async execute({ userUuid }: DeleteUserCommand): Promise<boolean> {
     // Fetch user before deleting
     const [userToDelete] = await this.db
       .select()
@@ -33,6 +32,6 @@ export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand> {
 
     this.eventBus.publish(new UserDeletedEvent(userToDelete.uuid));
 
-    return userToDelete;
+    return true;
   }
 }

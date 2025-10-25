@@ -22,15 +22,12 @@ if (missingVars.length > 0) {
   );
 }
 
-// When running from host machine (not Docker), convert "db" hostname to "localhost"
-const dbHost = requiredEnvVars.DB_HOST === "db" ? "localhost" : requiredEnvVars.DB_HOST!;
-
 export default defineConfig({
   schema: "./apps/api/src/db/schema/index.ts",
   out: "./apps/api/src/db/migrations",
   dialect: "postgresql",
   dbCredentials: {
-    host: dbHost,
+    host: requiredEnvVars.DB_HOST!,
     port: parseInt(requiredEnvVars.DB_PORT!, 10),
     user: requiredEnvVars.DB_USER!,
     password: requiredEnvVars.DB_PASSWORD!,

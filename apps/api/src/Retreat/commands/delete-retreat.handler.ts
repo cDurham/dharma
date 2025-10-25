@@ -6,7 +6,6 @@ import { DB_TOKEN } from "../../db/database.module";
 import { db as DbType } from "../../db/data-source";
 import { retreat } from "../../db/schema";
 import { RetreatDeletedEvent } from "../events/retreat-deleted.event";
-import { Retreat } from "../retreat.entity";
 import { DeleteRetreatCommand } from "./delete-retreat.command";
 
 @CommandHandler(DeleteRetreatCommand)
@@ -19,7 +18,7 @@ export class DeleteRetreatHandler
     private readonly eventBus: EventBus
   ) {}
 
-  async execute(command: DeleteRetreatCommand): Promise<Retreat> {
+  async execute(command: DeleteRetreatCommand): Promise<boolean> {
     const { uuid } = command.input;
 
     // Fetch retreat before deleting
@@ -37,6 +36,6 @@ export class DeleteRetreatHandler
 
     this.eventBus.publish(new RetreatDeletedEvent(retreatToDelete.uuid));
 
-    return retreatToDelete;
+    return true;
   }
 }

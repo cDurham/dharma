@@ -4,11 +4,9 @@ import * as schema from "./schema";
 
 /**
  * Database connection configuration
- * Convert "db" hostname to "localhost" when running from host machine
  */
-const dbHost = process.env.DB_HOST || process.env.DB_WRITE_HOST || "localhost";
 const poolConfig = {
-  host: dbHost === "db" ? "localhost" : dbHost,
+  host: process.env.DB_HOST || process.env.DB_WRITE_HOST || "localhost",
   port: parseInt(
     process.env.DB_PORT || process.env.DB_WRITE_PORT || "5432",
     10
@@ -35,13 +33,9 @@ export const db = drizzle(pool, { schema });
 /**
  * Read-only database connection pool (for read replicas if configured)
  */
-const readDbHost = process.env.DB_READ_HOST || process.env.DB_HOST || "localhost";
 const readPoolConfig = {
-  host: readDbHost === "db" ? "localhost" : readDbHost,
-  port: parseInt(
-    process.env.DB_READ_PORT || process.env.DB_PORT || "5432",
-    10
-  ),
+  host: process.env.DB_READ_HOST || process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_READ_PORT || process.env.DB_PORT || "5432", 10),
   user: process.env.DB_READ_USER || process.env.DB_USER || "postgres",
   password:
     process.env.DB_READ_PASSWORD || process.env.DB_PASSWORD || "postgres",
