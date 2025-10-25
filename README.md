@@ -9,8 +9,6 @@ Full-stack NX monorepo with NestJS GraphQL API backend and React frontend.
 - **Node.js** >= 20.0.0 *(includes npm automatically)*
 - **Docker** & **Docker Compose** (for containerized setup)
 
-> **Note:** npm (Node Package Manager) is automatically included when you install Node.js - no separate installation needed!
-
 ### Installing Prerequisites
 
 <details>

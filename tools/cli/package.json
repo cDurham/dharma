@@ -1,0 +1,21 @@
+{
+  "name": "@dharma/cli",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Dharma CLI - Development environment management tool",
+  "bin": {
+    "dharma": "dist/index.js"
+  },
+  "dependencies": {
+    "chalk": "5.6.2",
+    "commander": "14.0.1",
+    "ora": "9.0.0",
+    "prompts": "^2.4.2",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "@types/prompts": "^2.4.9",
+    "typescript": "^5.8.3"
+  }
+}
