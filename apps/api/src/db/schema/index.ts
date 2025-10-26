@@ -7,3 +7,4 @@ export * from "./relations.schema";
 export * from "./event-store.schema";
 export * from "./outbox.schema";
 export * from "./user-read-model.schema";
+export * from "./member-read-model.schema";

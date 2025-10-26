@@ -13,19 +13,18 @@ export class UserAggregate extends AggregateRoot<UserState> {
     return "User";
   }
 
-  private constructor(id: string) {
+  constructor(id: string) {
     super(id);
   }
 
   static create(params: {
-    uuid?: string;
     firstName: string;
     lastName: string;
     email: string;
     password: string;
     verificationToken: string | null;
   }): UserAggregate {
-    const id = params.uuid ?? uuidv7();
+    const id = uuidv7();
     const agg = new UserAggregate(id);
     const evt = new UserCreatedEvent(
       id,
@@ -39,10 +38,7 @@ export class UserAggregate extends AggregateRoot<UserState> {
     return agg;
   }
 
-  static fromHistory(id: string, events: any[]): UserAggregate {
-    const agg = new UserAggregate(id);
-    return AggregateRoot.replayEvents(agg, events);
-  }
+  // Rehydration centralized in AggregateRoot.fromHistory
 
   update(fields: Partial<UpdatableUserFields>) {
     const evt = new UserUpdatedEvent(this.id, fields);
@@ -182,4 +178,3 @@ export class UserAggregate extends AggregateRoot<UserState> {
     this.state = { ...this.state, deleted: true, updatedAt: new Date() };
   }
 }
-

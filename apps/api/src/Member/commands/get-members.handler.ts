@@ -3,7 +3,7 @@ import { Inject } from "@nestjs/common";
 
 import { DB_TOKEN } from "../../db/database.module";
 import { db as DbType } from "../../db/data-source";
-import { member } from "../../db/schema";
+import { memberReadModel } from "../../db/schema";
 import { Member } from "../member.entity";
 import { GetMembersQuery } from "./get-members.query";
 
@@ -15,6 +15,6 @@ export class GetMembersHandler implements IQueryHandler<GetMembersQuery> {
   ) {}
 
   async execute(): Promise<Member[]> {
-    return await this.db.select().from(member);
+    return await this.db.select().from(memberReadModel);
   }
 }

@@ -15,6 +15,8 @@ export class OutboxPublisherService {
     switch (aggregateType) {
       case "User":
         return "users";
+      case "Member":
+        return "members";
       default:
         return "domain-events";
     }
@@ -36,4 +38,3 @@ export class OutboxPublisherService {
     }
   }
 }
-

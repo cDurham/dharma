@@ -92,5 +92,17 @@ export abstract class AggregateRoot<T> {
     }
     return aggregate;
   }
-}
 
+  /**
+   * Generic rehydration helper to rebuild an aggregate from event history.
+   * Usage: UserAggregate.fromHistory(id, events)
+   */
+  static fromHistory<A extends AggregateRoot<any>>(
+    this: new (id: string) => A,
+    id: string,
+    events: any[]
+  ): A {
+    const agg = new this(id);
+    return AggregateRoot.replayEvents(agg, events);
+  }
+}

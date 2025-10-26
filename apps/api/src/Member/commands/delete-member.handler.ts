@@ -1,40 +1,31 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { Inject } from "@nestjs/common";
-import { eq } from "drizzle-orm";
-
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { member } from "../../db/schema";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { DeleteMemberCommand } from "./delete-member.command";
 import { Member } from "../member.entity";
-import { MemberDeletedEvent } from "../events/member-deleted.event";
+import { MemberRepository } from "../member-repository";
 
 @CommandHandler(DeleteMemberCommand)
-export class DeleteMemberHandler
-  implements ICommandHandler<DeleteMemberCommand>
-{
-  constructor(
-    @Inject(DB_TOKEN)
-    private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
-  ) {}
+export class DeleteMemberHandler implements ICommandHandler<DeleteMemberCommand> {
+  constructor(private readonly memberRepository: MemberRepository) {}
 
   async execute({ memberUuid }: DeleteMemberCommand): Promise<Member> {
-    // Fetch member before deleting
-    const [memberToDelete] = await this.db
-      .select()
-      .from(member)
-      .where(eq(member.uuid, memberUuid));
-
-    if (!memberToDelete) {
+    const aggregate = await this.memberRepository.load(memberUuid);
+    if (!aggregate) {
       throw new Error("Member not found");
     }
 
-    // Delete member
-    await this.db.delete(member).where(eq(member.uuid, memberUuid));
+    const stateBefore = aggregate.getState()!;
+    aggregate.delete();
+    await this.memberRepository.save(aggregate);
 
-    this.eventBus.publish(new MemberDeletedEvent(memberToDelete.uuid));
-
-    return memberToDelete;
+    return {
+      uuid: stateBefore.uuid,
+      firstName: stateBefore.firstName,
+      lastName: stateBefore.lastName,
+      joinDate: stateBefore.joinDate,
+      createdAt: stateBefore.createdAt!,
+      updatedAt: stateBefore.updatedAt!,
+      user: null,
+      userUuid: null,
+    };
   }
 }

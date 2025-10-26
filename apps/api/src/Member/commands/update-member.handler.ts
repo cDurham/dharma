@@ -1,49 +1,39 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { Inject } from "@nestjs/common";
-import { eq } from "drizzle-orm";
-
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { member } from "../../db/schema";
-import { MemberUpdatedEvent } from "../events/member-updated.event";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Member } from "../member.entity";
 import { UpdateMemberCommand } from "./update-member.command";
+import { MemberRepository } from "../member-repository";
+import { filterUndefined } from "../../EventStore/utils";
 
 @CommandHandler(UpdateMemberCommand)
-export class UpdateMemberHandler
-  implements ICommandHandler<UpdateMemberCommand>
-{
-  constructor(
-    @Inject(DB_TOKEN)
-    private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
-  ) {}
+export class UpdateMemberHandler implements ICommandHandler<UpdateMemberCommand> {
+  constructor(private readonly memberRepository: MemberRepository) {}
 
   async execute({ memberUuid, data }: UpdateMemberCommand): Promise<Member> {
-    // Check if member exists
-    const [existingMember] = await this.db
-      .select()
-      .from(member)
-      .where(eq(member.uuid, memberUuid));
-
-    if (!existingMember) {
+    const aggregate = await this.memberRepository.load(memberUuid);
+    if (!aggregate) {
       throw new Error("Member not found");
     }
 
-    // Update member
-    await this.db
-      .update(member)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(member.uuid, memberUuid));
+    const changes = filterUndefined({
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
 
-    // Fetch updated member
-    const [updatedMember] = await this.db
-      .select()
-      .from(member)
-      .where(eq(member.uuid, memberUuid));
+    if (Object.keys(changes).length > 0) {
+      aggregate.update(changes);
+      await this.memberRepository.save(aggregate);
+    }
 
-    this.eventBus.publish(new MemberUpdatedEvent(updatedMember.uuid));
-
-    return updatedMember;
+    const state = aggregate.getState()!;
+    return {
+      uuid: state.uuid,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      joinDate: state.joinDate,
+      createdAt: state.createdAt!,
+      updatedAt: state.updatedAt!,
+      user: null,
+      userUuid: null,
+    };
   }
 }
