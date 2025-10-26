@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from "@nestjs/common";
 import { Kafka, Producer, Consumer, Partitioners } from "kafkajs";
 
 @Injectable()
@@ -6,6 +6,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   private kafka: Kafka;
   private producer: Producer;
   private consumer: Consumer;
+  private readonly logger = new Logger(KafkaService.name);
 
   constructor() {
     this.kafka = new Kafka({
@@ -23,7 +24,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       await this.producer.connect();
       await this.consumer.connect();
     } catch (error) {
-      console.error("Error connecting to Kafka", error);
+      this.logger.error("Error connecting to Kafka", (error as any)?.stack ?? String(error));
     }
   }
 
@@ -32,7 +33,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       await this.producer.disconnect();
       await this.consumer.disconnect();
     } catch (error) {
-      console.error("Error disconnecting from Kafka", error);
+      this.logger.error("Error disconnecting from Kafka", (error as any)?.stack ?? String(error));
     }
   }
 
@@ -43,7 +44,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
         messages: [{ key, value: JSON.stringify(message) }],
       });
     } catch (error) {
-      console.error("Error producing message to Kafka", error);
+      this.logger.error("Error producing message to Kafka", (error as any)?.stack ?? String(error));
     }
   }
 
@@ -60,7 +61,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
         },
       });
     } catch (error) {
-      console.error("Error consuming message from Kafka", error);
+      this.logger.error("Error consuming message from Kafka", (error as any)?.stack ?? String(error));
     }
   }
 }

@@ -9,8 +9,12 @@ export default {
     }]
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/api',
-  collectCoverageFrom: ['src/**/*.(t|j)s'],
+  coverageDirectory: '../../coverage/api',
+  collectCoverageFrom: [
+    'src/**/*.(t|j)s',
+    '!src/**/*.spec.ts',
+    '!src/**/__tests__/**'
+  ],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transformIgnorePatterns: [
     'node_modules/(?!(@faker-js)/)',

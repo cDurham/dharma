@@ -6,9 +6,8 @@ import { UpdateMemberCommand } from "../../commands/update-member.command";
 import { DeleteMemberCommand } from "../../commands/delete-member.command";
 import { GetMembersQuery } from "../../commands/get-members.query";
 import { GetMemberQuery } from "../../commands/get-member.query";
-import { createMemberFixture } from "../../../../test/fixtures/member.fixture";
-import { createMockCommandBus, MockCommandBus } from "../../../../test/mocks/command-bus.mock";
-import { createMockQueryBus, MockQueryBus } from "../../../../test/mocks/query-bus.mock";
+import { createMemberFixture } from "@fixtures/member.fixture";
+import { createMockCommandBus, MockCommandBus, createMockQueryBus, MockQueryBus } from "@test/mocks";
 
 describe("MemberResolver", () => {
   let resolver: MemberResolver;

@@ -1,5 +1,4 @@
 import { ExecutionContext } from "@nestjs/common";
-import { GqlExecutionContext } from "@nestjs/graphql";
 import { JwtAuthGuard } from "../../jwt-auth.guard";
 
 describe("JwtAuthGuard", () => {

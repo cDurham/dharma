@@ -3,7 +3,7 @@ import { Logger } from "@nestjs/common";
 import { TokenCleanupService } from "../../token-cleanup.service";
 import { DB_TOKEN } from "../../../db/database.module";
 import { refreshToken } from "../../../db/schema";
-import { createMockDb, MockDb } from "../../../../test/mocks/database.mock";
+import { createMockDb, MockDb } from "@test/mocks";
 
 describe("TokenCleanupService", () => {
   let service: TokenCleanupService;

@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { MemberCreatedHandler } from "../../events/member-created.handler";
 import { MemberCreatedEvent } from "../../events/member-created.event";
 import { KafkaService } from "../../../kafka/kafka.service";
-import { createMockKafkaService, MockKafkaService } from "../../../../test/mocks/kafka.mock";
+import { createMockKafkaService, MockKafkaService } from "@test/mocks";
 
 describe("MemberCreatedHandler", () => {
   let handler: MemberCreatedHandler;

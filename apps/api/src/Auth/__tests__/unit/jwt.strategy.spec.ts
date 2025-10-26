@@ -3,9 +3,8 @@ import { ConfigService } from "@nestjs/config";
 import { QueryBus } from "@nestjs/cqrs";
 import { UnauthorizedException } from "@nestjs/common";
 import { JwtStrategy } from "../../jwt.strategy";
-import { createMockConfigService, MockConfigService } from "../../../../test/mocks/config.mock";
-import { createMockQueryBus, MockQueryBus } from "../../../../test/mocks/query-bus.mock";
-import { createUserFixture } from "../../../../test/fixtures/user.fixture";
+import { createMockConfigService, MockConfigService, createMockQueryBus, MockQueryBus } from "@test/mocks";
+import { createUserFixture } from "@fixtures/user.fixture";
 
 describe("JwtStrategy", () => {
   let strategy: JwtStrategy;

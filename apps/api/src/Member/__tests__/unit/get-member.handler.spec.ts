@@ -2,8 +2,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { DB_TOKEN } from "../../../db/database.module";
 import { GetMemberQuery } from "../../commands/get-member.query";
 import { GetMemberHandler } from "../../commands/get-member.handler";
-import { createMockDb, MockDb } from "../../../../test/mocks/database.mock";
-import { createMemberFixture } from "../../../../test/fixtures/member.fixture";
+import { createMockDb, MockDb } from "@test/mocks";
+import { createMemberFixture } from "@fixtures/member.fixture";
 
 describe("GetMemberHandler", () => {
   let handler: GetMemberHandler;

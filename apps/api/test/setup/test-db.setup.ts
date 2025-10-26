@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { createMockDb, MockDb } from "../mocks/database.mock";
 
 // Set up required environment variables for tests
