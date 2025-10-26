@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { DB_TOKEN } from "../../db/database.module";
 import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
+import { userReadModel } from "../../db/schema";
 import { GetUserByEmailQuery } from "./get-user-by-email.query";
 import { User } from "../user.entity";
 
@@ -20,8 +20,8 @@ export class GetUserByEmailHandler
   async execute({ email }: GetUserByEmailQuery): Promise<User | null> {
     const [result] = await this.db
       .select()
-      .from(user)
-      .where(eq(user.email, email));
+      .from(userReadModel)
+      .where(eq(userReadModel.email, email));
 
     return result || null;
   }

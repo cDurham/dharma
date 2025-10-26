@@ -14,8 +14,5 @@ export const user = pgTable(
     password: varchar("password", { length: 255 }).notNull(),
     verificationToken: varchar("verification_token", { length: 255 }),
   },
-  (table) => ({
-    emailUnique: unique().on(table.email),
-  })
+  (table) => [unique().on(table.email)]
 );
-

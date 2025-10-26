@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { DB_TOKEN } from "../../db/database.module";
 import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
+import { userReadModel } from "../../db/schema";
 import { User } from "../user.entity";
 import { GetUserQuery } from "./get-user.query";
 
@@ -20,8 +20,8 @@ export class GetUserHandler
   async execute({ userUuid }: GetUserQuery): Promise<User> {
     const [result] = await this.db
       .select()
-      .from(user)
-      .where(eq(user.uuid, userUuid));
+      .from(userReadModel)
+      .where(eq(userReadModel.uuid, userUuid));
 
     if (!result) {
       throw new Error("User not found");

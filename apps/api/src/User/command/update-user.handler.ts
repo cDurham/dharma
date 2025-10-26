@@ -1,57 +1,42 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
-import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
 import { User } from "../user.entity";
 import { UpdateUserCommand } from "./update-user.command";
-import { UserUpdatedEvent } from "../event/user-updated.event";
+import { UserRepository } from "../user-repository";
+import { UserAggregate } from "../user.aggregate";
 
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
   constructor(
-    @Inject(DB_TOKEN)
-    private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly userRepository: UserRepository
   ) {}
 
   async execute({ userUuid, data }: UpdateUserCommand): Promise<User | null> {
-    const { email, password } = data;
+    const aggregate = await this.userRepository.load(userUuid);
+    if (!aggregate) return null;
 
-    // Check if user exists
-    const [existingUser] = await this.db
-      .select()
-      .from(user)
-      .where(eq(user.uuid, userUuid));
-
-    if (!existingUser) {
-      return null;
+    const updateFields: any = {};
+    if (data.email !== undefined) updateFields.email = data.email;
+    if (data.password !== undefined) {
+      updateFields.password = await bcrypt.hash(data.password, 12);
+    }
+    if (Object.keys(updateFields).length > 0) {
+      aggregate.update(updateFields);
+      await this.userRepository.save(aggregate);
     }
 
-    // Hash password if provided
-    const updateData: any = { updatedAt: new Date() };
-    if (email !== undefined) updateData.email = email;
-    if (password !== undefined) {
-      updateData.password = await bcrypt.hash(password, 12);
-    }
-
-    // Update user
-    await this.db
-      .update(user)
-      .set(updateData)
-      .where(eq(user.uuid, userUuid));
-
-    // Fetch updated user
-    const [updatedUser] = await this.db
-      .select()
-      .from(user)
-      .where(eq(user.uuid, userUuid));
-
-    this.eventBus.publish(new UserUpdatedEvent(updatedUser.uuid));
-
-    return updatedUser;
+    const state = aggregate.getState()!;
+    return {
+      uuid: state.uuid,
+      firstName: state.firstName,
+      lastName: state.lastName,
+      email: state.email,
+      password: state.password,
+      verificationToken: state.verificationToken ?? null,
+      createdAt: state.createdAt!,
+      updatedAt: state.updatedAt!,
+    };
   }
 }

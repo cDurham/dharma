@@ -1,38 +1,34 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DB_TOKEN } from "../../db/database.module";
 import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
-import { UserUpdatedEvent } from "../event/user-updated.event";
+import { userReadModel } from "../../db/schema";
 import { VerifyEmailCommand } from "./verify-email.command";
+import { UserRepository } from "../user-repository";
 
 @CommandHandler(VerifyEmailCommand)
 export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly userRepository: UserRepository
   ) {}
 
   async execute({ token }: VerifyEmailCommand): Promise<boolean> {
-    const [userToVerify] = await this.db
+    const [row] = await this.db
       .select()
-      .from(user)
-      .where(eq(user.verificationToken, token));
+      .from(userReadModel)
+      .where(eq(userReadModel.verificationToken, token));
 
-    if (!userToVerify) {
-      return false;
-    }
+    if (!row) return false;
 
-    // Set verification token to null
-    await this.db
-      .update(user)
-      .set({ verificationToken: null, updatedAt: new Date() })
-      .where(eq(user.uuid, userToVerify.uuid));
+    const aggregate = await this.userRepository.load(row.uuid);
+    if (!aggregate) return false;
 
-    this.eventBus.publish(new UserUpdatedEvent(userToVerify.uuid));
+    aggregate.verifyEmail();
+    await this.userRepository.save(aggregate);
 
     return true;
   }

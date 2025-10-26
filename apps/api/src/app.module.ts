@@ -14,13 +14,15 @@ import { MemberModule } from "./Member/member.module";
 import { RetreatModule } from "./Retreat";
 import { UserModule } from "./User";
 import { VerificationController } from "./Verify/verify.controller";
+import { EventStoreModule } from "./EventStore/event-store.module";
 
 @Module({
   imports: [
     CqrsModule.forRoot(),
     ConfigModule.forRoot(), // This loads the .env file
     ScheduleModule.forRoot(), // Enable cron jobs globally
-    DatabaseModule, // Drizzle database module
+    DatabaseModule, 
+    EventStoreModule,
     UserModule,
     MemberModule,
     RetreatModule,

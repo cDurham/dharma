@@ -4,4 +4,6 @@ export * from "./member.schema";
 export * from "./retreat.schema";
 export * from "./refresh-token.schema";
 export * from "./relations.schema";
-
+export * from "./event-store.schema";
+export * from "./outbox.schema";
+export * from "./user-read-model.schema";

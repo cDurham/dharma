@@ -17,8 +17,5 @@ export const refreshToken = pgTable(
     isRevoked: boolean("is_revoked").notNull().default(false),
     hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
   },
-  (table) => ({
-    tokenHashIdx: index("refresh_token_token_hash_idx").on(table.tokenHash),
-  })
+  (table) => [index("refresh_token_token_hash_idx").on(table.tokenHash)]
 );
-
