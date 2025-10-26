@@ -14,6 +14,5 @@ export class MemberUpdatedHandler implements IEventHandler<MemberUpdatedEvent> {
       },
       "member-updated"
     );
-    console.log("Member updated event published", event);
   }
 }

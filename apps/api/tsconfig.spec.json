@@ -2,7 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/apps/api-tests",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "paths": {
+      "@api/*": ["apps/api/src/*"],
+      "@test/*": ["apps/api/test/*"],
+      "@mocks/*": ["apps/api/test/mocks/*"],
+      "@fixtures/*": ["apps/api/test/fixtures/*"]
+    }
   },
   "include": [
     "src/**/*.spec.ts",

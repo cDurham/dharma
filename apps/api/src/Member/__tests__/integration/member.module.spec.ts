@@ -1,14 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { CommandBus, CqrsModule, QueryBus } from "@nestjs/cqrs";
 import { MemberModule } from "../../member.module";
-import { DB_TOKEN } from "../../../db/database.module";
+import { DB_TOKEN, DatabaseModule } from "../../../db/database.module";
 import { member } from "../../../db/schema";
 import { CreateMemberCommand } from "../../commands/create-member.command";
 import { GetMemberQuery } from "../../commands/get-member.query";
-import { createMockDb, MockDb } from "../../../../../test/mocks/database.mock";
-import { createMockKafkaService, MockKafkaService } from "../../../../../test/mocks/kafka.mock";
 import { KafkaService } from "../../../kafka/kafka.service";
-import { createMemberFixture } from "../../../../../test/fixtures/member.fixture";
+import { createMockDb, MockDb, createMockKafkaService, MockKafkaService } from "@test/mocks";
+import { createMemberFixture } from "@fixtures/member.fixture";
 
 jest.mock("uuid", () => ({
   v7: jest.fn(),
@@ -29,14 +28,10 @@ describe("MemberModule Integration", () => {
     mockKafkaService = createMockKafkaService();
 
     moduleRef = await Test.createTestingModule({
-      imports: [CqrsModule, MemberModule],
-      providers: [
-        {
-          provide: DB_TOKEN,
-          useValue: mockDb,
-        },
-      ],
+      imports: [CqrsModule, DatabaseModule, MemberModule],
     })
+      .overrideProvider(DB_TOKEN)
+      .useValue(mockDb)
       .overrideProvider(KafkaService)
       .useValue(mockKafkaService)
       .compile();

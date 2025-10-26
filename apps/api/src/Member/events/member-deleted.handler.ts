@@ -14,6 +14,5 @@ export class MemberDeletedHandler implements IEventHandler<MemberDeletedEvent> {
       },
       "member-deleted"
     );
-    console.log("Member deleted event published", event);
   }
 }

@@ -15,6 +15,5 @@ export class MemberCreatedHandler implements IEventHandler<MemberCreatedEvent> {
       },
       "member-created"
     );
-    console.log("Member created event published", event);
   }
 }

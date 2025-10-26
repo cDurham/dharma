@@ -2,8 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
 import { MailerService } from "@nestjs-modules/mailer";
 import { EmailService } from "../../email.service";
-import { createMockMailerService, MockMailerService } from "../../../../test/mocks/mailer.mock";
-import { createMockConfigService, MockConfigService } from "../../../../test/mocks/config.mock";
+import { createMockMailerService, MockMailerService, createMockConfigService, MockConfigService } from "@test/mocks";
 
 describe("EmailService", () => {
   let service: EmailService;
