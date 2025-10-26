@@ -14,6 +14,8 @@ export class RetreatCreatedHandler
       {
         retreatUuid: event.retreatUuid,
         name: event.name,
+        startAt: event.startAt,
+        endAt: event.endAt,
       },
       "retreat-created"
     );

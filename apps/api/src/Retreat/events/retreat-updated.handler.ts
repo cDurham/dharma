@@ -13,6 +13,7 @@ export class RetreatUpdatedHandler
       "retreats",
       {
         retreatUuid: event.retreatUuid,
+        changes: event.changes,
       },
       "retreat-updated"
     );

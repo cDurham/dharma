@@ -1,54 +1,36 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { Inject } from "@nestjs/common";
-import { eq } from "drizzle-orm";
-
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { retreat } from "../../db/schema";
-import { RetreatUpdatedEvent } from "../events/retreat-updated.event";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Retreat } from "../retreat.entity";
 import { UpdateRetreatCommand } from "./update-retreat.command";
+import { RetreatRepository } from "../retreat-repository";
+import { filterUndefined } from "../../EventStore/utils";
 
 @CommandHandler(UpdateRetreatCommand)
-export class UpdateRetreatHandler
-  implements ICommandHandler<UpdateRetreatCommand>
-{
-  constructor(
-    @Inject(DB_TOKEN)
-    private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
-  ) {}
+export class UpdateRetreatHandler implements ICommandHandler<UpdateRetreatCommand> {
+  constructor(private readonly retreatRepository: RetreatRepository) {}
 
-  async execute({
-    retreatUuid,
-    data,
-  }: UpdateRetreatCommand): Promise<Retreat | null> {
-    const { name, startAt, endAt } = data;
+  async execute({ retreatUuid, data }: UpdateRetreatCommand): Promise<Retreat | null> {
+    const aggregate = await this.retreatRepository.load(retreatUuid);
+    if (!aggregate) return null;
 
-    // Check if retreat exists
-    const [existingRetreat] = await this.db
-      .select()
-      .from(retreat)
-      .where(eq(retreat.uuid, retreatUuid));
+    const changes = filterUndefined({
+      name: data.name,
+      startAt: data.startAt,
+      endAt: data.endAt,
+    });
 
-    if (!existingRetreat) {
-      return null;
+    if (Object.keys(changes).length > 0) {
+      aggregate.update(changes);
+      await this.retreatRepository.save(aggregate);
     }
 
-    // Update retreat
-    await this.db
-      .update(retreat)
-      .set({ name, startAt, endAt, updatedAt: new Date() })
-      .where(eq(retreat.uuid, retreatUuid));
-
-    // Fetch updated retreat
-    const [updatedRetreat] = await this.db
-      .select()
-      .from(retreat)
-      .where(eq(retreat.uuid, retreatUuid));
-
-    this.eventBus.publish(new RetreatUpdatedEvent(updatedRetreat.uuid));
-
-    return updatedRetreat;
+    const state = aggregate.getState()!;
+    return {
+      uuid: state.uuid,
+      name: state.name,
+      startAt: state.startAt,
+      endAt: state.endAt,
+      createdAt: state.createdAt!,
+      updatedAt: state.updatedAt!,
+    };
   }
 }
