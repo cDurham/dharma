@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { runCommand, runCommandAsync, withSpinner, createSpinner, printSuccess, printError, printInfo } from '../utils/docker.js';
+import { runCommandAsync, withSpinner, createSpinner, printSuccess, printError, printInfo, execInContainer } from '../utils/docker.js';
 import { serviceRegistry } from '../config/services.js';
 
 export const devCommand = new Command('dev')
@@ -66,8 +66,9 @@ devCommand
   .argument('[service]', 'Service to rebuild (or "all")', 'all')
   .action(async (service) => {
     const rebuildableServices = serviceRegistry.getRebuildableServices();
+    const resolvedService = serviceRegistry.resolveServiceName(service);
     
-    if (service === 'all') {
+    if (resolvedService === 'all') {
       printInfo('Rebuilding all services...');
       
       await withSpinner(
@@ -89,10 +90,10 @@ devCommand
       );
     } else {
       // Check if service exists and can be rebuilt
-      const serviceConfig = serviceRegistry.getService(service);
+      const serviceConfig = serviceRegistry.getService(resolvedService);
       
       if (!serviceConfig) {
-        printError(`Invalid service: ${service}`);
+        printError(`Invalid service: ${service} (${resolvedService})`);
         printError(`Valid services: ${rebuildableServices.map(s => s.name).join(', ')}, all`);
         process.exit(1);
       }
@@ -103,30 +104,28 @@ devCommand
         process.exit(1);
       }
       
-      // Use the actual docker-compose service name (e.g., 'api-dev', 'web-dev')
-      // For services with -dev suffix, use that; otherwise use the name as-is
-      const composeServiceName = service;
+      const displayName = serviceRegistry.getDisplayName(service);
       
-      printInfo(`Rebuilding ${service}...`);
+      printInfo(`Rebuilding ${displayName}...`);
       
-      await runCommandAsync(`docker compose --profile dev stop ${composeServiceName}`);
-      await runCommandAsync(`docker compose --profile dev rm -f ${composeServiceName}`);
+      await runCommandAsync(`docker compose --profile dev stop ${resolvedService}`);
+      await runCommandAsync(`docker compose --profile dev rm -f ${resolvedService}`);
       
-      const spinner = createSpinner(`Building ${service}...`).start();
-      const buildResult = await runCommandAsync(`docker compose --profile dev build --no-cache ${composeServiceName}`);
+      const spinner = createSpinner(`Building ${displayName}...`).start();
+      const buildResult = await runCommandAsync(`docker compose --profile dev build --no-cache ${resolvedService}`);
       
       if (!buildResult.success) {
         spinner.fail('Build failed');
         process.exit(1);
       }
       
-      spinner.text = `Starting ${service}...`;
-      const upResult = await runCommandAsync(`docker compose --profile dev up -d ${composeServiceName}`);
+      spinner.text = `Starting ${displayName}...`;
+      const upResult = await runCommandAsync(`docker compose --profile dev up -d ${resolvedService}`);
       
       if (upResult.success) {
-        spinner.succeed(`${service} rebuilt successfully`);
+        spinner.succeed(`${displayName} rebuilt successfully`);
       } else {
-        spinner.fail(`Failed to start ${service}`);
+        spinner.fail(`Failed to start ${displayName}`);
         process.exit(1);
       }
     }
@@ -185,7 +184,7 @@ devCommand
     // Push schema
     await withSpinner(
       'Pushing database schema...',
-      () => Promise.resolve(runCommand('npm run db:push', { silent: true })),
+      () => Promise.resolve(execInContainer('api-dev', 'npm run db:push')),
       { successMessage: 'Database schema pushed' }
     );
     
@@ -193,7 +192,7 @@ devCommand
     if (!options.skipSeed) {
       await withSpinner(
         'Seeding database...',
-        () => Promise.resolve(runCommand('npm run db:seed', { silent: true })),
+        () => Promise.resolve(execInContainer('api-dev', 'npm run db:seed')),
         { successMessage: 'Database seeded' }
       );
     }

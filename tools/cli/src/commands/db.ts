@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { runCommand, runCommandAsync, printSuccess, printError } from '../utils/docker.js';
+import { runCommand, runCommandAsync, printSuccess, printError, execInContainer } from '../utils/docker.js';
 
 export const dbCommand = new Command('db')
   .description('Database management commands');
@@ -9,7 +9,7 @@ dbCommand
   .description('Push database schema')
   .action(() => {
     printSuccess('Pushing database schema...');
-    const result = runCommand('npm run db:push');
+    const result = execInContainer('api-dev', 'npm run db:push');
     if (!result.success) {
       printError('Failed to push schema');
       process.exit(1);
@@ -21,7 +21,7 @@ dbCommand
   .description('Seed database with test data')
   .action(() => {
     printSuccess('Seeding database...');
-    const result = runCommand('npm run db:seed');
+    const result = execInContainer('api-dev', 'npm run db:seed');
     if (!result.success) {
       printError('Failed to seed database');
       process.exit(1);
@@ -33,7 +33,7 @@ dbCommand
   .description('Reset database (drop, push, seed)')
   .action(() => {
     printSuccess('Resetting database...');
-    const result = runCommand('npm run db:reset');
+    const result = execInContainer('api-dev', 'npm run db:reset');
     if (!result.success) {
       printError('Failed to reset database');
       process.exit(1);

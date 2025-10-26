@@ -3,6 +3,15 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 /**
+ * Service name aliases for convenience
+ * Maps short names to full service names in dev mode
+ */
+const SERVICE_ALIASES: Record<string, string> = {
+  'api': 'api-dev',
+  'web': 'web-dev',
+};
+
+/**
  * Service Registry - Singleton that loads services from docker-compose.yml
  */
 class ServiceRegistry {
@@ -90,10 +99,35 @@ class ServiceRegistry {
   public hasService(name: string): boolean {
     return this.services.has(name);
   }
+
+  /**
+   * Resolve a service name, applying aliases if needed
+   */
+  public resolveServiceName(name: string): string {
+    return SERVICE_ALIASES[name] || name;
+  }
+
+  /**
+   * Resolve multiple service names, applying aliases if needed
+   */
+  public resolveServiceNames(names: string[]): string[] {
+    return names.map(name => this.resolveServiceName(name));
+  }
+
+  /**
+   * Get the display name for a service (shows alias if used)
+   */
+  public getDisplayName(requestedName: string): string {
+    const resolvedName = this.resolveServiceName(requestedName);
+    return requestedName !== resolvedName ? `${requestedName} (${resolvedName})` : requestedName;
+  }
 }
 
 // Export singleton instance
 export const serviceRegistry = ServiceRegistry.getInstance();
+
+// Export aliases for reference
+export { SERVICE_ALIASES };
 
 // Export type for use in other files
 export type { ServiceConfig } from './docker-compose-parser.js';

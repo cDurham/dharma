@@ -8,7 +8,7 @@ export const execCommand = new Command('exec')
   .argument('[service]', 'Service to exec into')
   .argument('[command...]', 'Command to run (defaults to sh)')
   .action(async (service?: string, commandArgs: string[] = []) => {
-    let selectedService = service;
+    let selectedService = service ? serviceRegistry.resolveServiceName(service) : undefined;
     const execableServices = serviceRegistry.getExecableServices();
 
     // If no service specified, prompt user

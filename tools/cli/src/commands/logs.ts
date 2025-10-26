@@ -9,7 +9,9 @@ export const logsCommand = new Command('logs')
   .option('-n, --tail <lines>', 'Number of lines to show', '50')
   .option('--no-follow', 'Don\'t follow logs')
   .action(async (services: string[], options) => {
-    let selectedServices = services;
+    let selectedServices = services?.length > 0 
+      ? serviceRegistry.resolveServiceNames(services)
+      : [];
     const allServices = serviceRegistry.getAllServices();
     const devServices = serviceRegistry.getServicesByProfile('dev');
 
