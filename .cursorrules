@@ -1,0 +1,55 @@
+# Dharma Project Cursor Rules
+
+## CLI Tool Usage
+ALWAYS suggest using the custom CLI tool (`dharma`) for development operations instead of raw docker commands.
+
+### Service Name Aliasing
+The CLI supports short aliases for convenience:
+- `api` → `api-dev` (in dev mode)
+- `web` → `web-dev` (in dev mode)
+
+You can use either the short name (`api`) or full name (`api-dev`) - they're equivalent.
+
+### Available Commands
+
+**Development Environment Management:**
+- `dharma dev up` - Start development environment
+- `dharma dev down` - Stop development environment  
+- `dharma dev restart` - Restart development environment
+- `dharma dev rebuild [service]` - Rebuild specific service (e.g., `api`, `web`, `all`)
+- `dharma dev nuke` - Complete teardown (stop, remove volumes, prune)
+- `dharma dev reset` - Full teardown and rebuild with fresh database
+
+**Service Management:**
+- `dharma status` or `dharma ps` - Show status of all services
+- `dharma logs [services...]` - View container logs (e.g., `dharma logs api web`)
+- `dharma exec [service] [command]` - Execute commands in containers (e.g., `dharma exec api sh`)
+
+**Database Operations:**
+- `dharma db push` - Push database schema
+- `dharma db seed` - Seed database
+- `dharma db reset` - Reset database
+
+## When to Use CLI Commands
+- **Always** suggest `dharma dev restart` instead of `docker compose restart`
+- **Always** suggest `dharma logs api` instead of `docker logs dharma-api-dev-1`
+- **Always** suggest `dharma status` instead of `docker ps`
+- **Always** suggest `dharma dev rebuild api` for rebuilding the API service
+- **Always** suggest `dharma exec api sh` instead of `docker exec -it dharma-api-dev-1 sh`
+- **Always** suggest `dharma dev reset` for fresh environment setup
+
+## CLI Implementation Details
+Service aliases are centralized in `tools/cli/src/config/services.ts` in the `SERVICE_ALIASES` constant. To add new aliases, update that file and rebuild the CLI with `npm run cli:build`.
+
+## Project Structure
+- This is an Nx monorepo with `apps/api` (NestJS GraphQL backend) and `apps/web` (React frontend)
+- Uses Docker Compose for development environment
+- API runs on port 3000, web on port 4200
+- Uses Drizzle ORM with PostgreSQL
+
+## Code Style
+- Use TypeScript strict mode
+- Follow NestJS conventions for backend code
+- Use React with TypeScript for frontend
+- Prefer composition over inheritance
+- Use proper error handling and logging

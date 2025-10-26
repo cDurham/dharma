@@ -115,3 +115,35 @@ export function printWarning(message: string) {
   console.log(chalk.yellow('⚠'), message);
 }
 
+/**
+ * Execute a command inside a container, with smart error handling
+ */
+export function execInContainer(serviceName: string, command: string): CommandResult {
+  const service = serviceRegistry.getService(serviceName);
+  
+  if (!service) {
+    printError(`Service "${serviceName}" not found`);
+    return { success: false, error: `Unknown service: ${serviceName}` };
+  }
+
+  // Check if container is running
+  const status = getContainerStatus();
+  const containerStatus = status[service.containerName];
+
+  if (!containerStatus) {
+    printError(`Container "${service.containerName}" does not exist`);
+    printInfo(`Run 'dharma dev up' to start the environment`);
+    return { success: false, error: 'Container not found' };
+  }
+
+  if (!containerStatus.running) {
+    printError(`Container "${service.containerName}" is not running`);
+    printInfo(`Run 'dharma dev up' to start the environment`);
+    return { success: false, error: 'Container not running' };
+  }
+
+  // Execute command in container
+  const fullCommand = `docker exec ${service.containerName} ${command}`;
+  return runCommand(fullCommand);
+}
+
