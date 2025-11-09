@@ -7,7 +7,7 @@ cd $APP_DIR
 echo "🚀 Starting deployment..."
 
 # Pull latest code
-git pull origin main
+git pull origin trunk
 
 # Create .env from environment variables (passed by GitHub Actions)
 cat > .env << EOF
