@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 
 const httpLink = new HttpLink({
   credentials: "include",
@@ -6,7 +6,7 @@ const httpLink = new HttpLink({
 });
 
 const client = new ApolloClient({
-  link: from([httpLink]),
+  link: httpLink,
   cache: new InMemoryCache(),
 });
 

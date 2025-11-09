@@ -1,3 +1,9 @@
+mutation Login($data: ValidateUserInput!) {
+  login(data: $data) {
+    message
+  }
+}
+
 mutation CreateUser($data: CreateUserInput!) {
   createUser(data: $data) {
     uuid

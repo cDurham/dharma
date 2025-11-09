@@ -1,18 +1,16 @@
 import { useState } from "react";
 
-import { useCreateMemberMutation, useMembersQuery } from "./graphql/generated";
 import useLogout from "./graphql/useLogout";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { CreateMemberDocument, MembersDocument } from "./graphql/types";
 
 export const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
-  const [createMember] = useCreateMemberMutation();
-  const { loading, error, data, refetch } = useMembersQuery({
-    fetchPolicy: "network-only",
-    skip: true, // Don't fetch on mount
-  });
+  const [createMember] = useMutation(CreateMemberDocument);
+  const { loading, error, data, refetch } = useQuery(MembersDocument);
 
   const handleCreateMember = async (e: React.FormEvent) => {
     e.preventDefault();

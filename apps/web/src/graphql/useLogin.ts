@@ -1,18 +1,10 @@
-import { gql } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import { useLoginMutation } from "./generated";
-
-gql`
-  mutation login($data: ValidateUserInput!) {
-    login(data: $data) {
-      message
-    }
-  }
-`;
+import { useMutation } from "@apollo/client/react";
+import { LoginDocument } from "./types";
 
 const useLogin = () => {
   const navigate = useNavigate();
-  const [login, { loading, error }] = useLoginMutation();
+  const [login, { loading, error }] = useMutation(LoginDocument);
 
   const handleLogin = async (email: string, password: string) => {
     // dunno if we need this with the auth changes?
