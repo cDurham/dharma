@@ -1,7 +1,6 @@
 import { useState } from "react";
 
-import { useCreateMemberMutation } from "./graphql/generated";
-import { useMembersLazyQuery } from "./graphql/generated";
+import { useCreateMemberMutation, useMembersQuery } from "./graphql/generated";
 import useLogout from "./graphql/useLogout";
 
 export const Dashboard = () => {
@@ -10,7 +9,10 @@ export const Dashboard = () => {
   const [lastName, setLastName] = useState("");
 
   const [createMember] = useCreateMemberMutation();
-  const [getMembers, { loading, error, data }] = useMembersLazyQuery();
+  const { loading, error, data, refetch } = useMembersQuery({
+    fetchPolicy: "network-only",
+    skip: true, // Don't fetch on mount
+  });
 
   const handleCreateMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ export const Dashboard = () => {
       setIsDialogOpen(false);
       setFirstName("");
       setLastName("");
-      getMembers({ fetchPolicy: "network-only" }); // Refresh the member list
+      refetch(); // Refresh the member list
     } catch (error) {
       console.error("Error creating member:", error);
     }
@@ -29,7 +31,7 @@ export const Dashboard = () => {
 
   const handleGetMembers = () => {
     console.log("Fetching members...");
-    getMembers({ fetchPolicy: "network-only" });
+    refetch();
   };
 
   const [handleLogout, { loading: logoutLoading, error: logoutError }] =
