@@ -40,6 +40,36 @@ EOF
 
 EC2_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "YOUR_EC2_IP")
 
+# Setup GitHub Container Registry authentication
+echo ""
+echo "🐙 Setting up GitHub Container Registry (GHCR) authentication..."
+echo ""
+echo "To pull Docker images from GHCR, you need a GitHub Personal Access Token (PAT)."
+echo ""
+echo "Create one at: https://github.com/settings/tokens/new"
+echo "Required scope: read:packages"
+echo ""
+read -p "Enter your GitHub username: " GITHUB_USERNAME
+read -sp "Enter your GitHub PAT (input hidden): " GITHUB_PAT
+echo ""
+
+if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_PAT" ]; then
+    echo "🔐 Logging into GHCR..."
+    sudo -u deploy bash << EOF
+docker login ghcr.io -u "$GITHUB_USERNAME" -p "$GITHUB_PAT"
+EOF
+    if [ $? -eq 0 ]; then
+        echo "✅ GHCR authentication successful!"
+    else
+        echo "⚠️  GHCR authentication failed. You can run this manually later:"
+        echo "   docker login ghcr.io -u YOUR_USERNAME -p YOUR_PAT"
+    fi
+else
+    echo "⚠️  Skipping GHCR authentication (no credentials provided)"
+    echo "   You'll need to run this manually before deploying:"
+    echo "   docker login ghcr.io -u YOUR_USERNAME -p YOUR_PAT"
+fi
+
 echo ""
 echo "✅ Setup complete!"
 echo ""
@@ -51,6 +81,6 @@ sudo cat /home/deploy/.ssh/github_actions
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "📋 Next steps: See deploy/DEPLOYMENT.md (Step 3.4 onwards)"
+echo "📋 Next steps: See deploy/DEPLOYMENT.md (Step 3.3 onwards)"
 echo "💡 EC2_HOST for GitHub Secrets: $EC2_IP"
 echo ""

@@ -6,7 +6,50 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime_api
+          push: true
+          tags: ghcr.io/${{ github.repository }}/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime_web
+          push: true
+          tags: ghcr.io/${{ github.repository }}/web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
+    needs: build-and-push
     runs-on: ubuntu-latest
     
     steps:
@@ -23,11 +66,13 @@ jobs:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
           FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DB_HOST,DB_PASSWORD,JWT_SECRET,COOKIE_SECRET,EMAIL_USER,EMAIL_USER_PASSWORD,FRONTEND_URL
+          command_timeout: 20m
+          envs: DB_HOST,DB_PASSWORD,JWT_SECRET,COOKIE_SECRET,EMAIL_USER,EMAIL_USER_PASSWORD,FRONTEND_URL,GITHUB_REPOSITORY
           script: |
             cd /opt/dharma
             export DB_HOST="$DB_HOST"
@@ -37,4 +82,5 @@ jobs:
             export EMAIL_USER="$EMAIL_USER"
             export EMAIL_USER_PASSWORD="$EMAIL_USER_PASSWORD"
             export FRONTEND_URL="$FRONTEND_URL"
+            export GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
             bash deploy/deploy.sh

@@ -5,7 +5,8 @@ WORKDIR /workspace
 
 FROM base AS deps
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline --legacy-peer-deps
 
 FROM deps AS dev_api
 COPY . .

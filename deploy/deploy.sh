@@ -46,10 +46,10 @@ NODE_ENV=production
 EOF
 
 # Build and deploy with Docker Compose
-echo "🐳 Building and starting containers..."
+echo "🐳 Pulling and starting containers..."
 docker compose -f deploy/docker-compose.prod.yml down
-docker compose -f deploy/docker-compose.prod.yml build --no-cache
-docker compose -f deploy/docker-compose.prod.yml up -d
+docker compose -f deploy/docker-compose.prod.yml pull
+docker compose -f deploy/docker-compose.prod.yml up -d --force-recreate
 
 # Wait for API to be ready
 echo "⏳ Waiting for API to be ready..."

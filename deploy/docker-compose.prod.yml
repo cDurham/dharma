@@ -25,10 +25,7 @@ services:
     restart: unless-stopped
 
   api:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-      target: runtime_api
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/api:latest
     env_file: ../.env
     depends_on:
       kafka: { condition: service_healthy }
@@ -37,10 +34,7 @@ services:
     restart: unless-stopped
 
   web:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-      target: runtime_web
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/web:latest
     depends_on: [api]
     ports: [8080:80]
     networks: [app-net]
