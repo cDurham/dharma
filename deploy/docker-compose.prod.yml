@@ -1,0 +1,49 @@
+services:
+  # Database service removed - using AWS RDS instead
+  
+  zookeeper:
+    image: zookeeper:3.8
+    ports: [2181:2181]
+    networks: [app-net]
+    restart: unless-stopped
+
+  kafka:
+    image: wurstmeister/kafka:2.12-2.5.0
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: [9092:9092]
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks: [app-net]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      target: runtime_api
+    env_file: .env
+    depends_on:
+      kafka: { condition: service_healthy }
+    ports: [3000:3000]
+    networks: [app-net]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: runtime_web
+    depends_on: [api]
+    ports: [8080:80]
+    networks: [app-net]
+    restart: unless-stopped
+
+networks:
+  app-net: { driver: bridge }
+

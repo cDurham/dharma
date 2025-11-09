@@ -1,1 +1,39 @@
+name: Deploy to EC2
 
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DB_HOST,DB_PASSWORD,JWT_SECRET,COOKIE_SECRET,EMAIL_USER,EMAIL_USER_PASSWORD,FRONTEND_URL
+          script: |
+            cd /opt/dharma
+            export DB_HOST=$DB_HOST
+            export DB_PASSWORD=$DB_PASSWORD
+            export JWT_SECRET=$JWT_SECRET
+            export COOKIE_SECRET=$COOKIE_SECRET
+            export EMAIL_USER=$EMAIL_USER
+            export EMAIL_USER_PASSWORD=$EMAIL_USER_PASSWORD
+            export FRONTEND_URL=$FRONTEND_URL
+            bash deploy/deploy.sh

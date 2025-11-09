@@ -1,1 +1,32 @@
+name: Test
 
+on:
+  pull_request:
+    branches: [main, trunk]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Lint
+        run: |
+          npm run api:lint
+          npm run web:lint
+
+      - name: Test
+        run: |
+          npm run api:test
+          npm run web:test
