@@ -3,7 +3,6 @@ name: Deploy to EC2
 on:
   push:
     branches: [trunk]
-  workflow_dispatch:  # Allows manual triggering from GitHub UI
 
 jobs:
   deploy:
@@ -30,11 +29,11 @@ jobs:
           envs: DB_HOST,DB_PASSWORD,JWT_SECRET,COOKIE_SECRET,EMAIL_USER,EMAIL_USER_PASSWORD,FRONTEND_URL
           script: |
             cd /opt/dharma
-            export DB_HOST=$DB_HOST
-            export DB_PASSWORD=$DB_PASSWORD
-            export JWT_SECRET=$JWT_SECRET
-            export COOKIE_SECRET=$COOKIE_SECRET
-            export EMAIL_USER=$EMAIL_USER
-            export EMAIL_USER_PASSWORD=$EMAIL_USER_PASSWORD
-            export FRONTEND_URL=$FRONTEND_URL
+            export DB_HOST="$DB_HOST"
+            export DB_PASSWORD="$DB_PASSWORD"
+            export JWT_SECRET="$JWT_SECRET"
+            export COOKIE_SECRET="$COOKIE_SECRET"
+            export EMAIL_USER="$EMAIL_USER"
+            export EMAIL_USER_PASSWORD="$EMAIL_USER_PASSWORD"
+            export FRONTEND_URL="$FRONTEND_URL"
             bash deploy/deploy.sh
