@@ -8,9 +8,10 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import { useMutation } from "@apollo/client/react";
 
 import useLogin from "../graphql/useLogin";
-import { useCreateUserMutation } from "../graphql/generated";
+import { CreateUserDocument } from "../graphql/types";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -19,7 +20,7 @@ const LoginForm = () => {
   const [lastName, setLastName] = useState("");
   const [handleLogin, { loading, error }] = useLogin();
   const [createUser, { loading: signupLoading, error: signupError }] =
-    useCreateUserMutation();
+    useMutation(CreateUserDocument);
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => {

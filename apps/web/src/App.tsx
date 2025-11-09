@@ -1,7 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import LoginForm from "./component/LoginForm";
 import { Dashboard } from "./Dashboard";
-import { useMembersQuery } from "./graphql/generated";
 
 export const App = () => {
   return (

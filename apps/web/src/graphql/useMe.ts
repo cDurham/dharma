@@ -1,7 +1,8 @@
-import { useMeQuery } from "./generated";
+import { useQuery } from "@apollo/client/react";
+import { MeDocument } from "./types";
 
 export const useMe = () => {
-  return useMeQuery({
+  return useQuery(MeDocument, {
     fetchPolicy: "cache-and-network",
     errorPolicy: "all",
   });

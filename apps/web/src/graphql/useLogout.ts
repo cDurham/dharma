@@ -1,16 +1,10 @@
-import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
-
-const LOGOUT_MUTATION = gql`
-  mutation logout {
-    logout
-  }
-`;
+import { LogoutDocument } from "./types";
 
 const useLogout = () => {
   const navigate = useNavigate();
-  const [logout, { loading, error }] = useMutation(LOGOUT_MUTATION);
+  const [logout, { loading, error }] = useMutation(LogoutDocument);
 
   const handleLogout = async () => {
     try {

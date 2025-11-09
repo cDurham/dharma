@@ -1,0 +1,26 @@
+fragment UserBasicFields on User {
+  uuid
+  email
+  firstName
+  lastName
+}
+
+fragment UserWithDates on User {
+  ...UserBasicFields
+  createdAt
+  updatedAt
+}
+
+fragment MemberBasicFields on Member {
+  uuid
+  firstName
+  lastName
+  joinDate
+}
+
+fragment MemberWithUser on Member {
+  ...MemberBasicFields
+  user {
+    ...UserBasicFields
+  }
+}
