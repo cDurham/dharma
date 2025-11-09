@@ -9,8 +9,6 @@ Full-stack NX monorepo with NestJS GraphQL API backend and React frontend.
 - **Node.js** >= 20.0.0 *(includes npm automatically)*
 - **Docker** & **Docker Compose** (for containerized setup)
 
-> **Note:** npm (Node Package Manager) is automatically included when you install Node.js - no separate installation needed!
-
 ### Installing Prerequisites
 
 <details>
@@ -208,19 +206,21 @@ npm install
 # Copy the example environment file
 cp env.example .env
 
-# Edit .env with your configuration
-# At minimum, update these values:
-# - DB_PASSWORD
-# - JWT_ACCESS_TOKEN_SECRET
-# - JWT_REFRESH_TOKEN_SECRET
-# - EMAIL_USER & EMAIL_USER_PASSWORD (if using email features)
+### 3. Build the Dharma CLI
+
+```bash
+# Build the custom CLI tool (one-time setup)
+npm run cli:build
+
+# Make it globally accessible (optional but recommended)
+npm link
 ```
 
-### 3. Run with Docker (Recommended)
+### 4. Run with Docker (Recommended)
 
 ```bash
 # Start all services in development mode
-npm run d:dev
+dharma dev up
 
 # This starts:
 # - PostgreSQL (port 5432)
@@ -233,60 +233,69 @@ npm run d:dev
 - Frontend: http://localhost:4200
 - API GraphQL Playground: http://localhost:3000/graphql
 
-### 4. Initialize Database
+### 5. Initialize Database
 
 ```bash
 # Reset database schema and seed data
-npm run api:db:reset
+dharma db reset
 
 # Or run individually:
-npm run api:db:sync    # Sync schema
-npm run api:db:seed    # Seed data
+dharma db push    # Push schema
+dharma db seed    # Seed data
 ```
 
 ---
 
 ## 🛠️ Development
 
-### Docker Commands
+### Dharma CLI Commands (Recommended)
+
+The project includes a custom CLI tool for streamlined development:
 
 ```bash
-# Start development environment
-npm run d:dev
+# Development Environment
+dharma dev up           # Start development environment
+dharma dev down         # Stop development environment
+dharma dev restart      # Restart development environment
+dharma dev rebuild api  # Rebuild API service
+dharma dev rebuild web  # Rebuild web service
+dharma dev rebuild all  # Rebuild everything
+dharma dev reset        # Full teardown and fresh rebuild
+dharma dev nuke         # Complete cleanup (removes volumes)
 
-# Stop development environment
-docker compose --profile dev down
+# Service Status & Logs
+dharma status           # Show status of all services (alias: dharma ps)
+dharma logs api         # View API logs
+dharma logs web         # View web logs
+dharma logs api web     # View multiple service logs
 
-# Restart development environment
-npm run d:dev:restart
+# Execute Commands in Containers
+dharma exec api sh      # Open shell in API container
+dharma exec web sh      # Open shell in web container
 
-# Rebuild everything from scratch
-npm run d:dev:rebuild
-
-# Rebuild only API
-npm run d:dev:rebuild:api
-
-# View logs
-docker compose --profile dev logs -f
-docker compose --profile dev logs -f api-dev    # API logs only
-docker compose --profile dev logs -f web-dev    # Web logs only
+# Database Operations
+dharma db push          # Push database schema
+dharma db seed          # Seed database
+dharma db reset         # Reset database (push + seed)
 ```
 
-### Local Development (without Docker)
+**Service Aliases:** You can use short names (`api`, `web`) or full names (`api-dev`, `web-dev`) - they're equivalent in dev mode.
 
-If you prefer running services locally:
+### Alternative: Local Development (without Docker)
+
+If you prefer running services locally outside Docker:
 
 #### 1. Start Infrastructure Services
 
 ```bash
-# Start only PostgreSQL and Kafka
+# Start only PostgreSQL and Kafka (using Docker for infrastructure)
 docker compose up db kafka zookeeper -d
 ```
 
 #### 2. Run API
 
 ```bash
-# Terminal 1: Run API server
+# Terminal 1: Run API server locally
 npm run api:serve
 
 # The API will be available at http://localhost:3000
@@ -296,7 +305,7 @@ npm run api:serve
 #### 3. Run Web Frontend
 
 ```bash
-# Terminal 2: Run web dev server
+# Terminal 2: Run web dev server locally
 npm run web:serve
 
 # The frontend will be available at http://localhost:4200
@@ -335,19 +344,23 @@ nx test web --watch
 ## 🗄️ Database Management
 
 ```bash
-# Reset database (drop, sync, seed)
+# Using Dharma CLI (Recommended)
+dharma db reset    # Reset database (push schema + seed)
+dharma db push     # Push schema changes
+dharma db seed     # Seed data only
+
+# Alternative: Using npm scripts (if not using Docker)
 npm run api:db:reset
-
-# Sync schema without dropping
 npm run api:db:sync
-
-# Seed data only
 npm run api:db:seed
 ```
 
 **Connect to PostgreSQL:**
 ```bash
-# Via Docker
+# Via Dharma CLI
+dharma exec db psql -U postgres -d dharma_db
+
+# Or via Docker directly
 docker compose exec db psql -U postgres -d dharma_db
 
 # Or locally (if psql is installed)
@@ -419,9 +432,19 @@ npm run web:test           # Run web tests
 npm run web:codegen        # Generate GraphQL types
 ```
 
-### Docker Commands
+### Docker/CLI Commands
 
 ```bash
+# Using Dharma CLI (Recommended)
+dharma dev up              # Start dev environment
+dharma dev down            # Stop dev environment
+dharma dev restart         # Restart dev environment
+dharma dev rebuild all     # Rebuild dev environment
+dharma dev rebuild api     # Rebuild only API service
+dharma status              # Show service status
+dharma logs api web        # View logs
+
+# Using npm scripts (alternative)
 npm run d:dev              # Start dev profile
 npm run d:prod             # Start prod profile
 npm run d:dev:restart      # Restart dev environment
@@ -502,42 +525,44 @@ lsof -i :4200    # Web port
 lsof -i :5432    # PostgreSQL port
 
 # Stop Docker containers
-docker compose --profile dev down
+dharma dev down
 ```
 
 ### Database Connection Issues
 
 ```bash
 # Verify database is running
-docker compose ps
+dharma status
 
 # Check database logs
-docker compose logs db
+dharma logs db
 
-# Reset database connection
-docker compose restart db
-npm run api:db:sync
+# Reset database
+dharma db reset
 ```
 
 ### Kafka Connection Issues
 
 ```bash
 # Check Kafka health
-docker compose ps kafka
+dharma status
 
-# Restart Kafka
-docker compose restart kafka zookeeper
+# View Kafka logs
+dharma logs kafka
+
+# Restart entire environment
+dharma dev restart
 ```
 
 ### Node Modules Issues
 
 ```bash
-# Clean install
+# Clean install locally
 rm -rf node_modules
 npm install
 
-# In Docker, rebuild without cache
-npm run d:dev:rebuild
+# Rebuild Docker containers
+dharma dev rebuild all
 ```
 
 ### Hot Reload Not Working
@@ -546,10 +571,26 @@ Docker volumes are configured for hot-reload in dev mode. If changes aren't refl
 
 ```bash
 # Restart development services
-npm run d:dev:restart
+dharma dev restart
 
-# Or rebuild
-npm run d:dev:rebuild
+# Or rebuild specific service
+dharma dev rebuild api  # or web
+
+# Or full rebuild
+dharma dev rebuild all
+```
+
+### Complete Environment Reset
+
+If everything is broken and you want to start fresh:
+
+```bash
+# Nuclear option: complete teardown and rebuild
+dharma dev nuke   # Stop everything and remove volumes
+dharma dev up     # Start fresh
+
+# Or use reset (stops, rebuilds, starts)
+dharma dev reset
 ```
 
 ---
@@ -559,7 +600,7 @@ npm run d:dev:rebuild
 - **NX** - Monorepo build system
 - **NestJS** - Backend framework
 - **GraphQL** - API query language
-- **TypeORM** - Database ORM
+- **Drizzle ORM** - Database ORM
 - **CQRS** - Command Query Responsibility Segregation pattern
 - **React** - Frontend library
 - **Vite** - Frontend build tool

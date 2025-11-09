@@ -54,7 +54,7 @@
     "db-push": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit push --config=apps/api/drizzle.config.ts",
+        "command": "drizzle-kit push --force --config=apps/api/drizzle.config.ts",
         "cwd": "."
       }
     },
@@ -82,7 +82,7 @@
     "db-reset": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit drop --config=apps/api/drizzle.config.ts && drizzle-kit push --config=apps/api/drizzle.config.ts && npx tsx apps/api/src/db/seed.ts",
+        "command": "drizzle-kit drop --config=apps/api/drizzle.config.ts && drizzle-kit push --force --config=apps/api/drizzle.config.ts && npx tsx apps/api/src/db/seed.ts",
         "cwd": "."
       }
     },

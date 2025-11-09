@@ -2,7 +2,7 @@ import { v7 as uuidv7 } from "uuid";
 import * as dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { db, pool } from "./data-source";
-import { retreat, user, member } from "./schema";
+import { retreat, user, member, refreshToken } from "./schema";
 
 // Load environment variables
 dotenv.config();
@@ -11,6 +11,14 @@ async function seed() {
   console.log("Seeding database...");
 
   try {
+    // Clear existing data (in reverse order of dependencies)
+    console.log("Clearing existing data...");
+    await db.delete(refreshToken);
+    await db.delete(member);
+    await db.delete(user);
+    await db.delete(retreat);
+    console.log("✓ Cleared existing data");
+
     // Seed a test retreat
     const retreatId = uuidv7();
     await db.insert(retreat).values({
@@ -32,7 +40,7 @@ async function seed() {
       password: hashedPassword,
       verificationToken: null, // Already verified
     });
-    console.log("✓ Created test user");
+    console.log("✓ Created test user (email: test@example.com, password: password123)");
 
     // Seed a test member
     const memberId = uuidv7();

@@ -34,6 +34,10 @@ import { VerificationController } from "./Verify/verify.controller";
         req,
         res,
       }),
+      cors: {
+        origin: process.env.FRONTEND_URL,
+        credentials: true,
+      },
     }),
     AuthModule,
     ThrottlerModule.forRoot([
