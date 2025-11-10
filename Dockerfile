@@ -25,11 +25,13 @@ CMD ["npm", "run", "web:serve"]
 
 FROM deps AS build_api
 ARG CACHEBUST
+RUN echo "Cache bust: ${CACHEBUST}"
 COPY . .
 RUN npm run api:build
 
 FROM deps AS build_web
 ARG CACHEBUST
+RUN echo "Cache bust: ${CACHEBUST}"
 COPY . .
 RUN npm run web:build
 
