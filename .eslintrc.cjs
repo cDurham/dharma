@@ -46,6 +46,19 @@ module.exports = {
           version: "detect",
         },
       },
+      rules: {
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-uses-react": "off",
+      },
+    },
+    // Config files (no strict type-checking)
+    {
+      files: ["apps/web/*.config.ts", "apps/web/codegen.ts"],
+      extends: ["eslint:recommended"],
+      parserOptions: {
+        ecmaVersion: 2021,
+        sourceType: "module",
+      },
     },
     // JavaScript files
     {

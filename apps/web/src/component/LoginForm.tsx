@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   TextField,
   Button,
@@ -18,6 +18,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [isPending, startTransition] = useTransition();
   const [handleLogin, { loading, error }] = useLogin();
   const [createUser, { loading: signupLoading, error: signupError }] =
     useMutation(CreateUserDocument);
@@ -31,39 +32,42 @@ const LoginForm = () => {
     setOpen(false);
   };
 
-  const handleSignupSubmit = async (e: any) => {
-    e.preventDefault();
-    try {
-      const response = await createUser({
-        variables: {
-          data: { email, password, firstName, lastName },
-        },
-      });
-    } catch (err) {
-      // Display error message to the user
-    }
+  const loginAction = async (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    startTransition(async () => {
+      try {
+        await handleLogin(email, password);
+      } catch (err) {
+        console.error("Login failed:", err);
+      }
+    });
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    try {
-      const response = await handleLogin(email, password);
-      // if (response.data.login.verificationToken !== null) {
-      //   // Display error message if email is not verified
-      //   alert("Please verify your email to login.");
-      // }
-    } catch (err) {
-      // Display error message to the user
-    }
+  const signupAction = async () => {
+    startTransition(async () => {
+      try {
+        await createUser({
+          variables: {
+            data: { email, password, firstName, lastName },
+          },
+        });
+        setOpen(false);
+      } catch (err) {
+        console.error("Signup failed:", err);
+      }
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form action={loginAction}>
       <Typography variant="h6" gutterBottom>
         Login
       </Typography>
       <TextField
         label="email"
+        name="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         margin="normal"
@@ -71,16 +75,21 @@ const LoginForm = () => {
       />
       <TextField
         label="Password"
+        name="password"
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         margin="normal"
         fullWidth
       />
-      <Button type="submit" variant="contained" disabled={loading}>
-        Login
+      <Button type="submit" variant="contained" disabled={loading || isPending}>
+        {loading || isPending ? "Logging in..." : "Login"}
       </Button>
-      <Button onClick={handleOpen} variant="outlined" disabled={signupLoading}>
+      <Button
+        onClick={handleOpen}
+        variant="outlined"
+        disabled={signupLoading || isPending}
+      >
         Signup
       </Button>
       {error && <Typography color="error">Login failed</Typography>}
@@ -124,11 +133,11 @@ const LoginForm = () => {
             Cancel
           </Button>
           <Button
-            onClick={handleSignupSubmit}
+            onClick={() => void signupAction()}
             color="primary"
-            disabled={signupLoading}
+            disabled={signupLoading || isPending}
           >
-            Signup
+            {signupLoading || isPending ? "Signing up..." : "Signup"}
           </Button>
         </DialogActions>
       </Dialog>
