@@ -7,6 +7,7 @@ import { Strategy, ExtractJwt } from "passport-jwt";
 import { GetUserQuery } from "../User/command/get-user.query";
 import { User } from "../User/user.entity";
 import { AuthenticatedUser } from "../User/user.schema";
+import { getAccessToken } from "./auth.cookies";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -23,12 +24,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        // Primary: Extract from cookie
         (request: Request): string | null => {
-          const token = request?.cookies?.access_token;
-          return typeof token === 'string' ? token : null;
+          return getAccessToken(request) ?? null;
         },
-        // Fallback: Extract from Authorization header
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
