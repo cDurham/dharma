@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query";
 import { ValidateUserCommand } from "./auth-validate-user.command";
+import { User } from "../../User/user.entity";
 
 @CommandHandler(ValidateUserCommand)
 export class ValidateUserHandler
@@ -10,7 +11,7 @@ export class ValidateUserHandler
 {
   constructor(private readonly queryBus: QueryBus) {}
 
-  async execute({ input }: ValidateUserCommand) {
+  async execute({ input }: ValidateUserCommand): Promise<Omit<User, 'password'>> {
     const { email, password } = input;
     const user = await this.queryBus.execute(new GetUserByEmailQuery(email));
     if (!user) {
@@ -24,7 +25,7 @@ export class ValidateUserHandler
       throw new UnauthorizedException("Email not verified");
     }
 
-    const { password: _, ...result } = user;
+    const { password: password_, ...result } = user;
     return result;
   }
 }

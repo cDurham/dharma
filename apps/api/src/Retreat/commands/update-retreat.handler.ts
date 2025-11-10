@@ -8,6 +8,7 @@ import { retreat } from "../../db/schema";
 import { RetreatUpdatedEvent } from "../events/retreat-updated.event";
 import { Retreat } from "../retreat.entity";
 import { UpdateRetreatCommand } from "./update-retreat.command";
+import { UpdateRetreatData } from "../retreat.schema";
 
 @CommandHandler(UpdateRetreatCommand)
 export class UpdateRetreatHandler
@@ -23,8 +24,6 @@ export class UpdateRetreatHandler
     retreatUuid,
     data,
   }: UpdateRetreatCommand): Promise<Retreat | null> {
-    const { name, startAt, endAt } = data;
-
     // Check if retreat exists
     const [existingRetreat] = await this.db
       .select()
@@ -35,10 +34,11 @@ export class UpdateRetreatHandler
       return null;
     }
 
-    // Update retreat
+    const updateData: UpdateRetreatData = data;
+
     await this.db
       .update(retreat)
-      .set({ name, startAt, endAt, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(retreat.uuid, retreatUuid));
 
     // Fetch updated retreat

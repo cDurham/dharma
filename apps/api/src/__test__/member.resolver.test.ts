@@ -2,14 +2,21 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { AppModule } from "../app.module";
-import { Member } from "../Member/member.entity";
 import { faker } from "@faker-js/faker";
-import { Repository } from "typeorm";
-import { getRepositoryToken } from "@nestjs/typeorm";
+
+interface GraphQLResponse<T> {
+  data: T;
+}
+
+interface Member {
+  uuid: string;
+  firstName: string;
+  lastName: string;
+  joinDate?: string;
+}
 
 describe("E2E - Member Resolver", () => {
   let app: INestApplication;
-  let memberRepository: Repository<Member>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,29 +25,25 @@ describe("E2E - Member Resolver", () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-
-    memberRepository = moduleFixture.get<Repository<Member>>(
-      getRepositoryToken(Member)
-    );
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  const createMember = async () => {
+  const createMember = async (): Promise<Member> => {
     const createMemberMutation = `mutation createMember($data: CreateMemberInput!) {
         createMember(data: $data) {
             uuid
-            first_name
-            last_name
+            firstName
+            lastName
         }
     }`;
 
     const variables = {
       data: {
-        first_name: faker.person.firstName(),
-        last_name: faker.person.lastName(),
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
       },
     };
 
@@ -49,18 +52,15 @@ describe("E2E - Member Resolver", () => {
       .send({ query: createMemberMutation, variables })
       .expect(200);
 
-    return response.body.data.createMember;
+    const body = response.body as GraphQLResponse<{ createMember: Member }>;
+    return body.data.createMember;
   };
-
-  afterAll(async () => {
-    await app.close();
-  });
 
   it("/create member", async () => {
     const member = await createMember();
     expect(member).toHaveProperty("uuid");
-    expect(member).toHaveProperty("first_name");
-    expect(member).toHaveProperty("last_name");
+    expect(member).toHaveProperty("firstName");
+    expect(member).toHaveProperty("lastName");
   });
 
   it("/get members", async () => {
@@ -68,72 +68,76 @@ describe("E2E - Member Resolver", () => {
 
     const getMembersQuery = `query members {
         members {
-          first_name
-          last_name
-          join_date
           uuid
+          firstName
+          lastName
+          joinDate
         }
       }`;
 
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post("/graphql/")
       .send({ query: getMembersQuery })
-      .expect(200)
-      .then((response) => {
-        expect(response.body.data.members).toBeInstanceOf(Array);
-        response.body.data.members.forEach((member: any) => {
-          expect(typeof member.first_name).toBe("string");
-          expect(typeof member.last_name).toBe("string");
-          expect(typeof member.uuid).toBe("string");
-          expect(typeof member.join_date).toBe("string");
-        });
-      });
+      .expect(200);
+
+    const body = response.body as GraphQLResponse<{ members: Member[] }>;
+    expect(body.data.members).toBeInstanceOf(Array);
+    body.data.members.forEach((member) => {
+      expect(typeof member.firstName).toBe("string");
+      expect(typeof member.lastName).toBe("string");
+      expect(typeof member.uuid).toBe("string");
+      expect(typeof member.joinDate).toBe("string");
+    });
   });
 
   it("updates member", async () => {
     const createdMember = await createMember();
 
-    const updateMemberMutation = `mutation updateMember($id: String!, $data: UpdateMemberInput!) {
-        updateMember(id: $id, data: $data) {
-            first_name
-            last_name
+    const updateMemberMutation = `mutation updateMember($uuid: String!, $data: UpdateMemberInput!) {
+        updateMember(uuid: $uuid, data: $data) {
+            firstName
+            lastName
         }
     }`;
 
     const variables = {
-      id: createdMember.uuid,
+      uuid: createdMember.uuid,
       data: {
-        first_name: faker.person.firstName(),
-        last_name: faker.person.lastName(),
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
       },
     };
 
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post("/graphql")
       .send({ query: updateMemberMutation, variables })
-      .expect(200)
-      .then((response) => {
-        console.log(response.body);
-        expect(response.body.data.updateMember).toEqual(variables.data);
-      });
+      .expect(200);
+
+    const body = response.body as GraphQLResponse<{ updateMember: Member }>;
+    expect(body.data.updateMember.firstName).toEqual(variables.data.firstName);
+    expect(body.data.updateMember.lastName).toEqual(variables.data.lastName);
   });
 
   it("delete member", async () => {
     const createdMember = await createMember();
 
-    const deleteMemberMutation = `mutation deleteMember($id: String!) {
-        deleteMember(id: $id)
+    const deleteMemberMutation = `mutation deleteMember($uuid: String!) {
+        deleteMember(uuid: $uuid) {
+          uuid
+          firstName
+          lastName
+        }
       }`;
     const variables = {
-      id: createdMember.uuid,
+      uuid: createdMember.uuid,
     };
 
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post("/graphql")
       .send({ query: deleteMemberMutation, variables })
-      .expect(200)
-      .then((response) => {
-        expect(response.body.data.deleteMember).toBe(true);
-      });
+      .expect(200);
+
+    const body = response.body as GraphQLResponse<{ deleteMember: Member }>;
+    expect(body.data.deleteMember.uuid).toBe(createdMember.uuid);
   });
 });

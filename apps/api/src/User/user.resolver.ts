@@ -3,7 +3,7 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { JwtAuthGuard } from "../Auth/jwt-auth.guard";
 import { CurrentUser } from "../Auth/current-user.decorator";
-import { CreateUserInput, UpdateUserInput, User } from ".";
+import { CreateUserInput, UpdateUserInput, User, AuthenticatedUser } from ".";
 import { CreateUserCommand } from "./command/create-user.command";
 import { DeleteUserCommand } from "./command/delete-user.command";
 import { GetUserByEmailQuery } from "./command/get-user-by-email.query";
@@ -19,25 +19,25 @@ export class UserResolver {
     private queryBus: QueryBus
   ) {}
 
-  @Query((returns) => User)
+  @Query(() => User)
   async user(@Args("uuid") uuid: string): Promise<User | null> {
     const result = await this.queryBus.execute(new GetUserQuery(uuid));
     return result;
   }
 
-  @Query((returns) => [User])
+  @Query(() => [User])
   async users(): Promise<User[]> {
     const result = await this.queryBus.execute(new GetUsersQuery());
     return result;
   }
 
-  @Mutation((returns) => User)
+  @Mutation(() => User)
   async createUser(@Args("data") data: CreateUserInput): Promise<User> {
     const result = await this.commandBus.execute(new CreateUserCommand(data));
     return result;
   }
 
-  @Mutation((returns) => User)
+  @Mutation(() => User)
   async updateUser(
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateUserInput
@@ -48,27 +48,27 @@ export class UserResolver {
     return result;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async deleteUser(@Args("uuid") uuid: string): Promise<boolean> {
     const result = await this.commandBus.execute(new DeleteUserCommand(uuid));
     return result;
   }
 
-  @Query((returns) => User)
+  @Query(() => User)
   async getUserByEmail(@Args("email") email: string): Promise<User | null> {
     const result = await this.queryBus.execute(new GetUserByEmailQuery(email));
     return result;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async verifyEmail(@Args("token") token: string): Promise<boolean> {
     const result = await this.commandBus.execute(new VerifyEmailCommand(token));
     return result;
   }
 
-  @Query((returns) => User)
+  @Query(() => User)
   @UseGuards(JwtAuthGuard)
-  async me(@CurrentUser() user: User): Promise<User> {
-    return user;
+  me(@CurrentUser() user: AuthenticatedUser): User {
+    return user as User;
   }
 }

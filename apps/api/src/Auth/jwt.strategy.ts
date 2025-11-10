@@ -5,7 +5,7 @@ import { QueryBus } from "@nestjs/cqrs";
 import { Request } from "express";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { GetUserQuery } from "../User/command/get-user.query";
-import { User } from "../User/user.entity";
+import { AuthenticatedUser } from "../User/user.schema";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,7 +15,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     const secret = configService.get<string>("JWT_SECRET");
     if (!secret) {
-      throw new Error("JWT_SECRET environment variable is required but not set");
+      throw new Error(
+        "JWT_SECRET environment variable is required but not set"
+      );
     }
 
     super({
@@ -32,16 +34,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string }): Promise<User> {
+  async validate(payload: {
+    sub: string;
+    email: string;
+  }): Promise<AuthenticatedUser> {
     const user = await this.queryBus.execute(new GetUserQuery(payload.sub));
-    
+
     if (!user) {
       throw new UnauthorizedException("User not found");
     }
 
     // Exclude password from the returned user object
-    const { password, ...result } = user;
-    return result as User;
+    const { password: _password, ...result } = user;
+    return result;
   }
 }
-

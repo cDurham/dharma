@@ -15,19 +15,19 @@ export class RetreatResolver {
     private queryBus: QueryBus
   ) {}
 
-  @Query((returns) => Retreat)
+  @Query(() => Retreat)
   async retreat(@Args("uuid") uuid: string): Promise<Retreat | null> {
     const result = await this.queryBus.execute(new GetRetreatQuery(uuid));
     return result;
   }
 
-  @Query((returns) => [Retreat])
+  @Query(() => [Retreat])
   async retreats(): Promise<Retreat[]> {
     const result = await this.queryBus.execute(new GetRetreatsQuery());
     return result;
   }
 
-  @Mutation((returns) => Retreat)
+  @Mutation(() => Retreat)
   async createRetreat(
     @Args("data") data: CreateRetreatInput
   ): Promise<Retreat> {
@@ -37,7 +37,7 @@ export class RetreatResolver {
     return result;
   }
 
-  @Mutation((returns) => Retreat)
+  @Mutation(() => Retreat)
   async updateRetreat(
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateRetreatInput
@@ -48,7 +48,7 @@ export class RetreatResolver {
     return result;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async deleteRetreat(@Args("uuid") uuid: string): Promise<boolean> {
     const result = await this.commandBus.execute(
       new DeleteRetreatCommand({ uuid })

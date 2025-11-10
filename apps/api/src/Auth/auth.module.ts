@@ -24,7 +24,7 @@ import { authConfig } from "../config/auth.config";
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         const secret = configService.get<string>("JWT_SECRET");
         if (!secret) {
           throw new Error(

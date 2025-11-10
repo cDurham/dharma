@@ -2,10 +2,18 @@ import { faker } from "@faker-js/faker";
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import request from "supertest";
-import { runSeeders } from "typeorm-extension";
 import { AppModule } from "../app.module";
-import { AppDataSource } from "../db/data-source";
-import { Retreat } from "../Retreat/retreat.entity";
+
+interface GraphQLResponse<T> {
+  data: T;
+}
+
+interface Retreat {
+  uuid: string;
+  name: string;
+  startAt: string;
+  endAt: string;
+}
 
 describe("E2E - Retreat Resolver", () => {
   let app: INestApplication;
@@ -16,76 +24,68 @@ describe("E2E - Retreat Resolver", () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
-
-    await AppDataSource.initialize();
     await app.init();
-    await runSeeders(AppDataSource);
-  });
-
-  afterEach(async () => {
-    const retreatRepo = AppDataSource.getRepository(Retreat);
-    await retreatRepo.clear();
   });
 
   afterAll(async () => {
-    await AppDataSource.destroy();
-    await app.close(); // is this needed at all?
+    await app.close();
   });
 
   it("/create retreat", async () => {
     const createRetreatMutation = `mutation createRetreat($data: CreateRetreatInput!) {
         createRetreat(data: $data) {
+            uuid
             name
-            start_at
-            end_at
+            startAt
+            endAt
         }
     }`;
 
     const variables = {
       data: {
         name: faker.company.catchPhrase(),
-        start_at: faker.date.past(),
-        end_at: faker.date.future(),
+        startAt: faker.date.past(),
+        endAt: faker.date.future(),
       },
     };
 
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post("/graphql")
       .send({ query: createRetreatMutation, variables })
-      .expect(200)
-      .then((response) => {
-        expect(response.body.data.createRetreat.start_at).toEqual(
-          variables.data.start_at.toISOString()
-        );
-        expect(response.body.data.createRetreat.end_at).toEqual(
-          variables.data.end_at.toISOString()
-        );
-        expect(response.body.data.createRetreat.name).toEqual(
-          variables.data.name
-        );
-        expect(response.body.data.createRetreat.uuid).toBeDefined();
-      });
+      .expect(200);
+
+    const body = response.body as GraphQLResponse<{ createRetreat: Retreat }>;
+    expect(body.data.createRetreat.startAt).toEqual(
+      variables.data.startAt.toISOString()
+    );
+    expect(body.data.createRetreat.endAt).toEqual(
+      variables.data.endAt.toISOString()
+    );
+    expect(body.data.createRetreat.name).toEqual(variables.data.name);
+    expect(body.data.createRetreat.uuid).toBeDefined();
   });
 
   it("/retreats", async () => {
     const retreatsQuery = `query retreats {
         retreats {
+            uuid
             name
-            start_at
-            end_at
+            startAt
+            endAt
         }
     }`;
-    return request(app.getHttpServer())
+
+    const response = await request(app.getHttpServer())
       .post("/graphql")
       .send({ query: retreatsQuery })
-      .expect(200)
-      .then((response) => {
-        expect(response.body.data.retreats).toBeInstanceOf(Array);
-        response.body.data.retreats.forEach((retreat: any) => {
-          expect(typeof retreat.name).toBe("string");
-          expect(typeof retreat.start_at).toBe("string");
-          expect(typeof retreat.end_at).toBe("string");
-        });
-      });
+      .expect(200);
+
+    const body = response.body as GraphQLResponse<{ retreats: Retreat[] }>;
+    expect(body.data.retreats).toBeInstanceOf(Array);
+    body.data.retreats.forEach((retreat) => {
+      expect(typeof retreat.name).toBe("string");
+      expect(typeof retreat.startAt).toBe("string");
+      expect(typeof retreat.endAt).toBe("string");
+    });
   });
 });

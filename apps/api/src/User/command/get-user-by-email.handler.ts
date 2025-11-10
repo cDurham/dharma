@@ -1,4 +1,4 @@
-import { QueryHandler, IQueryHandler } from "@nestjs/cqrs";
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 

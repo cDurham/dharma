@@ -9,6 +9,7 @@ import { user } from "../../db/schema";
 import { User } from "../user.entity";
 import { UpdateUserCommand } from "./update-user.command";
 import { UserUpdatedEvent } from "../event/user-updated.event";
+import { UpdateUserData } from "../user.schema";
 
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
@@ -31,17 +32,16 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
       return null;
     }
 
-    // Hash password if provided
-    const updateData: any = { updatedAt: new Date() };
+    // Build update data with password hashing
+    const updateData: UpdateUserData = {};
     if (email !== undefined) updateData.email = email;
     if (password !== undefined) {
       updateData.password = await bcrypt.hash(password, 12);
     }
 
-    // Update user
     await this.db
       .update(user)
-      .set(updateData)
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(user.uuid, userUuid));
 
     // Fetch updated user

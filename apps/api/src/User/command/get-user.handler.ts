@@ -17,16 +17,12 @@ export class GetUserHandler
     private readonly db: typeof DbType
   ) {}
 
-  async execute({ userUuid }: GetUserQuery): Promise<User> {
+  async execute({ userUuid }: GetUserQuery): Promise<User | null> {
     const [result] = await this.db
       .select()
       .from(user)
       .where(eq(user.uuid, userUuid));
 
-    if (!result) {
-      throw new Error("User not found");
-    }
-
-    return result;
+    return result || null;
   }
 }

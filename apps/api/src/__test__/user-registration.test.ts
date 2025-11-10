@@ -5,9 +5,21 @@ import { AppModule } from "../app.module";
 import { EmailService } from "../Email";
 import { faker } from "@faker-js/faker";
 
+interface GraphQLResponse<T> {
+  data: T;
+  errors?: Array<{ message: string }>;
+}
+
+interface CreateUserResponse {
+  createUser: {
+    email: string;
+    verificationToken: string;
+  };
+}
+
 describe("User Registration and Email Verification", () => {
   let app: INestApplication;
-  let emailService: EmailService;
+  let sendVerificationEmailMock: jest.SpyInstance;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,7 +34,15 @@ describe("User Registration and Email Verification", () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    emailService = moduleFixture.get<EmailService>(EmailService);
+    const emailService = moduleFixture.get<EmailService>(EmailService);
+    sendVerificationEmailMock = jest.spyOn(
+      emailService,
+      "sendVerificationEmail"
+    );
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   it("should register a new user and send a verification email", async () => {
@@ -30,6 +50,7 @@ describe("User Registration and Email Verification", () => {
         mutation CreateUser($data: CreateUserInput!) {
             createUser(data: $data) {
                 email
+                verificationToken
             }
         }
     `;
@@ -38,8 +59,8 @@ describe("User Registration and Email Verification", () => {
       data: {
         email: faker.internet.email(),
         password: faker.internet.password(),
-        first_name: faker.person.firstName(),
-        last_name: faker.person.lastName(),
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
       },
     };
 
@@ -48,12 +69,14 @@ describe("User Registration and Email Verification", () => {
       .send({ query: createUserMutation, variables });
 
     expect(response.status).toBe(200);
-    expect(response.body.data.createUser.email).toBe(variables.data.email);
-    expect(response.body.data.createUser.verificationToken).toBeDefined();
 
-    expect(emailService.sendVerificationEmail).toHaveBeenCalledWith(
+    const body = response.body as GraphQLResponse<CreateUserResponse>;
+    expect(body.data.createUser.email).toBe(variables.data.email);
+    expect(body.data.createUser.verificationToken).toBeDefined();
+
+    expect(sendVerificationEmailMock).toHaveBeenCalledWith(
       variables.data.email,
-      response.body.data.createUser.verificationToken
+      body.data.createUser.verificationToken
     );
   });
 });

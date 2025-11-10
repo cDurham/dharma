@@ -1,3 +1,7 @@
-export class VerifyEmailCommand {
-  constructor(public readonly token: string) {}
+import { Command } from "@nestjs/cqrs";
+
+export class VerifyEmailCommand extends Command<boolean> {
+  constructor(public readonly token: string) {
+    super();
+  }
 }

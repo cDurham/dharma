@@ -9,12 +9,13 @@ import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-tok
 import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command";
 import { ValidateUserCommand } from "./command/auth-validate-user.command";
 import { authConfig } from "../config/auth.config";
+import { User } from "../User/user.entity";
 
 @Resolver()
 export class AuthResolver {
   constructor(private readonly commandBus: CommandBus) {}
 
-  @Mutation((returns) => LoginResponse)
+  @Mutation(() => LoginResponse)
   async login(
     @Args("data") loginInput: ValidateUserInput,
     @Context() context: { res: Response }
@@ -54,11 +55,11 @@ export class AuthResolver {
     };
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async refreshAccessToken(
     @Context() context: { res: Response; req: Request }
   ): Promise<boolean> {
-    const refreshToken = context.req.cookies.refresh_token;
+    const refreshToken = context.req.cookies.refresh_token as string;
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token not found");
     }
@@ -85,11 +86,11 @@ export class AuthResolver {
     return true;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async logout(
     @Context() context: { res: Response; req: Request }
   ): Promise<boolean> {
-    const refreshToken = context.req?.cookies?.refresh_token;
+    const refreshToken = context.req?.cookies?.refresh_token as string | undefined;
     if (refreshToken) {
       await this.commandBus.execute(
         new AuthRevokeRefreshTokenCommand(refreshToken)

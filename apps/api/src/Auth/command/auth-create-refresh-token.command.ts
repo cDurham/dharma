@@ -1,6 +1,7 @@
+import { Command } from "@nestjs/cqrs";
 import { getRefreshTokenExpiresInMs } from "../../config/auth.config";
 
-export class AuthCreateRefreshTokenCommand {
+export class AuthCreateRefreshTokenCommand extends Command<string> {
   constructor(
     public readonly userId: string,
     /**
@@ -8,5 +9,7 @@ export class AuthCreateRefreshTokenCommand {
      * you could pass them here.
      */
     public readonly expiresIn: number = getRefreshTokenExpiresInMs()
-  ) {}
+  ) {
+    super();
+  }
 }

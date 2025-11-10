@@ -1,5 +1,11 @@
-import { User } from "../../User";
+import { Command } from "@nestjs/cqrs";
+import { AuthenticatedUser } from "../../User/user.schema";
 
-export class AuthLoginUserCommand {
-  constructor(public readonly user: User) {}
+export class AuthLoginUserCommand extends Command<{
+  access_token: string;
+  refresh_token: string;
+}> {
+  constructor(public readonly user: AuthenticatedUser) {
+    super();
+  }
 }

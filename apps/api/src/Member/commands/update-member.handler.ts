@@ -8,6 +8,7 @@ import { member } from "../../db/schema";
 import { MemberUpdatedEvent } from "../events/member-updated.event";
 import { Member } from "../member.entity";
 import { UpdateMemberCommand } from "./update-member.command";
+import { UpdateMemberData } from "../member.schema";
 
 @CommandHandler(UpdateMemberCommand)
 export class UpdateMemberHandler
@@ -30,10 +31,11 @@ export class UpdateMemberHandler
       throw new Error("Member not found");
     }
 
-    // Update member
+    const updateData: UpdateMemberData = data;
+
     await this.db
       .update(member)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(member.uuid, memberUuid));
 
     // Fetch updated member

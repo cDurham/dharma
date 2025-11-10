@@ -16,22 +16,22 @@ export class MemberResolver {
     private queryBus: QueryBus
   ) {}
 
-  @Query((returns) => Member, { nullable: true })
+  @Query(() => Member, { nullable: true })
   async member(@Args("uuid") uuid: string): Promise<Member | null> {
     return this.queryBus.execute(new GetMemberQuery(uuid));
   }
 
-  @Query((returns) => [Member])
+  @Query(() => [Member])
   async members(): Promise<Member[]> {
     return this.queryBus.execute(new GetMembersQuery());
   }
 
-  @Mutation((returns) => Member)
+  @Mutation(() => Member)
   async createMember(@Args("data") data: CreateMemberInput): Promise<Member> {
     return this.commandBus.execute(new CreateMemberCommand(data));
   }
 
-  @Mutation((returns) => Member)
+  @Mutation(() => Member)
   async updateMember(
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateMemberInput
@@ -39,7 +39,7 @@ export class MemberResolver {
     return this.commandBus.execute(new UpdateMemberCommand(uuid, data));
   }
 
-  @Mutation((returns) => Member)
+  @Mutation(() => Member)
   async deleteMember(@Args("uuid") uuid: string): Promise<Member> {
     return this.commandBus.execute(new DeleteMemberCommand(uuid));
   }

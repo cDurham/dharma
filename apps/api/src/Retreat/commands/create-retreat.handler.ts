@@ -39,7 +39,9 @@ export class CreateRetreatHandler
       .where(eq(retreat.uuid, newRetreatId));
 
     // after saving, emit an event
-    this.eventBus.publish(new RetreatCreatedEvent(savedRetreat.uuid, savedRetreat.name));
+    this.eventBus.publish(
+      new RetreatCreatedEvent(savedRetreat.uuid, savedRetreat.name)
+    );
 
     return savedRetreat;
   }

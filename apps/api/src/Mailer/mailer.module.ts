@@ -7,7 +7,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
     ConfigModule.forRoot(), // Ensure ConfigModule is imported and configured
     NestMailerModule.forRootAsync({
       imports: [ConfigModule], // Import ConfigModule here
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         transport: {
           host: configService.get<string>("EMAIL_HOST"),
           port: configService.get<number>("EMAIL_PORT"),

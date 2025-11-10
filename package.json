@@ -63,6 +63,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.0.1",
     "drizzle-orm": "^0.44.7",
+    "drizzle-zod": "^0.8.3",
     "graphql": "^16.12.0",
     "graphql-http": "^1.22.4",
     "graphql-scalars": "^1.24.2",
@@ -79,7 +80,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "uuid": "^11.1.0",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@faker-js/faker": "10.1.0",
