@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  ignorePatterns: ["**/*", "!apps/**/*", "!libs/**/*", "!tools/**/*"],
+  ignorePatterns: ["node_modules", "dist", "tmp", ".nx", "coverage"],
   plugins: [],
   overrides: [
     // Base TypeScript config for all TS files
