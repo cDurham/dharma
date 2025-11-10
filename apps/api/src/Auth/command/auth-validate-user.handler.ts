@@ -27,6 +27,7 @@ export class ValidateUserHandler
       throw new UnauthorizedException("Email not verified");
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...result } = user;
     return result;
   }

@@ -1,12 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import request from "supertest";
 import { AppModule } from "../app.module";
-
-interface GraphQLResponse<T> {
-  data: T;
-}
+import { createGraphQLClient, GraphQLClient } from "./graphql-client";
 
 interface Retreat {
   uuid: string;
@@ -17,6 +13,7 @@ interface Retreat {
 
 describe("E2E - Retreat Resolver", () => {
   let app: INestApplication;
+  let graphql: GraphQLClient;
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -25,6 +22,7 @@ describe("E2E - Retreat Resolver", () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
+    graphql = createGraphQLClient(app);
   });
 
   afterAll(async () => {
@@ -49,20 +47,23 @@ describe("E2E - Retreat Resolver", () => {
       },
     };
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({ query: createRetreatMutation, variables })
-      .expect(200);
+    const response = await graphql.mutation<
+      { createRetreat: Retreat },
+      typeof variables
+    >({
+      query: createRetreatMutation,
+      variables,
+    });
 
-    const body = response.body as GraphQLResponse<{ createRetreat: Retreat }>;
-    expect(body.data.createRetreat.startAt).toEqual(
+    graphql.expectOk(response);
+    expect(response.data.createRetreat.startAt).toEqual(
       variables.data.startAt.toISOString()
     );
-    expect(body.data.createRetreat.endAt).toEqual(
+    expect(response.data.createRetreat.endAt).toEqual(
       variables.data.endAt.toISOString()
     );
-    expect(body.data.createRetreat.name).toEqual(variables.data.name);
-    expect(body.data.createRetreat.uuid).toBeDefined();
+    expect(response.data.createRetreat.name).toEqual(variables.data.name);
+    expect(response.data.createRetreat.uuid).toBeDefined();
   });
 
   it("/retreats", async () => {
@@ -75,14 +76,13 @@ describe("E2E - Retreat Resolver", () => {
         }
     }`;
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({ query: retreatsQuery })
-      .expect(200);
+    const response = await graphql.query<{ retreats: Retreat[] }>({
+      query: retreatsQuery,
+    });
 
-    const body = response.body as GraphQLResponse<{ retreats: Retreat[] }>;
-    expect(body.data.retreats).toBeInstanceOf(Array);
-    body.data.retreats.forEach((retreat) => {
+    graphql.expectOk(response);
+    expect(response.data.retreats).toBeInstanceOf(Array);
+    response.data.retreats.forEach((retreat) => {
       expect(typeof retreat.name).toBe("string");
       expect(typeof retreat.startAt).toBe("string");
       expect(typeof retreat.endAt).toBe("string");

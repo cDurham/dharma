@@ -1,12 +1,8 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import request from "supertest";
 import { AppModule } from "../app.module";
 import { faker } from "@faker-js/faker";
-
-interface GraphQLResponse<T> {
-  data: T;
-}
+import { createGraphQLClient, GraphQLClient } from "./graphql-client";
 
 interface Member {
   uuid: string;
@@ -17,6 +13,7 @@ interface Member {
 
 describe("E2E - Member Resolver", () => {
   let app: INestApplication;
+  let graphql: GraphQLClient;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,6 +22,7 @@ describe("E2E - Member Resolver", () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    graphql = createGraphQLClient(app);
   });
 
   afterAll(async () => {
@@ -47,13 +45,16 @@ describe("E2E - Member Resolver", () => {
       },
     };
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({ query: createMemberMutation, variables })
-      .expect(200);
+    const response = await graphql.mutation<
+      { createMember: Member },
+      typeof variables
+    >({
+      query: createMemberMutation,
+      variables,
+    });
 
-    const body = response.body as GraphQLResponse<{ createMember: Member }>;
-    return body.data.createMember;
+    graphql.expectOk(response);
+    return response.data.createMember;
   };
 
   it("/create member", async () => {
@@ -75,14 +76,14 @@ describe("E2E - Member Resolver", () => {
         }
       }`;
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql/")
-      .send({ query: getMembersQuery })
-      .expect(200);
+    const response = await graphql.query<{ members: Member[] }>({
+      query: getMembersQuery,
+    });
 
-    const body = response.body as GraphQLResponse<{ members: Member[] }>;
-    expect(body.data.members).toBeInstanceOf(Array);
-    body.data.members.forEach((member) => {
+    graphql.expectOk(response);
+    const { members } = response.data;
+    expect(members).toBeInstanceOf(Array);
+    members.forEach((member) => {
       expect(typeof member.firstName).toBe("string");
       expect(typeof member.lastName).toBe("string");
       expect(typeof member.uuid).toBe("string");
@@ -108,14 +109,21 @@ describe("E2E - Member Resolver", () => {
       },
     };
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({ query: updateMemberMutation, variables })
-      .expect(200);
+    const response = await graphql.mutation<
+      { updateMember: Member },
+      typeof variables
+    >({
+      query: updateMemberMutation,
+      variables,
+    });
 
-    const body = response.body as GraphQLResponse<{ updateMember: Member }>;
-    expect(body.data.updateMember.firstName).toEqual(variables.data.firstName);
-    expect(body.data.updateMember.lastName).toEqual(variables.data.lastName);
+    graphql.expectOk(response);
+    expect(response.data.updateMember.firstName).toEqual(
+      variables.data.firstName
+    );
+    expect(response.data.updateMember.lastName).toEqual(
+      variables.data.lastName
+    );
   });
 
   it("delete member", async () => {
@@ -132,12 +140,15 @@ describe("E2E - Member Resolver", () => {
       uuid: createdMember.uuid,
     };
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({ query: deleteMemberMutation, variables })
-      .expect(200);
+    const response = await graphql.mutation<
+      { deleteMember: Member },
+      typeof variables
+    >({
+      query: deleteMemberMutation,
+      variables,
+    });
 
-    const body = response.body as GraphQLResponse<{ deleteMember: Member }>;
-    expect(body.data.deleteMember.uuid).toBe(createdMember.uuid);
+    graphql.expectOk(response);
+    expect(response.data.deleteMember.uuid).toBe(createdMember.uuid);
   });
 });

@@ -1,24 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import request from "supertest";
 import { AppModule } from "../app.module";
 import { EmailService } from "../Email";
 import { faker } from "@faker-js/faker";
-
-interface GraphQLResponse<T> {
-  data: T;
-  errors?: Array<{ message: string }>;
-}
-
-interface CreateUserResponse {
-  createUser: {
-    email: string;
-    verificationToken: string;
-  };
-}
+import { createGraphQLClient, GraphQLClient } from "./graphql-client";
 
 describe("User Registration and Email Verification", () => {
   let app: INestApplication;
+  let graphql: GraphQLClient;
   let sendVerificationEmailMock: jest.SpyInstance;
 
   beforeAll(async () => {
@@ -33,6 +22,7 @@ describe("User Registration and Email Verification", () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+    graphql = createGraphQLClient(app);
 
     const emailService = moduleFixture.get<EmailService>(EmailService);
     sendVerificationEmailMock = jest.spyOn(
@@ -64,19 +54,22 @@ describe("User Registration and Email Verification", () => {
       },
     };
 
-    const response = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({ query: createUserMutation, variables });
+    const response = await graphql.mutation<
+      { createUser: { email: string; verificationToken: string } },
+      typeof variables
+    >({
+      query: createUserMutation,
+      variables,
+    });
 
-    expect(response.status).toBe(200);
-
-    const body = response.body as GraphQLResponse<CreateUserResponse>;
-    expect(body.data.createUser.email).toBe(variables.data.email);
-    expect(body.data.createUser.verificationToken).toBeDefined();
+    graphql.expectOk(response);
+    const { createUser } = response.data;
+    expect(createUser.email).toBe(variables.data.email);
+    expect(createUser.verificationToken).toBeDefined();
 
     expect(sendVerificationEmailMock).toHaveBeenCalledWith(
       variables.data.email,
-      body.data.createUser.verificationToken
+      createUser.verificationToken
     );
   });
 });

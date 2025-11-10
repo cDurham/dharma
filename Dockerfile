@@ -24,10 +24,12 @@ EXPOSE 4200
 CMD ["npm", "run", "web:serve"]
 
 FROM deps AS build_api
+ARG CACHEBUST
 COPY . .
 RUN npm run api:build
 
 FROM deps AS build_web
+ARG CACHEBUST
 COPY . .
 RUN npm run web:build
 

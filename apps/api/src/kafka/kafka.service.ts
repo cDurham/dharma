@@ -54,12 +54,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.consumer.subscribe({ topic, fromBeginning: true });
       await this.consumer.run({
-        eachMessage: async ({
-          topic: _topic,
-          partition: _partition,
-          message,
-        }) => {
-          // eslint-disable-next-line @typescript-eslint/require-await
+        eachMessage: async ({ message }) => {
           if (message && message.value) {
             eachMessage(JSON.parse(message.value.toString()));
           } else {
