@@ -27,8 +27,6 @@ services:
   api:
     image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/api:latest
     env_file: ../.env
-    depends_on:
-      kafka: { condition: service_healthy }
     ports: [3000:3000]
     networks: [app-net]
     restart: unless-stopped

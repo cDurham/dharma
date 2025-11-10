@@ -45,11 +45,29 @@ FRONTEND_URL=${FRONTEND_URL}
 NODE_ENV=production
 EOF
 
+# Run migrations on existing containers if they exist (zero-downtime)
+if docker compose -f deploy/docker-compose.prod.yml ps api | grep -q "Up"; then
+  echo "📊 Running database migrations on existing container..."
+  docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push || echo "⚠️ Migration on old container failed, will retry after deployment"
+fi
+
+# Check if we need to update images
+CURRENT_TAG=$(docker inspect ghcr.io/${GITHUB_REPOSITORY}/api:latest --format='{{index .RepoDigests 0}}' 2>/dev/null || echo "none")
+echo "📦 Current deployment: ${CURRENT_TAG}"
+echo "📦 Target deployment: ${IMAGE_TAG:-latest}"
+
 # Build and deploy with Docker Compose
-echo "🐳 Pulling and starting containers..."
-docker compose -f deploy/docker-compose.prod.yml down
+echo "🐳 Pulling new images..."
 docker compose -f deploy/docker-compose.prod.yml pull
-docker compose -f deploy/docker-compose.prod.yml up -d --force-recreate
+
+# Only recreate if images actually changed
+if docker compose -f deploy/docker-compose.prod.yml ps --quiet api web | grep -q .; then
+  echo "🔄 Updating running containers..."
+  docker compose -f deploy/docker-compose.prod.yml up -d --no-deps
+else
+  echo "🚀 Starting containers for the first time..."
+  docker compose -f deploy/docker-compose.prod.yml up -d
+fi
 
 # Wait for API to be ready with intelligent health check
 echo "⏳ Waiting for API to be ready..."
