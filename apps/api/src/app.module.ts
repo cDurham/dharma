@@ -29,7 +29,6 @@ import { VerificationController } from "./Verify/verify.controller";
       autoSchemaFile: true,
       driver: ApolloDriver,
       introspection: process.env.NODE_ENV !== "production",
-      // Apollo Server 5 includes a default landing page plugin automatically
       context: ({ req, res }: { req: Request; res: Response }) => ({
         req,
         res,

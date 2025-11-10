@@ -11,7 +11,9 @@ export class ValidateUserHandler
 {
   constructor(private readonly queryBus: QueryBus) {}
 
-  async execute({ input }: ValidateUserCommand): Promise<Omit<User, 'password'>> {
+  async execute({
+    input,
+  }: ValidateUserCommand): Promise<Omit<User, "password">> {
     const { email, password } = input;
     const user = await this.queryBus.execute(new GetUserByEmailQuery(email));
     if (!user) {
@@ -25,7 +27,7 @@ export class ValidateUserHandler
       throw new UnauthorizedException("Email not verified");
     }
 
-    const { password: password_, ...result } = user;
+    const { password: _password, ...result } = user;
     return result;
   }
 }

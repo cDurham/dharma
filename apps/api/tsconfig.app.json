@@ -14,6 +14,8 @@
     "**/__test__/**"
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "drizzle.config.ts",
+    "jest.config.ts"
   ]
 }

@@ -5,6 +5,7 @@ import { QueryBus } from "@nestjs/cqrs";
 import { Request } from "express";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { GetUserQuery } from "../User/command/get-user.query";
+import { User } from "../User/user.entity";
 import { AuthenticatedUser } from "../User/user.schema";
 
 @Injectable()
@@ -38,13 +39,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     sub: string;
     email: string;
   }): Promise<AuthenticatedUser> {
-    const user = await this.queryBus.execute(new GetUserQuery(payload.sub));
+    const user = await this.queryBus.execute<User | null>(
+      new GetUserQuery(payload.sub)
+    );
 
     if (!user) {
       throw new UnauthorizedException("User not found");
     }
 
     // Exclude password from the returned user object
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...result } = user;
     return result;
   }

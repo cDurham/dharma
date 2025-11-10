@@ -1,7 +1,8 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { Request, Response } from "express";
 import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
+import { GraphQLContext } from "../graphql-context.type";
+import { getRefreshToken } from "./auth.cookies";
 import { LoginResponse } from "./auth.dto";
 import { ValidateUserInput } from "./auth.input";
 import { AuthLoginUserCommand } from "./command/auth-login-user.command";
@@ -9,7 +10,6 @@ import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-tok
 import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command";
 import { ValidateUserCommand } from "./command/auth-validate-user.command";
 import { authConfig } from "../config/auth.config";
-import { User } from "../User/user.entity";
 
 @Resolver()
 export class AuthResolver {
@@ -18,7 +18,7 @@ export class AuthResolver {
   @Mutation(() => LoginResponse)
   async login(
     @Args("data") loginInput: ValidateUserInput,
-    @Context() context: { res: Response }
+    @Context() context: GraphQLContext
   ): Promise<LoginResponse> {
     const user = await this.commandBus.execute(
       new ValidateUserCommand(loginInput)
@@ -57,9 +57,9 @@ export class AuthResolver {
 
   @Mutation(() => Boolean)
   async refreshAccessToken(
-    @Context() context: { res: Response; req: Request }
+    @Context() context: GraphQLContext
   ): Promise<boolean> {
-    const refreshToken = context.req.cookies.refresh_token as string;
+    const refreshToken = getRefreshToken(context.req);
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token not found");
     }
@@ -87,10 +87,8 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean)
-  async logout(
-    @Context() context: { res: Response; req: Request }
-  ): Promise<boolean> {
-    const refreshToken = context.req?.cookies?.refresh_token as string | undefined;
+  async logout(@Context() context: GraphQLContext): Promise<boolean> {
+    const refreshToken = getRefreshToken(context.req);
     if (refreshToken) {
       await this.commandBus.execute(
         new AuthRevokeRefreshTokenCommand(refreshToken)
