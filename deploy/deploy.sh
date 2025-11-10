@@ -51,16 +51,27 @@ docker compose -f deploy/docker-compose.prod.yml down
 docker compose -f deploy/docker-compose.prod.yml pull
 docker compose -f deploy/docker-compose.prod.yml up -d --force-recreate
 
-# Wait for API to be ready
+# Wait for API to be ready with intelligent health check
 echo "⏳ Waiting for API to be ready..."
-sleep 10
+for i in {1..60}; do
+  if curl -f http://localhost:3000/graphql > /dev/null 2>&1; then
+    echo "✅ API is ready after $i seconds"
+    break
+  fi
+  if [ $i -eq 60 ]; then
+    echo "❌ API failed to start within 60 seconds"
+    docker compose -f deploy/docker-compose.prod.yml logs api
+    exit 1
+  fi
+  sleep 1
+done
 
 # Run database migrations
 echo "📊 Running database migrations..."
 docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push
 
-# Health check
-echo "🏥 Running health check..."
+# Final health check
+echo "🏥 Running final health check..."
 if curl -f http://localhost:3000/graphql > /dev/null 2>&1; then
     echo "✅ Deployment successful!"
 else

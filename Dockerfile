@@ -8,6 +8,11 @@ COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --prefer-offline --legacy-peer-deps
 
+FROM base AS deps-prod
+COPY package*.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --only=production --prefer-offline --legacy-peer-deps
+
 FROM deps AS dev_api
 COPY . .
 EXPOSE 3000 9229
@@ -30,7 +35,7 @@ FROM node:22-slim AS runtime_api
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build_api /workspace/dist/apps/api ./dist/apps/api
-COPY --from=deps /workspace/node_modules ./node_modules
+COPY --from=deps-prod /workspace/node_modules ./node_modules
 EXPOSE 3000
 CMD ["node", "dist/apps/api/index.js"]
 

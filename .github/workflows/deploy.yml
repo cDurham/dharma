@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api, web]
     permissions:
       contents: read
       packages: write
@@ -30,27 +33,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Build and push API image
+      - name: Build and push ${{ matrix.service }} image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          target: runtime_api
+          target: runtime_${{ matrix.service }}
           push: true
-          tags: ghcr.io/${{ steps.repo.outputs.repository_lower }}/api:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      
-      - name: Build and push Web image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          target: runtime_web
-          push: true
-          tags: ghcr.io/${{ steps.repo.outputs.repository_lower }}/web:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ghcr.io/${{ steps.repo.outputs.repository_lower }}/${{ matrix.service }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
   deploy:
     needs: build-and-push
