@@ -13,7 +13,7 @@ const useLogin = () => {
         variables: { data: { email, password } },
         onCompleted: (data) => {
           if (data?.login) {
-            navigate("/dashboard");
+            void navigate("/dashboard");
           }
         },
       });

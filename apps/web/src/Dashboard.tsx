@@ -11,7 +11,7 @@ export const Dashboard = () => {
   const [createMember] = useMutation(CreateMemberDocument);
   const { loading, error, data, refetch } = useQuery(MembersDocument);
 
-  const createMemberAction = async (formData: FormData) => {
+  const createMemberAction = (formData: FormData) => {
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
 

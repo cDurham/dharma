@@ -32,7 +32,7 @@ const LoginForm = () => {
     setOpen(false);
   };
 
-  const loginAction = async (formData: FormData) => {
+  const loginAction = (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
@@ -45,7 +45,7 @@ const LoginForm = () => {
     });
   };
 
-  const signupAction = async () => {
+  const signupAction = () => {
     startTransition(async () => {
       try {
         await createUser({
