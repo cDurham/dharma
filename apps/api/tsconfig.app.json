@@ -5,8 +5,8 @@
     "declaration": true,
     "declarationMap": true,
     "types": ["node"],
-    "module": "CommonJS",
-    "target": "ES2021"
+    "module": "ESNext",
+    "target": "ES2022"
   },
   "exclude": [
     "**/*.spec.ts",
