@@ -1,6 +1,5 @@
-type AuthPayload {
-  accessToken: String!
-  user: User!
+type LoginResponse {
+  message: String!
 }
 
 input LoginInput {
@@ -8,20 +7,8 @@ input LoginInput {
   password: String!
 }
 
-input RegisterInput {
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-}
-
 type Mutation {
-  login(input: LoginInput!): AuthPayload!
-  register(input: RegisterInput!): AuthPayload!
+  login(data: LoginInput!): LoginResponse!
+  refreshAccessToken: Boolean!
   logout: Boolean!
-  refreshToken: AuthPayload!
-}
-
-type Query {
-  me: User
 }

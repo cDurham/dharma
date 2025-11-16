@@ -9,6 +9,7 @@
       "options": {
         "commands": [
           "tsc -b tsconfig.app.json",
+          "find src -name '*.graphql' -exec sh -c 'mkdir -p ../../dist/apps/api/$(dirname {}) && cp {} ../../dist/apps/api/{}' \\;",
           "sh -c 'tsc -b tsconfig.app.json --watch --preserveWatchOutput & node --watch --enable-source-maps ../../dist/apps/api/src/index.js'"
         ],
         "parallel": false,
@@ -23,7 +24,15 @@
       "options": {
         "main": "apps/api/src/index.ts",
         "outputPath": "dist/apps/api",
-        "tsConfig": "apps/api/tsconfig.app.json"
+        "tsConfig": "apps/api/tsconfig.app.json",
+        "assets": [
+          {
+            "input": "apps/api/src",
+            "glob": "**/*.graphql",
+            "output": "src"
+          }
+        ],
+        "generatePackageJson": false
       }
     },
     "lint": {

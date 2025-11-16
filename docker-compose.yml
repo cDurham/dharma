@@ -50,6 +50,7 @@ services:
     env_file: .env
     volumes:
       - ./apps/api:/workspace/apps/api # hot‑reload bind‑mount
+      - ./dist:/workspace/dist # keep compiled artifacts in sync (schema lives here)
       - /workspace/node_modules
     ports: [3000:3000, 9229:9229]
     depends_on:

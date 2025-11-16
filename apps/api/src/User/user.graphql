@@ -29,10 +29,13 @@ input UpdateUserInput {
 type Query {
   user(uuid: ID!): User
   users: [User!]!
+  getUserByEmail(email: String!): User
+  me: User
 }
 
 type Mutation {
-  createUser(input: CreateUserInput!): User!
-  updateUser(uuid: ID!, input: UpdateUserInput!): User!
-  deleteUser(uuid: ID!): User!
+  createUser(data: CreateUserInput!): User!
+  updateUser(uuid: ID!, data: UpdateUserInput!): User!
+  deleteUser(uuid: ID!): Boolean!
+  verifyEmail(token: String!): Boolean!
 }
