@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc/apps/api",
+    "outDir": "../../dist/apps/api",
     "declaration": true,
     "declarationMap": true,
     "types": ["node"],
@@ -10,12 +10,9 @@
   },
   "exclude": [
     "**/*.spec.ts",
+    "**/*.test.ts",
     "**/__tests__/**",
     "**/__test__/**"
   ],
-  "include": [
-    "src/**/*.ts",
-    "drizzle.config.ts",
-    "jest.config.ts"
-  ]
+  "include": ["src/**/*.ts", "drizzle.config.ts"]
 }

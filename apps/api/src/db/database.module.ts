@@ -21,4 +21,3 @@ const databaseProviders = [
   exports: [...databaseProviders],
 })
 export class DatabaseModule {}
-

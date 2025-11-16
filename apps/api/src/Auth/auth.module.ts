@@ -6,6 +6,7 @@ import { PassportModule } from "@nestjs/passport";
 import { EmailModule } from "../Email/email.module";
 import { MemberModule } from "../Member/member.module";
 import { UserModule } from "../User/user.module";
+import { authConfig } from "../config/auth.config";
 import { AuthResolver } from "./auth.resolver";
 import { AuthCreateRefreshTokenHandler } from "./command/auth-create-refresh-token.handler";
 import { AuthLoginUserHandler } from "./command/auth-login-user.handler";
@@ -15,7 +16,6 @@ import { ValidateUserHandler } from "./command/auth-validate-user.handler";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { JwtStrategy } from "./jwt.strategy";
 import { TokenCleanupService } from "./token-cleanup.service";
-import { authConfig } from "../config/auth.config";
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { authConfig } from "../config/auth.config";
         const secret = configService.get<string>("JWT_SECRET");
         if (!secret) {
           throw new Error(
-            "JWT_SECRET environment variable is required but not set"
+            "JWT_SECRET environment variable is required but not set",
           );
         }
         return {

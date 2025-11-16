@@ -1,5 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
-import { Kafka, Producer, Consumer, Partitioners } from "kafkajs";
+import {
+  Injectable,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from "@nestjs/common";
+import { type Consumer, Kafka, Partitioners, type Producer } from "kafkajs";
 
 @Injectable()
 export class KafkaService implements OnModuleInit, OnModuleDestroy {
@@ -42,10 +46,10 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       console.warn(
         "⚠️  Kafka connection failed (non-critical):",
-        error instanceof Error ? error.message : error
+        error instanceof Error ? error.message : error,
       );
       console.log(
-        "📝 Application will continue without Kafka event publishing"
+        "📝 Application will continue without Kafka event publishing",
       );
     }
   }
@@ -81,7 +85,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       // Non-critical - event was already handled by NestJS CQRS
       console.warn(
         "⚠️  Kafka produce failed (non-critical):",
-        error instanceof Error ? error.message : error
+        error instanceof Error ? error.message : error,
       );
     }
   }

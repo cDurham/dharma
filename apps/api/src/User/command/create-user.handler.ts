@@ -1,15 +1,15 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
-import { v4 as uuidv4 } from "uuid";
-import { v7 as uuidv7 } from "uuid";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { user } from "../../db/schema";
 import { UserCreatedEvent } from "../event/user-created.event";
-import { User } from "../user.entity";
+import type { User } from "../user.entity";
 import { CreateUserCommand } from "./create-user.command";
 
 @CommandHandler(CreateUserCommand)

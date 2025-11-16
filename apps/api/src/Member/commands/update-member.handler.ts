@@ -1,14 +1,14 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { member } from "../../db/schema";
 import { MemberUpdatedEvent } from "../events/member-updated.event";
-import { Member } from "../member.entity";
+import type { Member } from "../member.entity";
+import type { UpdateMemberData } from "../member.schema";
 import { UpdateMemberCommand } from "./update-member.command";
-import { UpdateMemberData } from "../member.schema";
 
 @CommandHandler(UpdateMemberCommand)
 export class UpdateMemberHandler

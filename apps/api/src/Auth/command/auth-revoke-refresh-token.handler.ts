@@ -1,12 +1,12 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { refreshToken } from "../../db/schema";
-import { AuthRevokeRefreshTokenCommand } from "./auth-revoke-refresh-token.command";
 import { hashToken } from "../utils";
+import { AuthRevokeRefreshTokenCommand } from "./auth-revoke-refresh-token.command";
 
 @CommandHandler(AuthRevokeRefreshTokenCommand)
 export class AuthRevokeRefreshTokenHandler

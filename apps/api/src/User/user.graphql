@@ -1,0 +1,39 @@
+scalar DateTime
+
+type User {
+  uuid: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  verificationToken: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  email: String
+  password: String
+  verifiedEmail: Boolean
+  verificationToken: String
+}
+
+type Query {
+  user(uuid: ID!): User
+  users: [User!]!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(uuid: ID!, input: UpdateUserInput!): User!
+  deleteUser(uuid: ID!): User!
+}
+

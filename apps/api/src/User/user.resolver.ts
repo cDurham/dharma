@@ -1,9 +1,9 @@
 import { UseGuards } from "@nestjs/common";
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import type { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { JwtAuthGuard } from "../Auth/jwt-auth.guard";
+import { type AuthenticatedUser, type CreateUserInput, type UpdateUserInput, User } from ".";
 import { CurrentUser } from "../Auth/current-user.decorator";
-import { CreateUserInput, UpdateUserInput, User, AuthenticatedUser } from ".";
+import { JwtAuthGuard } from "../Auth/jwt-auth.guard";
 import { CreateUserCommand } from "./command/create-user.command";
 import { DeleteUserCommand } from "./command/delete-user.command";
 import { GetUserByEmailQuery } from "./command/get-user-by-email.query";

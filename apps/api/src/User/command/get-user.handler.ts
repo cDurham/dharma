@@ -1,11 +1,11 @@
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { user } from "../../db/schema";
-import { User } from "../user.entity";
+import type { User } from "../user.entity";
 import { GetUserQuery } from "./get-user.query";
 
 @QueryHandler(GetUserQuery)

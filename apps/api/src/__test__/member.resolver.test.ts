@@ -1,8 +1,8 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import { AppModule } from "../app.module";
 import { faker } from "@faker-js/faker";
-import { createGraphQLClient, GraphQLClient } from "./graphql-client";
+import type { INestApplication } from "@nestjs/common";
+import { Test, type TestingModule } from "@nestjs/testing";
+import { AppModule } from "../app.module";
+import { type GraphQLClient, createGraphQLClient } from "./graphql-client";
 
 interface Member {
   uuid: string;
@@ -119,10 +119,10 @@ describe("E2E - Member Resolver", () => {
 
     graphql.expectOk(response);
     expect(response.data.updateMember.firstName).toEqual(
-      variables.data.firstName
+      variables.data.firstName,
     );
     expect(response.data.updateMember.lastName).toEqual(
-      variables.data.lastName
+      variables.data.lastName,
     );
   });
 

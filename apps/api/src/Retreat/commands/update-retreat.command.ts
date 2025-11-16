@@ -1,11 +1,11 @@
 import { Command } from "@nestjs/cqrs";
-import { UpdateRetreatInput } from "../retreat.input";
-import { Retreat } from "../retreat.entity";
+import type { Retreat } from "../retreat.entity";
+import type { UpdateRetreatInput } from "../retreat.input";
 
 export class UpdateRetreatCommand extends Command<Retreat | null> {
   constructor(
     public readonly retreatUuid: string,
-    public readonly data: UpdateRetreatInput
+    public readonly data: UpdateRetreatInput,
   ) {
     super();
   }

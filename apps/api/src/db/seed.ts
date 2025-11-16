@@ -1,11 +1,11 @@
-import { v7 as uuidv7 } from "uuid";
-import * as dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-import { db, pool } from "./data-source";
-import { retreat, user, member, refreshToken } from "./schema";
+import { config } from "dotenv";
+import { v7 as uuidv7 } from "uuid";
+import { db, pool } from "./data-source.js";
+import { member, refreshToken, retreat, user } from "./schema/index.js";
 
 // Load environment variables
-dotenv.config();
+config();
 
 async function seed() {
   console.log("Seeding database...");
@@ -40,7 +40,9 @@ async function seed() {
       password: hashedPassword,
       verificationToken: null, // Already verified
     });
-    console.log("✓ Created test user (email: test@example.com, password: password123)");
+    console.log(
+      "✓ Created test user (email: test@example.com, password: password123)",
+    );
 
     // Seed a test member
     const memberId = uuidv7();

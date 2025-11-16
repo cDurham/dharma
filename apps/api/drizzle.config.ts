@@ -1,7 +1,11 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
 import { defineConfig } from "drizzle-kit";
-import * as dotenv from "dotenv";
 
-dotenv.config();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+config();
 
 // Validate required environment variables
 const requiredEnvVars = {
@@ -18,17 +22,17 @@ const missingVars = Object.entries(requiredEnvVars)
 
 if (missingVars.length > 0) {
   throw new Error(
-    `❌ Missing required environment variables for Drizzle:\n  - ${missingVars.join("\n  - ")}\n\nPlease check your .env file.`
+    `❌ Missing required environment variables for Drizzle:\n  - ${missingVars.join("\n  - ")}\n\nPlease check your .env file.`,
   );
 }
 
 export default defineConfig({
-  schema: "./apps/api/src/db/schema/index.ts",
-  out: "./apps/api/src/db/migrations",
+  schema: join(__dirname, "src/db/schema/index.ts"),
+  out: join(__dirname, "src/db/migrations"),
   dialect: "postgresql",
   dbCredentials: {
     host: requiredEnvVars.DB_HOST!,
-    port: parseInt(requiredEnvVars.DB_PORT!, 10),
+    port: Number.parseInt(requiredEnvVars.DB_PORT!, 10),
     user: requiredEnvVars.DB_USER!,
     password: requiredEnvVars.DB_PASSWORD!,
     database: requiredEnvVars.DB_DATABASE!,

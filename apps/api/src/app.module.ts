@@ -5,15 +5,15 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import { AuthModule } from "./Auth";
-import { DatabaseModule } from "./db/database.module";
-import { KafkaModule } from "./kafka/kafka.module";
 import { MemberModule } from "./Member/member.module";
 import { RetreatModule } from "./Retreat";
 import { UserModule } from "./User";
 import { VerificationController } from "./Verify/verify.controller";
+import { DatabaseModule } from "./db/database.module";
+import { KafkaModule } from "./kafka/kafka.module";
 
 @Module({
   imports: [
@@ -26,8 +26,9 @@ import { VerificationController } from "./Verify/verify.controller";
     RetreatModule,
     KafkaModule,
     GraphQLModule.forRoot({
-      autoSchemaFile: true,
+      typePaths: ["./**/*.graphql"],
       driver: ApolloDriver,
+      sortSchema: true,
       introspection: process.env.NODE_ENV !== "production",
       context: ({ req, res }: { req: Request; res: Response }) => ({
         req,

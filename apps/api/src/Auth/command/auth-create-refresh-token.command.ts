@@ -8,7 +8,7 @@ export class AuthCreateRefreshTokenCommand extends Command<string> {
      * Optional: if you want to track IP / user-agent for security,
      * you could pass them here.
      */
-    public readonly expiresIn: number = getRefreshTokenExpiresInMs()
+    public readonly expiresIn: number = getRefreshTokenExpiresInMs(),
   ) {
     super();
   }

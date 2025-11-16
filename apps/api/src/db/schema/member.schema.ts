@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { baseColumns } from "./base.schema";
 import { user } from "./user.schema";
 
@@ -14,4 +14,3 @@ export const member = pgTable("member", {
     .defaultNow(),
   userUuid: uuid("user_uuid").references(() => user.uuid),
 });
-

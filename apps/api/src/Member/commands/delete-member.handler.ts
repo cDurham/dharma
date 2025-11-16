@@ -1,13 +1,13 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { member } from "../../db/schema";
-import { DeleteMemberCommand } from "./delete-member.command";
-import { Member } from "../member.entity";
 import { MemberDeletedEvent } from "../events/member-deleted.event";
+import type { Member } from "../member.entity";
+import { DeleteMemberCommand } from "./delete-member.command";
 
 @CommandHandler(DeleteMemberCommand)
 export class DeleteMemberHandler

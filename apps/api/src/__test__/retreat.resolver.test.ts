@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { INestApplication } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { INestApplication } from "@nestjs/common";
+import { Test, type TestingModule } from "@nestjs/testing";
 import { AppModule } from "../app.module";
-import { createGraphQLClient, GraphQLClient } from "./graphql-client";
+import { type GraphQLClient, createGraphQLClient } from "./graphql-client";
 
 interface Retreat {
   uuid: string;
@@ -57,10 +57,10 @@ describe("E2E - Retreat Resolver", () => {
 
     graphql.expectOk(response);
     expect(response.data.createRetreat.startAt).toEqual(
-      variables.data.startAt.toISOString()
+      variables.data.startAt.toISOString(),
     );
     expect(response.data.createRetreat.endAt).toEqual(
-      variables.data.endAt.toISOString()
+      variables.data.endAt.toISOString(),
     );
     expect(response.data.createRetreat.name).toEqual(variables.data.name);
     expect(response.data.createRetreat.uuid).toBeDefined();

@@ -1,17 +1,17 @@
-import { useState, useTransition } from "react";
+import { useMutation } from "@apollo/client/react";
 import {
-  TextField,
   Button,
-  Typography,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useMutation } from "@apollo/client/react";
+import { useState, useTransition } from "react";
 
-import useLogin from "../graphql/useLogin";
 import { CreateUserDocument } from "../graphql/types";
+import useLogin from "../graphql/useLogin";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");

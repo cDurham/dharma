@@ -1,6 +1,6 @@
 import { Command } from "@nestjs/cqrs";
-import { CreateRetreatInput } from "../retreat.input";
-import { Retreat } from "../retreat.entity";
+import type { Retreat } from "../retreat.entity";
+import type { CreateRetreatInput } from "../retreat.input";
 
 export class CreateRetreatCommand extends Command<Retreat> {
   constructor(public readonly input: CreateRetreatInput) {

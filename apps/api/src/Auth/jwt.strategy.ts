@@ -1,24 +1,24 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import type { ConfigService } from "@nestjs/config";
+import type { QueryBus } from "@nestjs/cqrs";
 import { PassportStrategy } from "@nestjs/passport";
-import { QueryBus } from "@nestjs/cqrs";
-import { Request } from "express";
-import { Strategy, ExtractJwt } from "passport-jwt";
+import type { Request } from "express";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { GetUserQuery } from "../User/command/get-user.query";
-import { User } from "../User/user.entity";
-import { AuthenticatedUser } from "../User/user.schema";
+import type { User } from "../User/user.entity";
+import type { AuthenticatedUser } from "../User/user.schema";
 import { getAccessToken } from "./auth.cookies";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly queryBus: QueryBus
+    private readonly queryBus: QueryBus,
   ) {
     const secret = configService.get<string>("JWT_SECRET");
     if (!secret) {
       throw new Error(
-        "JWT_SECRET environment variable is required but not set"
+        "JWT_SECRET environment variable is required but not set",
       );
     }
 
@@ -39,7 +39,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     email: string;
   }): Promise<AuthenticatedUser> {
     const user = await this.queryBus.execute<User | null>(
-      new GetUserQuery(payload.sub)
+      new GetUserQuery(payload.sub),
     );
 
     if (!user) {

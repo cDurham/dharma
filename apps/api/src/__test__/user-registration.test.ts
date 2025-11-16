@@ -1,9 +1,9 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import { AppModule } from "../app.module";
-import { EmailService } from "../Email";
 import { faker } from "@faker-js/faker";
-import { createGraphQLClient, GraphQLClient } from "./graphql-client";
+import type { INestApplication } from "@nestjs/common";
+import { Test, type TestingModule } from "@nestjs/testing";
+import { EmailService } from "../Email";
+import { AppModule } from "../app.module";
+import { type GraphQLClient, createGraphQLClient } from "./graphql-client";
 
 describe("User Registration and Email Verification", () => {
   let app: INestApplication;
@@ -27,7 +27,7 @@ describe("User Registration and Email Verification", () => {
     const emailService = moduleFixture.get<EmailService>(EmailService);
     sendVerificationEmailMock = jest.spyOn(
       emailService,
-      "sendVerificationEmail"
+      "sendVerificationEmail",
     );
   });
 
@@ -69,7 +69,7 @@ describe("User Registration and Email Verification", () => {
 
     expect(sendVerificationEmailMock).toHaveBeenCalledWith(
       variables.data.email,
-      createUser.verificationToken
+      createUser.verificationToken,
     );
   });
 });

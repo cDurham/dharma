@@ -1,11 +1,11 @@
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { member } from "../../db/schema";
-import { Member } from "../member.entity";
+import type { Member } from "../member.entity";
 import { GetMemberQuery } from "./get-member.query";
 
 @QueryHandler(GetMemberQuery)

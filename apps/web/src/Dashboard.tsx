@@ -1,8 +1,8 @@
 import { useState, useTransition } from "react";
 
-import useLogout from "./graphql/useLogout";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CreateMemberDocument, MembersDocument } from "./graphql/types";
+import useLogout from "./graphql/useLogout";
 
 export const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

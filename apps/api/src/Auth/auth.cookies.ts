@@ -1,4 +1,4 @@
-import { Request } from "express";
+import type { Request } from "express";
 import { z } from "zod";
 
 export const AuthCookiesSchema = z.object({

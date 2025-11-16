@@ -1,14 +1,14 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { Inject } from "@nestjs/common";
-import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { Inject } from "@nestjs/common";
+import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
+import bcrypt from "bcryptjs";
 import { v7 as uuidv7 } from "uuid";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { refreshToken } from "../../db/schema";
-import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command";
 import { hashToken } from "../utils";
+import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command";
 
 @CommandHandler(AuthCreateRefreshTokenCommand)
 export class AuthCreateRefreshTokenHandler

@@ -1,4 +1,4 @@
-import { INestApplication } from "@nestjs/common";
+import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 
 export type GraphQLSuccess<TData> = {
@@ -23,13 +23,13 @@ export type GraphQLResponse<TData> =
 
 export interface GraphQLClient {
   query<TData, TVariables = Record<string, unknown>>(
-    options: GraphQLOperationOptions<TVariables>
+    options: GraphQLOperationOptions<TVariables>,
   ): Promise<GraphQLResponse<TData>>;
   mutation<TData, TVariables = Record<string, unknown>>(
-    options: GraphQLOperationOptions<TVariables>
+    options: GraphQLOperationOptions<TVariables>,
   ): Promise<GraphQLResponse<TData>>;
   expectOk<TData>(
-    response: GraphQLResponse<TData>
+    response: GraphQLResponse<TData>,
   ): asserts response is GraphQLSuccess<TData>;
 }
 

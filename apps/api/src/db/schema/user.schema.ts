@@ -1,4 +1,4 @@
-import { pgTable, varchar, unique } from "drizzle-orm/pg-core";
+import { pgTable, unique, varchar } from "drizzle-orm/pg-core";
 import { baseColumns } from "./base.schema";
 
 /**
@@ -16,6 +16,5 @@ export const user = pgTable(
   },
   (table) => ({
     emailUnique: unique().on(table.email),
-  })
+  }),
 );
-

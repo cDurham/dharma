@@ -1,6 +1,6 @@
 import { Command } from "@nestjs/cqrs";
-import { CreateMemberInput } from "../member.input";
-import { Member } from "../member.entity";
+import type { Member } from "../member.entity";
+import type { CreateMemberInput } from "../member.input";
 
 export class CreateMemberCommand extends Command<Member> {
   constructor(public readonly input: CreateMemberInput) {

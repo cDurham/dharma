@@ -1,9 +1,13 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type ICommandHandler,
+  type QueryBus,
+} from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query";
+import type { User } from "../../User/user.entity";
 import { ValidateUserCommand } from "./auth-validate-user.command";
-import { User } from "../../User/user.entity";
 
 @CommandHandler(ValidateUserCommand)
 export class ValidateUserHandler

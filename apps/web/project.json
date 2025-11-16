@@ -19,9 +19,9 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/web/**/*.ts", "apps/web/**/*.tsx"]
+        "command": "biome check --write {projectRoot}"
       }
     },
     "test": {

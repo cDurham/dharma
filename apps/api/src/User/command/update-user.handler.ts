@@ -1,15 +1,15 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { user } from "../../db/schema";
-import { User } from "../user.entity";
-import { UpdateUserCommand } from "./update-user.command";
 import { UserUpdatedEvent } from "../event/user-updated.event";
-import { UpdateUserData } from "../user.schema";
+import type { User } from "../user.entity";
+import type { UpdateUserData } from "../user.schema";
+import { UpdateUserCommand } from "./update-user.command";
 
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {

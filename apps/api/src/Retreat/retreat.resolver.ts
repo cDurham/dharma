@@ -1,4 +1,4 @@
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import type { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { CreateRetreatCommand } from "./commands/create-retreat.command";
 import { DeleteRetreatCommand } from "./commands/delete-retreat.command";
@@ -6,7 +6,7 @@ import { GetRetreatQuery } from "./commands/get-retreat.query";
 import { GetRetreatsQuery } from "./commands/get-retreats.query";
 import { UpdateRetreatCommand } from "./commands/update-retreat.command";
 import { Retreat } from "./retreat.entity";
-import { CreateRetreatInput, UpdateRetreatInput } from "./retreat.input";
+import type { CreateRetreatInput, UpdateRetreatInput } from "./retreat.input";
 
 @Resolver(() => Retreat)
 export class RetreatResolver {

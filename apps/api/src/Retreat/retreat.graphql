@@ -1,0 +1,33 @@
+scalar DateTime
+
+type Retreat {
+  uuid: ID!
+  name: String!
+  startAt: DateTime!
+  endAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateRetreatInput {
+  name: String!
+  startAt: DateTime!
+  endAt: DateTime!
+}
+
+input UpdateRetreatInput {
+  name: String
+  startAt: DateTime
+  endAt: DateTime
+}
+
+type Query {
+  retreat(uuid: ID!): Retreat
+  retreats: [Retreat!]!
+}
+
+type Mutation {
+  createRetreat(data: CreateRetreatInput!): Retreat!
+  updateRetreat(uuid: String!, data: UpdateRetreatInput!): Retreat!
+  deleteRetreat(uuid: String!): Retreat!
+}

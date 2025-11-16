@@ -1,9 +1,9 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { user } from "../../db/schema";
 import { UserUpdatedEvent } from "../event/user-updated.event";
 import { VerifyEmailCommand } from "./verify-email.command";

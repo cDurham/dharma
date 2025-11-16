@@ -11,7 +11,9 @@ async function bootstrap() {
   // Use cookie-parser middleware with signing secret
   const cookieSecret = process.env.COOKIE_SECRET;
   if (!cookieSecret) {
-    throw new Error("COOKIE_SECRET environment variable is required but not set");
+    throw new Error(
+      "COOKIE_SECRET environment variable is required but not set",
+    );
   }
   app.use(cookieParser(cookieSecret));
   const corsOptions = {
@@ -41,7 +43,7 @@ async function bootstrap() {
               },
             }
           : true,
-    })
+    }),
   );
 
   await app.listen(3000);

@@ -1,9 +1,9 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { retreat } from "../../db/schema";
 import { RetreatDeletedEvent } from "../events/retreat-deleted.event";
 import { DeleteRetreatCommand } from "./delete-retreat.command";

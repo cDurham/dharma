@@ -1,8 +1,8 @@
-import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { Logger } from "@nestjs/common";
+import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
+import type { EmailService } from "../../Email/email.service";
+import type { KafkaService } from "../../kafka/kafka.service";
 import { UserCreatedEvent } from "./user-created.event";
-import { KafkaService } from "../../kafka/kafka.service";
-import { EmailService } from "../../Email/email.service";
 
 @EventsHandler(UserCreatedEvent)
 export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
@@ -10,21 +10,21 @@ export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
 
   constructor(
     private readonly kafkaService: KafkaService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
   ) {}
 
   async handle(event: UserCreatedEvent) {
     // Publish to Kafka for other services
     await this.kafkaService.produce(
       "users",
-      { 
+      {
         userUuid: event.userUuid,
         email: event.email,
         firstName: event.firstName,
       },
-      "user-created"
+      "user-created",
     );
-    
+
     this.logger.log(`User created event published to Kafka: ${event.userUuid}`);
 
     // Send verification email - if it fails, log but don't throw
@@ -32,7 +32,7 @@ export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
     try {
       await this.emailService.sendVerificationEmail(
         event.email,
-        event.verificationToken
+        event.verificationToken,
       );
       this.logger.log(`Verification email sent to: ${event.email}`);
     } catch (error) {
@@ -43,7 +43,7 @@ export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
       // 3. Store in dead letter queue
       this.logger.error(
         `Failed to send verification email to ${event.email}:`,
-        error
+        error,
       );
       // Don't throw - let other side effects succeed
     }

@@ -1,0 +1,7 @@
+# Cursor ignore file
+# This file tells Cursor which files to exclude from indexing and AI context
+
+# Explicitly include .swcrc files (override default ignore patterns)
+!**/.swcrc
+
+

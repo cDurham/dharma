@@ -1,14 +1,14 @@
 import {
-  createParamDecorator,
-  ExecutionContext,
+  type ExecutionContext,
   UnauthorizedException,
+  createParamDecorator,
 } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
-import { GraphQLContext } from "../graphql-context.type";
 import {
-  AuthenticatedUser,
+  type AuthenticatedUser,
   AuthenticatedUserSchema,
 } from "../User/user.schema";
+import type { GraphQLContext } from "../graphql-context.type";
 
 export const CurrentUser = createParamDecorator(
   (data: unknown, context: ExecutionContext): AuthenticatedUser => {
@@ -20,10 +20,10 @@ export const CurrentUser = createParamDecorator(
 
     if (!result.success) {
       throw new UnauthorizedException(
-        `Invalid user context: ${result.error.issues.map((i) => i.message).join(", ")}`
+        `Invalid user context: ${result.error.issues.map((i) => i.message).join(", ")}`,
       );
     }
 
     return result.data;
-  }
+  },
 );

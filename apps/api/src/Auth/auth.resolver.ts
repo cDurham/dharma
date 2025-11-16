@@ -1,15 +1,15 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
+import type { CommandBus } from "@nestjs/cqrs";
 import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
-import { GraphQLContext } from "../graphql-context.type";
+import { authConfig } from "../config/auth.config";
+import type { GraphQLContext } from "../graphql-context.type";
 import { getRefreshToken } from "./auth.cookies";
 import { LoginResponse } from "./auth.dto";
-import { ValidateUserInput } from "./auth.input";
+import type { ValidateUserInput } from "./auth.input";
 import { AuthLoginUserCommand } from "./command/auth-login-user.command";
 import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-token.command";
 import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command";
 import { ValidateUserCommand } from "./command/auth-validate-user.command";
-import { authConfig } from "../config/auth.config";
 
 @Resolver()
 export class AuthResolver {

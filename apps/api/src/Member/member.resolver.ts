@@ -1,5 +1,5 @@
 // resolver/MemberResolver.ts
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import type { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { CreateMemberCommand } from "./commands/create-member.command";
 import { DeleteMemberCommand } from "./commands/delete-member.command";
@@ -7,7 +7,7 @@ import { GetMemberQuery } from "./commands/get-member.query";
 import { GetMembersQuery } from "./commands/get-members.query";
 import { UpdateMemberCommand } from "./commands/update-member.command";
 import { Member } from "./member.entity";
-import { CreateMemberInput, UpdateMemberInput } from "./member.input";
+import type { CreateMemberInput, UpdateMemberInput } from "./member.input";
 
 @Resolver(() => Member)
 export class MemberResolver {

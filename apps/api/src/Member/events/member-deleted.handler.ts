@@ -1,5 +1,5 @@
-import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { KafkaService } from "../../kafka/kafka.service";
+import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
+import type { KafkaService } from "../../kafka/kafka.service";
 import { MemberDeletedEvent } from "./member-deleted.event";
 
 @EventsHandler(MemberDeletedEvent)
@@ -12,7 +12,7 @@ export class MemberDeletedHandler implements IEventHandler<MemberDeletedEvent> {
       {
         memberUuid: event.memberUuid,
       },
-      "member-deleted"
+      "member-deleted",
     );
     console.log("Member deleted event published", event);
   }

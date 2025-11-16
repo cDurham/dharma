@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Redirect } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { CommandBus } from "@nestjs/cqrs";
+import type { ConfigService } from "@nestjs/config";
+import type { CommandBus } from "@nestjs/cqrs";
 import { VerifyEmailCommand } from "../User/command/verify-email.command";
 
 @Controller("verify")

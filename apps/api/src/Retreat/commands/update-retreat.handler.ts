@@ -1,14 +1,14 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
+import type { db as DbType } from "../../db/data-source";
 import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
 import { retreat } from "../../db/schema";
 import { RetreatUpdatedEvent } from "../events/retreat-updated.event";
-import { Retreat } from "../retreat.entity";
+import type { Retreat } from "../retreat.entity";
+import type { UpdateRetreatData } from "../retreat.schema";
 import { UpdateRetreatCommand } from "./update-retreat.command";
-import { UpdateRetreatData } from "../retreat.schema";
 
 @CommandHandler(UpdateRetreatCommand)
 export class UpdateRetreatHandler

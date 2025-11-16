@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client/react";
+import { useNavigate } from "react-router-dom";
 import { LoginDocument } from "./types";
 
 const useLogin = () => {
