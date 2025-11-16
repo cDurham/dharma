@@ -1,7 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import type { EmailService } from "../../Email/email.service.js";
-import type { KafkaService } from "../../kafka/kafka.service.js";
+import { EmailService } from "../../Email/email.service.js";
+import { KafkaService } from "../../kafka/kafka.service.js";
 import { UserCreatedEvent } from "./user-created.event.js";
 
 @EventsHandler(UserCreatedEvent)
