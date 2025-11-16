@@ -1,5 +1,6 @@
 import { parseDockerCompose, ServiceConfig } from './docker-compose-parser.js';
 import { resolve, dirname } from 'path';
+import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 /**
@@ -20,11 +21,7 @@ class ServiceRegistry {
   private projectRoot: string;
 
   private constructor() {
-    // Get project root in ES module context
-    // Current file: tools/cli/dist/config/services.js
-    // Project root: 4 levels up
-    const currentDir = dirname(fileURLToPath(import.meta.url));
-    this.projectRoot = resolve(currentDir, '../../../../');
+    this.projectRoot = resolveProjectRoot();
     this.services = parseDockerCompose(this.projectRoot);
   }
 
@@ -131,4 +128,30 @@ export { SERVICE_ALIASES };
 
 // Export type for use in other files
 export type { ServiceConfig } from './docker-compose-parser.js';
+
+function resolveProjectRoot(): string {
+  const explicit = process.env.DHARMA_PROJECT_ROOT;
+  if (explicit && hasCompose(explicit)) {
+    return explicit;
+  }
+
+  const cwd = process.cwd();
+  if (hasCompose(cwd)) {
+    return cwd;
+  }
+
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  const bundledRoot = resolve(currentDir, '../../../../');
+  if (hasCompose(bundledRoot)) {
+    return bundledRoot;
+  }
+
+  throw new Error(
+    "Could not locate docker-compose.yml. Run the CLI from the repository root or set DHARMA_PROJECT_ROOT."
+  );
+}
+
+function hasCompose(dir: string): boolean {
+  return existsSync(resolve(dir, 'docker-compose.yml'));
+}
 

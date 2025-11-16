@@ -1,5 +1,5 @@
 // resolver/MemberResolver.ts
-import type { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { CreateMemberCommand } from "./commands/create-member.command.js";
 import { DeleteMemberCommand } from "./commands/delete-member.command.js";

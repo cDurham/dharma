@@ -1,9 +1,9 @@
 import {
-  type CommandBus,
+  CommandBus,
   CommandHandler,
   type ICommandHandler,
 } from "@nestjs/cqrs";
-import type { JwtService } from "@nestjs/jwt";
+import { JwtService } from "@nestjs/jwt";
 import {
   authConfig,
   getRefreshTokenExpiresInMs,

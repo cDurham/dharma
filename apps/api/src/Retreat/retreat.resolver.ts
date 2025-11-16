@@ -1,4 +1,4 @@
-import type { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { CreateRetreatCommand } from "./commands/create-retreat.command.js";
 import { DeleteRetreatCommand } from "./commands/delete-retreat.command.js";

@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
-import type { QueryBus } from "@nestjs/cqrs";
+import { ConfigService } from "@nestjs/config";
+import { QueryBus } from "@nestjs/cqrs";
 import { PassportStrategy } from "@nestjs/passport";
 import type { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";

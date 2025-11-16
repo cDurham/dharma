@@ -2,11 +2,11 @@ import crypto from "crypto";
 import { UnauthorizedException } from "@nestjs/common";
 import { Inject } from "@nestjs/common";
 import {
-  type CommandBus,
+  CommandBus,
   CommandHandler,
   type ICommandHandler,
 } from "@nestjs/cqrs";
-import type { JwtService } from "@nestjs/jwt";
+import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";

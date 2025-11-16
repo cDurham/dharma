@@ -1,6 +1,6 @@
-import type { MailerService } from "@nestjs-modules/mailer";
+import { MailerService } from "@nestjs-modules/mailer";
 import { Injectable } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class EmailService {

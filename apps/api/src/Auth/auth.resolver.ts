@@ -1,5 +1,5 @@
 import { UnauthorizedException } from "@nestjs/common";
-import type { CommandBus } from "@nestjs/cqrs";
+import { CommandBus } from "@nestjs/cqrs";
 import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
 import { authConfig } from "../config/auth.config.js";
 import type { GraphQLContext } from "../graphql-context.type.js";

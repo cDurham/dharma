@@ -8,16 +8,18 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "tsc -b tsconfig.app.json --watch --preserveWatchOutput",
-          "node --watch --enable-source-maps ../../dist/apps/api/index.js"
+          "tsc -b tsconfig.app.json",
+          "sh -c 'tsc -b tsconfig.app.json --watch --preserveWatchOutput & node --watch --enable-source-maps ../../dist/apps/api/src/index.js'"
         ],
-        "parallel": true,
+        "parallel": false,
         "cwd": "apps/api"
       }
     },
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{workspaceRoot}/dist/apps/api"],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/api"
+      ],
       "options": {
         "main": "apps/api/src/index.ts",
         "outputPath": "dist/apps/api",
@@ -32,7 +34,9 @@
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/api"],
+      "outputs": [
+        "{workspaceRoot}/coverage/api"
+      ],
       "options": {
         "configFile": "apps/api/vitest.config.ts"
       }
