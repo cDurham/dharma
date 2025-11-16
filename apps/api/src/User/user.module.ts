@@ -3,7 +3,6 @@ import { ConfigModule } from "@nestjs/config";
 import { CqrsModule } from "@nestjs/cqrs";
 import { EmailModule } from "../Email/email.module";
 import { VerificationController } from "../Verify/verify.controller";
-import { KafkaModule } from "../kafka/kafka.module";
 import { CreateUserHandler } from "./command/create-user.handler";
 import { DeleteUserHandler } from "./command/delete-user.handler";
 import { GetUserByEmailHandler } from "./command/get-user-by-email.handler";
@@ -17,7 +16,7 @@ import { UserUpdatedHandler } from "./event/user-updated.handler";
 import { UserResolver } from "./user.resolver";
 
 @Module({
-  imports: [EmailModule, KafkaModule, ConfigModule, CqrsModule],
+  imports: [EmailModule, ConfigModule, CqrsModule],
   providers: [
     UserResolver,
     VerificationController,
