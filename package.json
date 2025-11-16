@@ -96,6 +96,7 @@
     "@graphql-codegen/typed-document-node": "^6.1.0",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-operations": "^5.0.2",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@nestjs/cli": "^11.0.4",
     "@nestjs/schematics": "^11.0.5",
     "@nestjs/testing": "^11.1.3",

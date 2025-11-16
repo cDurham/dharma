@@ -1,4 +1,4 @@
-nx run # ESM Migration Summary
+# ESM Migration Summary
 
 ## Overview
 Successfully migrated the Dharma monorepo to a modern, full ESM build system with enterprise-grade tooling.
