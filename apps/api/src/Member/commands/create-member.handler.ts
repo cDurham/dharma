@@ -1,9 +1,5 @@
 import { Inject } from "@nestjs/common";
-import {
-  CommandHandler,
-  type EventBus,
-  type ICommandHandler,
-} from "@nestjs/cqrs";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 

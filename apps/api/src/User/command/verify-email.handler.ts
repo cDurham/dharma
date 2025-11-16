@@ -1,9 +1,5 @@
 import { Inject } from "@nestjs/common";
-import {
-  CommandHandler,
-  type EventBus,
-  type ICommandHandler,
-} from "@nestjs/cqrs";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
 import type { db as DbType } from "../../db/data-source.js";
