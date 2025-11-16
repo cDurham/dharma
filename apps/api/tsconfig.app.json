@@ -3,7 +3,10 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "incremental": true,
+    "noEmitOnError": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "../../dist/apps/api",

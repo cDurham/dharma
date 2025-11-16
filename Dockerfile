@@ -40,19 +40,30 @@ RUN echo "Cache bust: ${CACHEBUST}"
 COPY . .
 RUN pnpm nx run web:build
 
+# ---------- prune_deps (production-only dependencies)
+FROM deps AS prune_deps
+RUN pnpm prune --prod
+
 # ---------- runtime_api
 FROM node:22-slim AS runtime_api
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy package.json to preserve "type": "module" for ESM
-COPY --from=build_api /workspace/package.json ./
+# Create minimal runtime package.json for ESM
+RUN echo '{"type":"module","name":"dharma-api","version":"1.0.0"}' > package.json
 
 # Copy built API
 COPY --from=build_api /workspace/dist/apps/api ./dist/apps/api
 
-# Copy node_modules (includes production dependencies)
-COPY --from=deps /workspace/node_modules ./node_modules
+# Copy pruned production-only node_modules
+COPY --from=prune_deps /workspace/node_modules ./node_modules
+
+# Run as non-root user
+USER node
+
+# Health check for API readiness
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "fetch('http://localhost:3000/.well-known/apollo/server-health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
 EXPOSE 3000
 CMD ["node", "dist/apps/api/index.js"]
@@ -60,3 +71,4 @@ CMD ["node", "dist/apps/api/index.js"]
 # ---------- runtime_web
 FROM nginx:1.27-alpine AS runtime_web
 COPY --from=build_web /workspace/dist/apps/web /usr/share/nginx/html
+USER nginx

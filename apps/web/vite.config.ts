@@ -21,6 +21,7 @@ export default defineConfig({
   },
   build: {
     outDir: "../../dist/apps/web",
+    target: "es2022",
     reportCompressedSize: true,
     sourcemap: true,
     commonjsOptions: {

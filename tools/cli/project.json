@@ -8,7 +8,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/tools/cli/dist"],
       "options": {
-        "command": "tsc --project tsconfig.json",
+        "command": "tsup",
         "cwd": "tools/cli"
       }
     }

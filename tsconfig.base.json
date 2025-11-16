@@ -5,8 +5,6 @@
     "module": "ESNext",
     "lib": ["DOM", "ES2022"],
     "moduleResolution": "Bundler",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
