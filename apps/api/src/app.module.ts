@@ -6,6 +6,8 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
 import type { Request, Response } from "express";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { AuthModule } from "./Auth";
 import { MemberModule } from "./Member/member.module";
@@ -14,6 +16,8 @@ import { UserModule } from "./User";
 import { VerificationController } from "./Verify/verify.controller";
 import { DatabaseModule } from "./db/database.module";
 import { KafkaModule } from "./kafka/kafka.module";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 @Module({
   imports: [
@@ -26,7 +30,7 @@ import { KafkaModule } from "./kafka/kafka.module";
     RetreatModule,
     KafkaModule,
     GraphQLModule.forRoot({
-      typePaths: ["./**/*.graphql"],
+      typePaths: [join(__dirname, "./**/*.graphql")],
       driver: ApolloDriver,
       sortSchema: true,
       introspection: process.env.NODE_ENV !== "production",

@@ -2,13 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/apps/api-tests",
-    "types": ["jest", "node"],
+    "types": ["vitest/globals", "node"],
     "module": "ESNext",
     "target": "ES2022"
   },
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
-    "src/**/__tests__/**/*.ts"
+    "src/**/__test__/**/*.ts"
   ]
 }
