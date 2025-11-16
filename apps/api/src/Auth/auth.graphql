@@ -2,13 +2,13 @@ type LoginResponse {
   message: String!
 }
 
-input LoginInput {
+input ValidateUserInput {
   email: String!
   password: String!
 }
 
 type Mutation {
-  login(data: LoginInput!): LoginResponse!
+  login(data: ValidateUserInput!): LoginResponse!
   refreshAccessToken: Boolean!
   logout: Boolean!
 }
