@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
 import { devCommand } from './commands/dev.js';
 import { logsCommand } from './commands/logs.js';

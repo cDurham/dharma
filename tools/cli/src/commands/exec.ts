@@ -7,6 +7,7 @@ export const execCommand = new Command('exec')
   .description('Execute command in a container')
   .argument('[service]', 'Service to exec into')
   .argument('[command...]', 'Command to run (defaults to sh)')
+  .allowUnknownOption(true) // Allow flags to pass through to the container command
   .action(async (service?: string, commandArgs: string[] = []) => {
     let selectedService = service ? serviceRegistry.resolveServiceName(service) : undefined;
     const execableServices = serviceRegistry.getExecableServices();
@@ -53,8 +54,31 @@ export const execCommand = new Command('exec')
       process.exit(1);
     }
 
-    const command = commandArgs.length > 0 ? commandArgs.join(' ') : 'sh';
+    // Build command with proper argument escaping
+    const command = commandArgs.length > 0 ? commandArgs : ['sh'];
     
-    await runCommandAsync(`docker exec -it ${containerName} ${command}`);
+    // Only use -it flags if we have a TTY (interactive mode)
+    const isTTY = process.stdin.isTTY && process.stdout.isTTY;
+    const dockerArgs = ['docker', 'exec'];
+    if (isTTY) {
+      dockerArgs.push('-it');
+    }
+    dockerArgs.push(containerName, ...command);
+    
+    // Use spawn with array arguments for proper escaping
+    const { spawn } = await import('child_process');
+    const child = spawn(dockerArgs[0], dockerArgs.slice(1), {
+      stdio: 'inherit',
+      shell: false, // Don't use shell to avoid escaping issues
+    });
+
+    child.on('error', (error) => {
+      printError(`Failed to execute command: ${error.message}`);
+      process.exit(1);
+    });
+
+    child.on('exit', (code) => {
+      process.exit(code || 0);
+    });
   });
 
