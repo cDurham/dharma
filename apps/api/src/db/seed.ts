@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import { config } from "dotenv";
 import { v7 as uuidv7 } from "uuid";
-import { db, pool } from "./data-source";
-import { member, refreshToken, retreat, user } from "./schema/index";
+import { db, pool } from "./data-source.js";
+import { member, refreshToken, retreat, user } from "./schema/index.js";
 
 // Load environment variables
 config();

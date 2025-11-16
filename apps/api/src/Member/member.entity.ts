@@ -1,5 +1,5 @@
-import type { User } from "../User/user.entity";
-import type { MemberRow } from "../db/types";
+import type { User } from "../User/user.entity.js";
+import type { MemberRow } from "../db/types.js";
 
 export class Member implements Omit<MemberRow, "userUuid"> {
   uuid!: string;

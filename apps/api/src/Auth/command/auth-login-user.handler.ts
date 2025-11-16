@@ -7,9 +7,9 @@ import type { JwtService } from "@nestjs/jwt";
 import {
   authConfig,
   getRefreshTokenExpiresInMs,
-} from "../../config/auth.config";
-import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command";
-import { AuthLoginUserCommand } from "./auth-login-user.command";
+} from "../../config/auth.config.js";
+import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command.js";
+import { AuthLoginUserCommand } from "./auth-login-user.command.js";
 
 @CommandHandler(AuthLoginUserCommand)
 export class AuthLoginUserHandler

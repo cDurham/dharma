@@ -1,5 +1,5 @@
 import { Command } from "@nestjs/cqrs";
-import { getRefreshTokenExpiresInMs } from "../../config/auth.config";
+import { getRefreshTokenExpiresInMs } from "../../config/auth.config.js";
 
 export class AuthCreateRefreshTokenCommand extends Command<string> {
   constructor(

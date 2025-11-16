@@ -1,22 +1,26 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type EventBus,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { user } from "../../db/schema";
-import { UserUpdatedEvent } from "../event/user-updated.event";
-import type { User } from "../user.entity";
-import type { UpdateUserData } from "../user.schema";
-import { UpdateUserCommand } from "./update-user.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { user } from "../../db/schema/index.js";
+import { UserUpdatedEvent } from "../event/user-updated.event.js";
+import type { User } from "../user.entity.js";
+import type { UpdateUserData } from "../user.schema.js";
+import { UpdateUserCommand } from "./update-user.command.js";
 
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute({ userUuid, data }: UpdateUserCommand): Promise<User | null> {

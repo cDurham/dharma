@@ -3,19 +3,19 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { EmailModule } from "../Email/email.module";
-import { MemberModule } from "../Member/member.module";
-import { UserModule } from "../User/user.module";
-import { authConfig } from "../config/auth.config";
-import { AuthResolver } from "./auth.resolver";
-import { AuthCreateRefreshTokenHandler } from "./command/auth-create-refresh-token.handler";
-import { AuthLoginUserHandler } from "./command/auth-login-user.handler";
-import { AuthRefreshAccessTokenHandler } from "./command/auth-refresh-access-token.handler";
-import { AuthRevokeRefreshTokenHandler } from "./command/auth-revoke-refresh-token.handler";
-import { ValidateUserHandler } from "./command/auth-validate-user.handler";
-import { JwtAuthGuard } from "./jwt-auth.guard";
-import { JwtStrategy } from "./jwt.strategy";
-import { TokenCleanupService } from "./token-cleanup.service";
+import { EmailModule } from "../Email/email.module.js";
+import { MemberModule } from "../Member/member.module.js";
+import { UserModule } from "../User/user.module.js";
+import { authConfig } from "../config/auth.config.js";
+import { AuthResolver } from "./auth.resolver.js";
+import { AuthCreateRefreshTokenHandler } from "./command/auth-create-refresh-token.handler.js";
+import { AuthLoginUserHandler } from "./command/auth-login-user.handler.js";
+import { AuthRefreshAccessTokenHandler } from "./command/auth-refresh-access-token.handler.js";
+import { AuthRevokeRefreshTokenHandler } from "./command/auth-revoke-refresh-token.handler.js";
+import { ValidateUserHandler } from "./command/auth-validate-user.handler.js";
+import { JwtAuthGuard } from "./jwt-auth.guard.js";
+import { JwtStrategy } from "./jwt.strategy.js";
+import { TokenCleanupService } from "./token-cleanup.service.js";
 
 @Module({
   imports: [

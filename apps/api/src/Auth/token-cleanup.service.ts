@@ -2,9 +2,9 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { and, eq, lt, or } from "drizzle-orm";
 
-import type { db as DbType } from "../db/data-source";
-import { DB_TOKEN } from "../db/database.module";
-import { refreshToken } from "../db/schema";
+import type { db as DbType } from "../db/data-source.js";
+import { DB_TOKEN } from "../db/database.module.js";
+import { refreshToken } from "../db/schema/index.js";
 
 @Injectable()
 export class TokenCleanupService {
@@ -12,7 +12,7 @@ export class TokenCleanupService {
 
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
   // Run every Sunday at 3:00 AM
@@ -32,9 +32,9 @@ export class TokenCleanupService {
             lt(refreshToken.expiresAt, sevenDaysAgo),
             and(
               eq(refreshToken.isRevoked, true),
-              lt(refreshToken.createdAt, sevenDaysAgo)
-            )
-          )
+              lt(refreshToken.createdAt, sevenDaysAgo),
+            ),
+          ),
         );
 
       this.logger.log("Cleanup complete.");

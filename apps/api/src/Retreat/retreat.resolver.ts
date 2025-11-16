@@ -1,18 +1,21 @@
 import type { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { CreateRetreatCommand } from "./commands/create-retreat.command";
-import { DeleteRetreatCommand } from "./commands/delete-retreat.command";
-import { GetRetreatQuery } from "./commands/get-retreat.query";
-import { GetRetreatsQuery } from "./commands/get-retreats.query";
-import { UpdateRetreatCommand } from "./commands/update-retreat.command";
-import { Retreat } from "./retreat.entity";
-import type { CreateRetreatInput, UpdateRetreatInput } from "./retreat.input";
+import { CreateRetreatCommand } from "./commands/create-retreat.command.js";
+import { DeleteRetreatCommand } from "./commands/delete-retreat.command.js";
+import { GetRetreatQuery } from "./commands/get-retreat.query.js";
+import { GetRetreatsQuery } from "./commands/get-retreats.query.js";
+import { UpdateRetreatCommand } from "./commands/update-retreat.command.js";
+import { Retreat } from "./retreat.entity.js";
+import type {
+  CreateRetreatInput,
+  UpdateRetreatInput,
+} from "./retreat.input.js";
 
 @Resolver(() => Retreat)
 export class RetreatResolver {
   constructor(
     private commandBus: CommandBus,
-    private queryBus: QueryBus
+    private queryBus: QueryBus,
   ) {}
 
   @Query(() => Retreat)
@@ -29,10 +32,10 @@ export class RetreatResolver {
 
   @Mutation(() => Retreat)
   async createRetreat(
-    @Args("data") data: CreateRetreatInput
+    @Args("data") data: CreateRetreatInput,
   ): Promise<Retreat> {
     const result = await this.commandBus.execute(
-      new CreateRetreatCommand(data)
+      new CreateRetreatCommand(data),
     );
     return result;
   }
@@ -40,10 +43,10 @@ export class RetreatResolver {
   @Mutation(() => Retreat)
   async updateRetreat(
     @Args("uuid") uuid: string,
-    @Args("data") data: UpdateRetreatInput
+    @Args("data") data: UpdateRetreatInput,
   ): Promise<Retreat | null> {
     const result = await this.commandBus.execute(
-      new UpdateRetreatCommand(uuid, data)
+      new UpdateRetreatCommand(uuid, data),
     );
     return result;
   }
@@ -51,7 +54,7 @@ export class RetreatResolver {
   @Mutation(() => Boolean)
   async deleteRetreat(@Args("uuid") uuid: string): Promise<boolean> {
     const result = await this.commandBus.execute(
-      new DeleteRetreatCommand({ uuid })
+      new DeleteRetreatCommand({ uuid }),
     );
     return result;
   }

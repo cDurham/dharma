@@ -1,14 +1,18 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type EventBus,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { retreat } from "../../db/schema";
-import { RetreatUpdatedEvent } from "../events/retreat-updated.event";
-import type { Retreat } from "../retreat.entity";
-import type { UpdateRetreatData } from "../retreat.schema";
-import { UpdateRetreatCommand } from "./update-retreat.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { retreat } from "../../db/schema/index.js";
+import { RetreatUpdatedEvent } from "../events/retreat-updated.event.js";
+import type { Retreat } from "../retreat.entity.js";
+import type { UpdateRetreatData } from "../retreat.schema.js";
+import { UpdateRetreatCommand } from "./update-retreat.command.js";
 
 @CommandHandler(UpdateRetreatCommand)
 export class UpdateRetreatHandler
@@ -17,7 +21,7 @@ export class UpdateRetreatHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute({

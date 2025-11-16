@@ -5,9 +5,9 @@ import {
   type QueryBus,
 } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
-import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query";
-import type { User } from "../../User/user.entity";
-import { ValidateUserCommand } from "./auth-validate-user.command";
+import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query.js";
+import type { User } from "../../User/user.entity.js";
+import { ValidateUserCommand } from "./auth-validate-user.command.js";
 
 @CommandHandler(ValidateUserCommand)
 export class ValidateUserHandler

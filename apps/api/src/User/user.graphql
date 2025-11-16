@@ -36,4 +36,3 @@ type Mutation {
   updateUser(uuid: ID!, input: UpdateUserInput!): User!
   deleteUser(uuid: ID!): User!
 }
-

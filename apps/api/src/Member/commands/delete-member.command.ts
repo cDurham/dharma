@@ -1,5 +1,5 @@
 import { Command } from "@nestjs/cqrs";
-import type { Member } from "../member.entity";
+import type { Member } from "../member.entity.js";
 
 export class DeleteMemberCommand extends Command<Member> {
   constructor(public readonly memberUuid: string) {

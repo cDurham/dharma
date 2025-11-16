@@ -1,6 +1,6 @@
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import type { KafkaService } from "../../kafka/kafka.service";
-import { RetreatUpdatedEvent } from "./retreat-updated.event";
+import type { KafkaService } from "../../kafka/kafka.service.js";
+import { RetreatUpdatedEvent } from "./retreat-updated.event.js";
 
 @EventsHandler(RetreatUpdatedEvent)
 export class RetreatUpdatedHandler

@@ -14,9 +14,8 @@ export default defineConfig({
       provider: "v8",
       reportsDirectory: join(__dirname, "../../coverage/api"),
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.{test,spec}.ts", "src/__test__/**"]
+      exclude: ["src/**/*.{test,spec}.ts", "src/__test__/**"],
     },
-    setupFiles: [join(__dirname, "vitest.setup.ts")]
-  }
+    setupFiles: [join(__dirname, "vitest.setup.ts")],
+  },
 });
-

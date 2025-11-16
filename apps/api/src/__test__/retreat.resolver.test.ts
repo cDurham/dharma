@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import type { INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { AppModule } from "../app.module";
-import { type GraphQLClient, createGraphQLClient } from "./graphql-client";
+import { AppModule } from "../app.module.js";
+import { type GraphQLClient, createGraphQLClient } from "./graphql-client.js";
 
 interface Retreat {
   uuid: string;

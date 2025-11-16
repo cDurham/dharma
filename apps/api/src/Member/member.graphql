@@ -29,4 +29,3 @@ type Mutation {
   updateMember(uuid: String!, data: UpdateMemberInput!): Member!
   deleteMember(uuid: String!): Member!
 }
-

@@ -1,12 +1,16 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type EventBus,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { retreat } from "../../db/schema";
-import { RetreatDeletedEvent } from "../events/retreat-deleted.event";
-import { DeleteRetreatCommand } from "./delete-retreat.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { retreat } from "../../db/schema/index.js";
+import { RetreatDeletedEvent } from "../events/retreat-deleted.event.js";
+import { DeleteRetreatCommand } from "./delete-retreat.command.js";
 
 @CommandHandler(DeleteRetreatCommand)
 export class DeleteRetreatHandler
@@ -15,7 +19,7 @@ export class DeleteRetreatHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: DeleteRetreatCommand): Promise<boolean> {

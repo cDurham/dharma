@@ -1,2 +1,2 @@
-export * from "./person.entity";
-export * from "./person.input";
+export * from "./person.entity.js";
+export * from "./person.input.js";

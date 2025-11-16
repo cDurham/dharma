@@ -1,14 +1,18 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type EventBus,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { member } from "../../db/schema";
-import { MemberCreatedEvent } from "../events/member-created.event";
-import type { Member } from "../member.entity";
-import { CreateMemberCommand } from "./create-member.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { member } from "../../db/schema/index.js";
+import { MemberCreatedEvent } from "../events/member-created.event.js";
+import type { Member } from "../member.entity.js";
+import { CreateMemberCommand } from "./create-member.command.js";
 
 @CommandHandler(CreateMemberCommand)
 export class CreateMemberHandler
@@ -17,7 +21,7 @@ export class CreateMemberHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: CreateMemberCommand): Promise<Member> {
@@ -39,7 +43,7 @@ export class CreateMemberHandler
       .where(eq(member.uuid, newMemberId));
 
     this.eventBus.publish(
-      new MemberCreatedEvent(savedMember.uuid, savedMember.firstName)
+      new MemberCreatedEvent(savedMember.uuid, savedMember.firstName),
     );
 
     return savedMember;

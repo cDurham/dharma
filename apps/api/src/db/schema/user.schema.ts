@@ -1,5 +1,5 @@
 import { pgTable, unique, varchar } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
+import { baseColumns } from "./base.schema.js";
 
 /**
  * User table - extends Person with authentication fields

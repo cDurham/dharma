@@ -1,6 +1,6 @@
 import { Command } from "@nestjs/cqrs";
-import type { Member } from "../member.entity";
-import type { UpdateMemberInput } from "../member.input";
+import type { Member } from "../member.entity.js";
+import type { UpdateMemberInput } from "../member.input.js";
 
 export class UpdateMemberCommand extends Command<Member> {
   constructor(

@@ -2,9 +2,9 @@ import { faker } from "@faker-js/faker";
 import type { INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
-import { EmailService } from "../Email";
-import { AppModule } from "../app.module";
-import { type GraphQLClient, createGraphQLClient } from "./graphql-client";
+import { EmailService } from "../Email/index.js";
+import { AppModule } from "../app.module.js";
+import { type GraphQLClient, createGraphQLClient } from "./graphql-client.js";
 
 describe.skip("User Registration and Email Verification", () => {
   let app: INestApplication;
@@ -26,10 +26,7 @@ describe.skip("User Registration and Email Verification", () => {
     graphql = createGraphQLClient(app);
 
     const emailService = moduleFixture.get<EmailService>(EmailService);
-    sendVerificationEmailMock = vi.spyOn(
-      emailService,
-      "sendVerificationEmail",
-    );
+    sendVerificationEmailMock = vi.spyOn(emailService, "sendVerificationEmail");
   });
 
   afterAll(async () => {

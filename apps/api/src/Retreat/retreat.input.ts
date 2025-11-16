@@ -1,4 +1,4 @@
-import type { Retreat } from "./retreat.entity";
+import type { Retreat } from "./retreat.entity.js";
 
 export class CreateRetreatInput implements Partial<Retreat> {
   name!: string;

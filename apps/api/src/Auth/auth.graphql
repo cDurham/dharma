@@ -25,4 +25,3 @@ type Mutation {
 type Query {
   me: User
 }
-

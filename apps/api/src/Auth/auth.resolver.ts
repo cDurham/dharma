@@ -1,15 +1,15 @@
 import { UnauthorizedException } from "@nestjs/common";
 import type { CommandBus } from "@nestjs/cqrs";
 import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
-import { authConfig } from "../config/auth.config";
-import type { GraphQLContext } from "../graphql-context.type";
-import { getRefreshToken } from "./auth.cookies";
-import { LoginResponse } from "./auth.dto";
-import type { ValidateUserInput } from "./auth.input";
-import { AuthLoginUserCommand } from "./command/auth-login-user.command";
-import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-token.command";
-import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command";
-import { ValidateUserCommand } from "./command/auth-validate-user.command";
+import { authConfig } from "../config/auth.config.js";
+import type { GraphQLContext } from "../graphql-context.type.js";
+import { getRefreshToken } from "./auth.cookies.js";
+import { LoginResponse } from "./auth.dto.js";
+import type { ValidateUserInput } from "./auth.input.js";
+import { AuthLoginUserCommand } from "./command/auth-login-user.command.js";
+import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-token.command.js";
+import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command.js";
+import { ValidateUserCommand } from "./command/auth-validate-user.command.js";
 
 @Resolver()
 export class AuthResolver {
@@ -18,14 +18,14 @@ export class AuthResolver {
   @Mutation(() => LoginResponse)
   async login(
     @Args("data") loginInput: ValidateUserInput,
-    @Context() context: GraphQLContext
+    @Context() context: GraphQLContext,
   ): Promise<LoginResponse> {
     const user = await this.commandBus.execute(
-      new ValidateUserCommand(loginInput)
+      new ValidateUserCommand(loginInput),
     );
 
     const { access_token, refresh_token } = await this.commandBus.execute(
-      new AuthLoginUserCommand(user)
+      new AuthLoginUserCommand(user),
     );
 
     if (context.res && typeof context.res.cookie === "function") {
@@ -46,7 +46,7 @@ export class AuthResolver {
       });
     } else {
       console.warn(
-        "Unable to set cookie: Response object not available in context"
+        "Unable to set cookie: Response object not available in context",
       );
     }
 
@@ -57,14 +57,14 @@ export class AuthResolver {
 
   @Mutation(() => Boolean)
   async refreshAccessToken(
-    @Context() context: GraphQLContext
+    @Context() context: GraphQLContext,
   ): Promise<boolean> {
     const refreshToken = getRefreshToken(context.req);
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token not found");
     }
     const { access_token, refresh_token } = await this.commandBus.execute(
-      new AuthRefreshAccessTokenCommand(refreshToken)
+      new AuthRefreshAccessTokenCommand(refreshToken),
     );
 
     // Set new access token cookie
@@ -91,7 +91,7 @@ export class AuthResolver {
     const refreshToken = getRefreshToken(context.req);
     if (refreshToken) {
       await this.commandBus.execute(
-        new AuthRevokeRefreshTokenCommand(refreshToken)
+        new AuthRevokeRefreshTokenCommand(refreshToken),
       );
     }
     if (context.res && typeof context.res.cookie === "function") {
@@ -113,7 +113,7 @@ export class AuthResolver {
       return true;
     } else {
       console.warn(
-        "Unable to clear cookie: Response object not available in context"
+        "Unable to clear cookie: Response object not available in context",
       );
       return false;
     }

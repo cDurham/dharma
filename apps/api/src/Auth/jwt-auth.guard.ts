@@ -2,7 +2,7 @@ import { type ExecutionContext, Injectable } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
 import { AuthGuard } from "@nestjs/passport";
 import type { Request } from "express";
-import type { GraphQLContext } from "../graphql-context.type";
+import type { GraphQLContext } from "../graphql-context.type.js";
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {

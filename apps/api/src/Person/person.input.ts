@@ -1,4 +1,4 @@
-import type { Person } from "./person.entity";
+import type { Person } from "./person.entity.js";
 
 export class PersonInput implements Partial<Person> {
   firstName!: string;

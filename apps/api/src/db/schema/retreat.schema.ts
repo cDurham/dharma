@@ -1,5 +1,5 @@
 import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
+import { baseColumns } from "./base.schema.js";
 
 /**
  * Retreat table

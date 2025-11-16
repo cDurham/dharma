@@ -1,5 +1,5 @@
-import { PersonInput, UpdatePersonInput } from "../Person/person.input";
-import type { User } from "./user.entity";
+import { PersonInput, UpdatePersonInput } from "../Person/person.input.js";
+import type { User } from "./user.entity.js";
 
 export class CreateUserInput extends PersonInput implements Partial<User> {
   email!: string;

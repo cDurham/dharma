@@ -7,8 +7,8 @@ import { GqlExecutionContext } from "@nestjs/graphql";
 import {
   type AuthenticatedUser,
   AuthenticatedUserSchema,
-} from "../User/user.schema";
-import type { GraphQLContext } from "../graphql-context.type";
+} from "../User/user.schema.js";
+import type { GraphQLContext } from "../graphql-context.type.js";
 
 export const CurrentUser = createParamDecorator(
   (data: unknown, context: ExecutionContext): AuthenticatedUser => {

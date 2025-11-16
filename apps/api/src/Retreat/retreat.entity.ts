@@ -1,4 +1,4 @@
-import type { RetreatRow } from "../db/types";
+import type { RetreatRow } from "../db/types.js";
 
 export class Retreat implements RetreatRow {
   uuid!: string;

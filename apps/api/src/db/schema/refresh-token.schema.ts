@@ -6,8 +6,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
-import { user } from "./user.schema";
+import { baseColumns } from "./base.schema.js";
+import { user } from "./user.schema.js";
 
 /**
  * RefreshToken table - for JWT refresh token management

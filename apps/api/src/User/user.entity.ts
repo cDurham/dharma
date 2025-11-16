@@ -1,4 +1,4 @@
-import type { UserRow } from "../db/types";
+import type { UserRow } from "../db/types.js";
 
 export class User implements UserRow {
   uuid!: string;

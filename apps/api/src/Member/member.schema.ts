@@ -1,6 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import type { z } from "zod";
-import { member } from "../db/schema";
+import { member } from "../db/schema/index.js";
 
 export const UpdateMemberSchema = createInsertSchema(member)
   .pick({ firstName: true, lastName: true, joinDate: true })

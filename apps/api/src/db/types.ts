@@ -1,5 +1,5 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type * as schema from "./schema";
+import type * as schema from "./schema/index.js";
 
 /**
  * Inferred types from Drizzle schemas

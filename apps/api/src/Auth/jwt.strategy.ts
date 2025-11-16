@@ -4,10 +4,10 @@ import type { QueryBus } from "@nestjs/cqrs";
 import { PassportStrategy } from "@nestjs/passport";
 import type { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { GetUserQuery } from "../User/command/get-user.query";
-import type { User } from "../User/user.entity";
-import type { AuthenticatedUser } from "../User/user.schema";
-import { getAccessToken } from "./auth.cookies";
+import { GetUserQuery } from "../User/command/get-user.query.js";
+import type { User } from "../User/user.entity.js";
+import type { AuthenticatedUser } from "../User/user.schema.js";
+import { getAccessToken } from "./auth.cookies.js";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

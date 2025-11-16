@@ -1,13 +1,17 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type EventBus,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { member } from "../../db/schema";
-import { MemberDeletedEvent } from "../events/member-deleted.event";
-import type { Member } from "../member.entity";
-import { DeleteMemberCommand } from "./delete-member.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { member } from "../../db/schema/index.js";
+import { MemberDeletedEvent } from "../events/member-deleted.event.js";
+import type { Member } from "../member.entity.js";
+import { DeleteMemberCommand } from "./delete-member.command.js";
 
 @CommandHandler(DeleteMemberCommand)
 export class DeleteMemberHandler
@@ -16,7 +20,7 @@ export class DeleteMemberHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute({ memberUuid }: DeleteMemberCommand): Promise<Member> {

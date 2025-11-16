@@ -9,13 +9,13 @@ import type { Request, Response } from "express";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { AuthModule } from "./Auth";
-import { MemberModule } from "./Member/member.module";
-import { RetreatModule } from "./Retreat";
-import { UserModule } from "./User";
-import { VerificationController } from "./Verify/verify.controller";
-import { DatabaseModule } from "./db/database.module";
-import { KafkaModule } from "./kafka/kafka.module";
+import { AuthModule } from "./Auth/index.js";
+import { MemberModule } from "./Member/member.module.js";
+import { RetreatModule } from "./Retreat/index.js";
+import { UserModule } from "./User/index.js";
+import { VerificationController } from "./Verify/verify.controller.js";
+import { DatabaseModule } from "./db/database.module.js";
+import { KafkaModule } from "./kafka/kafka.module.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

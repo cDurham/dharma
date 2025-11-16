@@ -1,5 +1,5 @@
 import { Command } from "@nestjs/cqrs";
-import type { AuthenticatedUser } from "../../User/user.schema";
+import type { AuthenticatedUser } from "../../User/user.schema.js";
 
 export class AuthLoginUserCommand extends Command<{
   access_token: string;

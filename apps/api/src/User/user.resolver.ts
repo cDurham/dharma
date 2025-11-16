@@ -1,22 +1,27 @@
 import { UseGuards } from "@nestjs/common";
 import type { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { type AuthenticatedUser, type CreateUserInput, type UpdateUserInput, User } from ".";
-import { CurrentUser } from "../Auth/current-user.decorator";
-import { JwtAuthGuard } from "../Auth/jwt-auth.guard";
-import { CreateUserCommand } from "./command/create-user.command";
-import { DeleteUserCommand } from "./command/delete-user.command";
-import { GetUserByEmailQuery } from "./command/get-user-by-email.query";
-import { GetUserQuery } from "./command/get-user.query";
-import { GetUsersQuery } from "./command/get-users.query";
-import { UpdateUserCommand } from "./command/update-user.command";
-import { VerifyEmailCommand } from "./command/verify-email.command";
+import {
+  type AuthenticatedUser,
+  type CreateUserInput,
+  type UpdateUserInput,
+  User,
+} from "./index.js";
+import { CurrentUser } from "../Auth/current-user.decorator.js";
+import { JwtAuthGuard } from "../Auth/jwt-auth.guard.js";
+import { CreateUserCommand } from "./command/create-user.command.js";
+import { DeleteUserCommand } from "./command/delete-user.command.js";
+import { GetUserByEmailQuery } from "./command/get-user-by-email.query.js";
+import { GetUserQuery } from "./command/get-user.query.js";
+import { GetUsersQuery } from "./command/get-users.query.js";
+import { UpdateUserCommand } from "./command/update-user.command.js";
+import { VerifyEmailCommand } from "./command/verify-email.command.js";
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(
     private commandBus: CommandBus,
-    private queryBus: QueryBus
+    private queryBus: QueryBus,
   ) {}
 
   @Query(() => User)
@@ -40,10 +45,10 @@ export class UserResolver {
   @Mutation(() => User)
   async updateUser(
     @Args("uuid") uuid: string,
-    @Args("data") data: UpdateUserInput
+    @Args("data") data: UpdateUserInput,
   ): Promise<User | null> {
     const result = await this.commandBus.execute(
-      new UpdateUserCommand(uuid, data)
+      new UpdateUserCommand(uuid, data),
     );
     return result;
   }

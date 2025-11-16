@@ -1,5 +1,5 @@
 import { Global, Module } from "@nestjs/common";
-import { db, readDb } from "./data-source";
+import { db, readDb } from "./data-source.js";
 
 export const DB_TOKEN = "DB_CONNECTION";
 export const READ_DB_TOKEN = "READ_DB_CONNECTION";

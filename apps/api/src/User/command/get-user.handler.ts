@@ -2,11 +2,11 @@ import { Inject } from "@nestjs/common";
 import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { user } from "../../db/schema";
-import type { User } from "../user.entity";
-import { GetUserQuery } from "./get-user.query";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { user } from "../../db/schema/index.js";
+import type { User } from "../user.entity.js";
+import { GetUserQuery } from "./get-user.query.js";
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler
@@ -14,7 +14,7 @@ export class GetUserHandler
 {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
   async execute({ userUuid }: GetUserQuery): Promise<User | null> {

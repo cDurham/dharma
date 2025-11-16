@@ -1,7 +1,11 @@
 import crypto from "crypto";
 import { UnauthorizedException } from "@nestjs/common";
 import { Inject } from "@nestjs/common";
-import { type CommandBus, CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  type CommandBus,
+  CommandHandler,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import type { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -10,12 +14,12 @@ import { v7 as uuidv7 } from "uuid";
 import {
   authConfig,
   getRefreshTokenExpiresInMs,
-} from "../../config/auth.config";
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { refreshToken, user } from "../../db/schema";
-import { hashToken } from "../utils";
-import { AuthRefreshAccessTokenCommand } from "./auth-refresh-access-token.command";
+} from "../../config/auth.config.js";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { refreshToken, user } from "../../db/schema/index.js";
+import { hashToken } from "../utils.js";
+import { AuthRefreshAccessTokenCommand } from "./auth-refresh-access-token.command.js";
 
 @CommandHandler(AuthRefreshAccessTokenCommand)
 export class AuthRefreshAccessTokenHandler
@@ -25,7 +29,7 @@ export class AuthRefreshAccessTokenHandler
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
     private readonly jwtService: JwtService,
-    private readonly commandBus: CommandBus
+    private readonly commandBus: CommandBus,
   ) {}
 
   async execute(command: AuthRefreshAccessTokenCommand): Promise<{
@@ -48,7 +52,7 @@ export class AuthRefreshAccessTokenHandler
       oldRefreshToken &&
       (await bcrypt.compare(
         command.refreshTokenString,
-        oldRefreshToken.token.hashedToken
+        oldRefreshToken.token.hashedToken,
       ));
 
     if (

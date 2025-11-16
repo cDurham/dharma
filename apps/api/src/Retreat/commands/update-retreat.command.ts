@@ -1,6 +1,6 @@
 import { Command } from "@nestjs/cqrs";
-import type { Retreat } from "../retreat.entity";
-import type { UpdateRetreatInput } from "../retreat.input";
+import type { Retreat } from "../retreat.entity.js";
+import type { UpdateRetreatInput } from "../retreat.input.js";
 
 export class UpdateRetreatCommand extends Command<Retreat | null> {
   constructor(

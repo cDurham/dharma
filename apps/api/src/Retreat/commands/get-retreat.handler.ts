@@ -2,11 +2,11 @@ import { Inject } from "@nestjs/common";
 import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { retreat } from "../../db/schema";
-import type { Retreat } from "../retreat.entity";
-import { GetRetreatQuery } from "./get-retreat.query";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { retreat } from "../../db/schema/index.js";
+import type { Retreat } from "../retreat.entity.js";
+import { GetRetreatQuery } from "./get-retreat.query.js";
 
 @QueryHandler(GetRetreatQuery)
 export class GetRetreatHandler
@@ -14,7 +14,7 @@ export class GetRetreatHandler
 {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
   async execute({ uuid }: GetRetreatQuery): Promise<Retreat | null> {

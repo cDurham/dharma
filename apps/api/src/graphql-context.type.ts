@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import type { AuthCookies } from "./Auth/auth.cookies";
-import type { AuthenticatedUser } from "./User/user.schema";
+import type { AuthCookies } from "./Auth/auth.cookies.js";
+import type { AuthenticatedUser } from "./User/user.schema.js";
 
 export interface GraphQLContext {
   req: Request & {

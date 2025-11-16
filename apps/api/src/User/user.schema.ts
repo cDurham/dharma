@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import type { z } from "zod";
-import { user } from "../db/schema";
+import { user } from "../db/schema/index.js";
 
 /**
  * Schema for authenticated user (without password)

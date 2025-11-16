@@ -1,14 +1,18 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, type EventBus, type ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandHandler,
+  type EventBus,
+  type ICommandHandler,
+} from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import type { db as DbType } from "../../db/data-source";
-import { DB_TOKEN } from "../../db/database.module";
-import { member } from "../../db/schema";
-import { MemberUpdatedEvent } from "../events/member-updated.event";
-import type { Member } from "../member.entity";
-import type { UpdateMemberData } from "../member.schema";
-import { UpdateMemberCommand } from "./update-member.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { member } from "../../db/schema/index.js";
+import { MemberUpdatedEvent } from "../events/member-updated.event.js";
+import type { Member } from "../member.entity.js";
+import type { UpdateMemberData } from "../member.schema.js";
+import { UpdateMemberCommand } from "./update-member.command.js";
 
 @CommandHandler(UpdateMemberCommand)
 export class UpdateMemberHandler
@@ -17,7 +21,7 @@ export class UpdateMemberHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute({ memberUuid, data }: UpdateMemberCommand): Promise<Member> {

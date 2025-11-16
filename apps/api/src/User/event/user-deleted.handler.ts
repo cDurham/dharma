@@ -1,6 +1,6 @@
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
-import type { KafkaService } from "../../kafka/kafka.service";
-import { UserDeletedEvent } from "./user-deleted.event";
+import type { KafkaService } from "../../kafka/kafka.service.js";
+import { UserDeletedEvent } from "./user-deleted.event.js";
 
 @EventsHandler(UserDeletedEvent)
 export class UserDeletedHandler implements IEventHandler<UserDeletedEvent> {
