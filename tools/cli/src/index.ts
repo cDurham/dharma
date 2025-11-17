@@ -4,6 +4,7 @@ import { logsCommand } from './commands/logs.js';
 import { dbCommand } from './commands/db.js';
 import { execCommand } from './commands/exec.js';
 import { statusCommand } from './commands/status.js';
+import { lintCommand } from './commands/lint.js';
 import { showBanner } from './utils/banner.js';
 
 const program = new Command();
@@ -27,5 +28,6 @@ program.addCommand(logsCommand);
 program.addCommand(dbCommand);
 program.addCommand(execCommand);
 program.addCommand(statusCommand);
+program.addCommand(lintCommand);
 
 program.parse(process.argv);
