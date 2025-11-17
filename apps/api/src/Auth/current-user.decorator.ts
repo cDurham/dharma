@@ -11,7 +11,7 @@ import {
 } from "../User/user.schema.js";
 
 export const CurrentUser = createParamDecorator(
-  (data: unknown, context: ExecutionContext): AuthenticatedUser => {
+  (_data: unknown, context: ExecutionContext): AuthenticatedUser => {
     const ctx = GqlExecutionContext.create(context);
     const gqlContext = ctx.getContext<GraphQLContext>();
     const user = gqlContext.req?.user;

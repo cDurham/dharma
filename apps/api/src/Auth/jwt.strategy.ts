@@ -12,7 +12,7 @@ import { getAccessToken } from "./auth.cookies.js";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly configService: ConfigService,
+    configService: ConfigService,
     private readonly queryBus: QueryBus,
   ) {
     const secret = configService.get<string>("JWT_SECRET");

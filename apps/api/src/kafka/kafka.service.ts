@@ -68,7 +68,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async produce(topic: string, message: any, key: string) {
+  async produce(topic: string, message: unknown, key: string) {
     // Silently skip if Kafka is not configured or not connected
     if (!this.isConnected || !this.producer) {
       console.log(`📝 Event logged (Kafka disabled): ${topic}/${key}`);
@@ -90,7 +90,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async consume(topic: string, eachMessage: (message: any) => void) {
+  async consume(topic: string, eachMessage: (message: unknown) => void) {
     if (!this.isConnected || !this.consumer) {
       console.warn("⚠️  Cannot consume - Kafka not connected");
       return;
@@ -101,8 +101,11 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       await this.consumer.run({
         // eslint-disable-next-line @typescript-eslint/require-await
         eachMessage: async ({ message }) => {
-          if (message && message.value) {
-            eachMessage(JSON.parse(message.value.toString()));
+          if (message?.value) {
+            const parsedMessage = JSON.parse(
+              message.value.toString(),
+            ) as unknown;
+            eachMessage(parsedMessage);
           } else {
             console.error("Invalid message format");
           }

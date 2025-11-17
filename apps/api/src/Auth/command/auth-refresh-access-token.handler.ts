@@ -1,8 +1,8 @@
+import crypto from "node:crypto";
 import { Inject, UnauthorizedException } from "@nestjs/common";
-import { CommandBus, CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 
@@ -24,7 +24,6 @@ export class AuthRefreshAccessTokenHandler
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
     private readonly jwtService: JwtService,
-    private readonly commandBus: CommandBus,
   ) {}
 
   async execute(command: AuthRefreshAccessTokenCommand): Promise<{

@@ -1,7 +1,7 @@
+import crypto from "node:crypto";
 import { Inject } from "@nestjs/common";
 import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { v7 as uuidv7 } from "uuid";
 
 import type { db as DbType } from "../../db/data-source.js";
