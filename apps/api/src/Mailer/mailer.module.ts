@@ -1,6 +1,6 @@
-import { MailerModule as NestMailerModule } from "@nestjs-modules/mailer";
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { MailerModule as NestMailerModule } from "@nestjs-modules/mailer";
 
 @Module({
   imports: [
@@ -9,8 +9,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       imports: [ConfigModule], // Import ConfigModule here
       useFactory: (configService: ConfigService) => {
         const emailUser = configService.get<string>("EMAIL_USER");
-        const emailPassword =
-          configService.get<string>("EMAIL_USER_PASSWORD");
+        const emailPassword = configService.get<string>("EMAIL_USER_PASSWORD");
 
         return {
           transport: {

@@ -1,3 +1,5 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ApolloDriver } from "@nestjs/apollo";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
@@ -6,16 +8,14 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
 import type { Request, Response } from "express";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { AuthModule } from "./Auth/index.js";
+import { DatabaseModule } from "./db/database.module.js";
+import { KafkaModule } from "./kafka/kafka.module.js";
 import { MemberModule } from "./Member/member.module.js";
 import { RetreatModule } from "./Retreat/index.js";
 import { UserModule } from "./User/index.js";
 import { VerificationController } from "./Verify/verify.controller.js";
-import { DatabaseModule } from "./db/database.module.js";
-import { KafkaModule } from "./kafka/kafka.module.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 @Module({

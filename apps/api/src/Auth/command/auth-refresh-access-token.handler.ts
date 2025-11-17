@@ -1,13 +1,8 @@
-import crypto from "crypto";
-import { UnauthorizedException } from "@nestjs/common";
-import { Inject } from "@nestjs/common";
-import {
-  CommandBus,
-  CommandHandler,
-  type ICommandHandler,
-} from "@nestjs/cqrs";
+import { Inject, UnauthorizedException } from "@nestjs/common";
+import { CommandBus, CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 

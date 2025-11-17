@@ -1,17 +1,24 @@
 // resolver/MemberResolver.ts
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from "@nestjs/graphql";
+import { GetUserQuery } from "../User/command/get-user.query.js";
+import type { UserEntity } from "../User/user.entity.js";
+import { User } from "../User/user.type.js";
 import { CreateMemberCommand } from "./commands/create-member.command.js";
 import { DeleteMemberCommand } from "./commands/delete-member.command.js";
 import { GetMemberQuery } from "./commands/get-member.query.js";
 import { GetMembersQuery } from "./commands/get-members.query.js";
 import { UpdateMemberCommand } from "./commands/update-member.command.js";
-import { GetUserQuery } from "../User/command/get-user.query.js";
-import { User } from "../User/user.type.js";
-import type { UserEntity } from "../User/user.entity.js";
 import { MemberEntity } from "./member.entity.js";
-import { Member } from "./member.type.js";
 import { CreateMemberInput, UpdateMemberInput } from "./member.input.js";
+import { Member } from "./member.type.js";
 
 @Resolver(() => Member)
 export class MemberResolver {
@@ -34,9 +41,7 @@ export class MemberResolver {
 
   @Mutation(() => Member)
   async createMember(@Args("data") data: CreateMemberInput): Promise<Member> {
-    const entity = await this.commandBus.execute(
-      new CreateMemberCommand(data),
-    );
+    const entity = await this.commandBus.execute(new CreateMemberCommand(data));
     return this.mapToGraphQL(entity);
   }
 
@@ -53,9 +58,7 @@ export class MemberResolver {
 
   @Mutation(() => Member)
   async deleteMember(@Args("uuid") uuid: string): Promise<Member> {
-    const entity = await this.commandBus.execute(
-      new DeleteMemberCommand(uuid),
-    );
+    const entity = await this.commandBus.execute(new DeleteMemberCommand(uuid));
     return this.mapToGraphQL(entity);
   }
 

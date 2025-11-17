@@ -5,8 +5,8 @@ import { PassportStrategy } from "@nestjs/passport";
 import type { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { GetUserQuery } from "../User/command/get-user.query.js";
-import type { AuthenticatedUser } from "../User/user.schema.js";
 import type { UserEntity } from "../User/user.entity.js";
+import type { AuthenticatedUser } from "../User/user.schema.js";
 import { getAccessToken } from "./auth.cookies.js";
 
 @Injectable()

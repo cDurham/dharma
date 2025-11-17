@@ -2,8 +2,7 @@ import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { v4 as uuidv4 } from "uuid";
-import { v7 as uuidv7 } from "uuid";
+import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
 
 import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";

@@ -5,16 +5,16 @@ import { CurrentUser } from "../Auth/current-user.decorator.js";
 import { JwtAuthGuard } from "../Auth/jwt-auth.guard.js";
 import { CreateUserCommand } from "./command/create-user.command.js";
 import { DeleteUserCommand } from "./command/delete-user.command.js";
-import { GetUserByEmailQuery } from "./command/get-user-by-email.query.js";
 import { GetUserQuery } from "./command/get-user.query.js";
+import { GetUserByEmailQuery } from "./command/get-user-by-email.query.js";
 import { GetUsersQuery } from "./command/get-users.query.js";
 import { ResendVerificationEmailCommand } from "./command/resend-verification-email.command.js";
 import { UpdateUserCommand } from "./command/update-user.command.js";
 import { VerifyEmailCommand } from "./command/verify-email.command.js";
-import type { AuthenticatedUser } from "./user.schema.js";
-import { User } from "./user.type.js";
 import type { UserEntity } from "./user.entity.js";
 import { CreateUserInput, UpdateUserInput } from "./user.input.js";
+import type { AuthenticatedUser } from "./user.schema.js";
+import { User } from "./user.type.js";
 
 @Resolver(() => User)
 export class UserResolver {
@@ -37,9 +37,7 @@ export class UserResolver {
 
   @Mutation(() => User)
   async createUser(@Args("data") data: CreateUserInput): Promise<User> {
-    const entity = await this.commandBus.execute(
-      new CreateUserCommand(data),
-    );
+    const entity = await this.commandBus.execute(new CreateUserCommand(data));
     return this.mapToGraphQL(entity);
   }
 
@@ -73,10 +71,10 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async resendVerificationEmail(@Args("email") email: string): Promise<boolean> {
-    return this.commandBus.execute(
-      new ResendVerificationEmailCommand(email),
-    );
+  async resendVerificationEmail(
+    @Args("email") email: string,
+  ): Promise<boolean> {
+    return this.commandBus.execute(new ResendVerificationEmailCommand(email));
   }
 
   @Query(() => User)

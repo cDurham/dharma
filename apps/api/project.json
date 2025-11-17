@@ -18,9 +18,7 @@
     },
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{workspaceRoot}/dist/apps/api"
-      ],
+      "outputs": ["{workspaceRoot}/dist/apps/api"],
       "options": {
         "main": "apps/api/src/index.ts",
         "outputPath": "dist/apps/api",
@@ -43,9 +41,7 @@
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": [
-        "{workspaceRoot}/coverage/api"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/api"],
       "options": {
         "configFile": "apps/api/vitest.config.ts"
       }

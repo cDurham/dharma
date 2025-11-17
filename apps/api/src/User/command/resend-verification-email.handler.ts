@@ -2,11 +2,10 @@ import { Inject, Logger } from "@nestjs/common";
 import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-
-import { EmailService } from "../../Email/email.service.js";
 import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { user } from "../../db/schema/index.js";
+import { EmailService } from "../../Email/email.service.js";
 import { ResendVerificationEmailCommand } from "./resend-verification-email.command.js";
 
 @CommandHandler(ResendVerificationEmailCommand)

@@ -1,8 +1,4 @@
-import {
-  CommandBus,
-  CommandHandler,
-  type ICommandHandler,
-} from "@nestjs/cqrs";
+import { CommandBus, CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   authConfig,
