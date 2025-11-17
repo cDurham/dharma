@@ -58,11 +58,31 @@ export const logsCommand = new Command('logs')
       .map(s => serviceRegistry.getContainerName(s))
       .filter((name): name is string => name !== undefined);
     
-    const followFlag = options.follow ? '-f' : '';
+    if (containerNames.length === 0) {
+      printError('No valid containers found for selected services');
+      process.exit(1);
+    }
+    
+    // Default to following logs unless --no-follow is explicitly set
+    const shouldFollow = options.follow !== false;
+    const followFlag = shouldFollow ? '-f' : '';
     const tailFlag = `--tail ${options.tail}`;
     
-    const cmd = `docker logs ${containerNames.join(' ')} ${followFlag} ${tailFlag} 2>&1 | cat`;
-    
-    await runCommandAsync(cmd);
+    // Use docker compose logs for multiple services (supports multiple service names)
+    // For single service, we can use either approach
+    if (containerNames.length === 1) {
+      // Single container - use docker logs directly
+      const flags = [followFlag, tailFlag].filter(f => f).join(' ');
+      const cmd = `docker logs ${flags} ${containerNames[0]} 2>&1 | cat`;
+      await runCommandAsync(cmd);
+    } else {
+      // Multiple containers - use docker compose logs which supports multiple services
+      // docker compose logs uses service names from docker-compose.yml, not container names
+      const serviceNames = selectedServices;
+      // Flags must come before service names in docker compose logs
+      const flags = [followFlag, tailFlag].filter(f => f).join(' ');
+      const cmd = `docker compose logs ${flags} ${serviceNames.join(' ')} 2>&1 | cat`;
+      await runCommandAsync(cmd);
+    }
   });
 

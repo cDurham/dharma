@@ -1,6 +1,6 @@
-import { pgTable, varchar, timestamp, uuid } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
-import { user } from "./user.schema";
+import { pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { baseColumns } from "./base.schema.js";
+import { user } from "./user.schema.js";
 
 /**
  * Member table - extends Person with join date and optional user reference
@@ -14,4 +14,3 @@ export const member = pgTable("member", {
     .defaultNow(),
   userUuid: uuid("user_uuid").references(() => user.uuid),
 });
-

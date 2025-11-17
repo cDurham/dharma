@@ -6,12 +6,12 @@ import { MailerService } from "@nestjs-modules/mailer";
 export class EmailService {
   constructor(
     private mailerService: MailerService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {}
 
   async sendVerificationEmail(
     email: string,
-    verificationToken: string
+    verificationToken: string,
   ): Promise<void> {
     const verificationUrl = `${this.configService.get<string>("BACKEND_URL")}/verify?token=${verificationToken}`;
     await this.mailerService.sendMail({

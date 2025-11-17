@@ -7,7 +7,7 @@ cd $APP_DIR
 echo "🚀 Starting deployment..."
 
 # Pull latest code
-git pull origin trunk
+git pull origin ${GIT_BRANCH:-trunk}
 
 # Create .env from environment variables (passed by GitHub Actions)
 cat > .env << EOF
@@ -34,10 +34,6 @@ COOKIE_REFRESH_TOKEN_MAX_AGE_MS=604800000
 EMAIL_USER=${EMAIL_USER}
 EMAIL_USER_PASSWORD=${EMAIL_USER_PASSWORD}
 
-# Kafka Configuration
-KAFKA_CLIENT_ID=dharma-backend
-KAFKA_BROKERS=kafka:9092
-
 # Frontend URL
 FRONTEND_URL=${FRONTEND_URL}
 
@@ -45,22 +41,51 @@ FRONTEND_URL=${FRONTEND_URL}
 NODE_ENV=production
 EOF
 
-# Build and deploy with Docker Compose
-echo "🐳 Building and starting containers..."
-docker compose -f deploy/docker-compose.prod.yml down
-docker compose -f deploy/docker-compose.prod.yml build --no-cache
-docker compose -f deploy/docker-compose.prod.yml up -d
+# Run migrations on existing containers if they exist (zero-downtime)
+if docker compose -f deploy/docker-compose.prod.yml ps api | grep -q "Up"; then
+  echo "📊 Running database migrations on existing container..."
+  docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push || echo "⚠️ Migration on old container failed, will retry after deployment"
+fi
 
-# Wait for API to be ready
+# Check if we need to update images
+CURRENT_TAG=$(docker inspect ghcr.io/${GITHUB_REPOSITORY}/api:latest --format='{{index .RepoDigests 0}}' 2>/dev/null || echo "none")
+echo "📦 Current deployment: ${CURRENT_TAG}"
+echo "📦 Target deployment: ${IMAGE_TAG:-latest}"
+
+# Build and deploy with Docker Compose
+echo "🐳 Pulling new images..."
+docker compose -f deploy/docker-compose.prod.yml pull
+
+# Only recreate if images actually changed
+if docker compose -f deploy/docker-compose.prod.yml ps --quiet api web | grep -q .; then
+  echo "🔄 Updating running containers..."
+  docker compose -f deploy/docker-compose.prod.yml up -d --no-deps
+else
+  echo "🚀 Starting containers for the first time..."
+  docker compose -f deploy/docker-compose.prod.yml up -d
+fi
+
+# Wait for API to be ready with intelligent health check
 echo "⏳ Waiting for API to be ready..."
-sleep 10
+for i in {1..60}; do
+  if curl -f http://localhost:3000/graphql > /dev/null 2>&1; then
+    echo "✅ API is ready after $i seconds"
+    break
+  fi
+  if [ $i -eq 60 ]; then
+    echo "❌ API failed to start within 60 seconds"
+    docker compose -f deploy/docker-compose.prod.yml logs api
+    exit 1
+  fi
+  sleep 1
+done
 
 # Run database migrations
 echo "📊 Running database migrations..."
 docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push
 
-# Health check
-echo "🏥 Running health check..."
+# Final health check
+echo "🏥 Running final health check..."
 if curl -f http://localhost:3000/graphql > /dev/null 2>&1; then
     echo "✅ Deployment successful!"
 else

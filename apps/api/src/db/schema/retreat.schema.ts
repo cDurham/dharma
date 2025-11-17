@@ -1,5 +1,5 @@
-import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
+import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { baseColumns } from "./base.schema.js";
 
 /**
  * Retreat table
@@ -10,4 +10,3 @@ export const retreat = pgTable("retreat", {
   startAt: timestamp("start_at", { withTimezone: true }).notNull(),
   endAt: timestamp("end_at", { withTimezone: true }).notNull(),
 });
-

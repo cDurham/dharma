@@ -1,5 +1,5 @@
-import { Module, Global } from "@nestjs/common";
-import { KafkaService } from "./kafka.service";
+import { Global, Module } from "@nestjs/common";
+import { KafkaService } from "./kafka.service.js";
 
 @Global()
 @Module({

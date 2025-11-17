@@ -1,13 +1,14 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { member } from "../../db/schema";
-import { MemberUpdatedEvent } from "../events/member-updated.event";
-import { Member } from "../member.entity";
-import { UpdateMemberCommand } from "./update-member.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { member } from "../../db/schema/index.js";
+import { MemberUpdatedEvent } from "../events/member-updated.event.js";
+import type { MemberEntity } from "../member.entity.js";
+import type { UpdateMemberData } from "../member.schema.js";
+import { UpdateMemberCommand } from "./update-member.command.js";
 
 @CommandHandler(UpdateMemberCommand)
 export class UpdateMemberHandler
@@ -16,10 +17,13 @@ export class UpdateMemberHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
-  async execute({ memberUuid, data }: UpdateMemberCommand): Promise<Member> {
+  async execute({
+    memberUuid,
+    data,
+  }: UpdateMemberCommand): Promise<MemberEntity> {
     // Check if member exists
     const [existingMember] = await this.db
       .select()
@@ -30,10 +34,11 @@ export class UpdateMemberHandler
       throw new Error("Member not found");
     }
 
-    // Update member
+    const updateData: UpdateMemberData = data;
+
     await this.db
       .update(member)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(member.uuid, memberUuid));
 
     // Fetch updated member

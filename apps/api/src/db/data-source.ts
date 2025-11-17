@@ -1,15 +1,15 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as schema from "./schema";
+import * as schema from "./schema/index.js";
 
 /**
  * Database connection configuration
  */
 const poolConfig = {
   host: process.env.DB_HOST || process.env.DB_WRITE_HOST || "localhost",
-  port: parseInt(
+  port: Number.parseInt(
     process.env.DB_PORT || process.env.DB_WRITE_PORT || "5432",
-    10
+    10,
   ),
   user: process.env.DB_USER || process.env.DB_WRITE_USER || "postgres",
   password:
@@ -35,7 +35,10 @@ export const db = drizzle(pool, { schema });
  */
 const readPoolConfig = {
   host: process.env.DB_READ_HOST || process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_READ_PORT || process.env.DB_PORT || "5432", 10),
+  port: Number.parseInt(
+    process.env.DB_READ_PORT || process.env.DB_PORT || "5432",
+    10,
+  ),
   user: process.env.DB_READ_USER || process.env.DB_USER || "postgres",
   password:
     process.env.DB_READ_PASSWORD || process.env.DB_PASSWORD || "postgres",

@@ -1,14 +1,14 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
-import { v7 as uuidv7 } from "uuid";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
+import { v7 as uuidv7 } from "uuid";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { retreat } from "../../db/schema";
-import { RetreatCreatedEvent } from "../events/retreat-created.event";
-import { Retreat } from "../retreat.entity";
-import { CreateRetreatCommand } from "./create-retreat.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { retreat } from "../../db/schema/index.js";
+import { RetreatCreatedEvent } from "../events/retreat-created.event.js";
+import type { RetreatEntity } from "../retreat.entity.js";
+import { CreateRetreatCommand } from "./create-retreat.command.js";
 
 @CommandHandler(CreateRetreatCommand)
 export class CreateRetreatHandler
@@ -17,10 +17,10 @@ export class CreateRetreatHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreateRetreatCommand): Promise<Retreat> {
+  async execute(command: CreateRetreatCommand): Promise<RetreatEntity> {
     const { name, startAt, endAt } = command.input;
 
     const newRetreatId = uuidv7();
@@ -39,7 +39,9 @@ export class CreateRetreatHandler
       .where(eq(retreat.uuid, newRetreatId));
 
     // after saving, emit an event
-    this.eventBus.publish(new RetreatCreatedEvent(savedRetreat.uuid, savedRetreat.name));
+    this.eventBus.publish(
+      new RetreatCreatedEvent(savedRetreat.uuid, savedRetreat.name),
+    );
 
     return savedRetreat;
   }

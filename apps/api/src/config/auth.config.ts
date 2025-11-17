@@ -15,23 +15,33 @@ export interface AuthConfig {
 
 export const authConfig: AuthConfig = {
   accessToken: {
-    expiresIn: parseInt(process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || "900"), // 15 minutes in seconds
-    maxAgeMs: parseInt(process.env.JWT_ACCESS_TOKEN_MAX_AGE_MS || "900000"), // 15 minutes in milliseconds
+    expiresIn: Number.parseInt(
+      process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || "900",
+      10,
+    ), // 15 minutes in seconds
+    maxAgeMs: Number.parseInt(
+      process.env.JWT_ACCESS_TOKEN_MAX_AGE_MS || "900000",
+      10,
+    ), // 15 minutes in milliseconds
   },
   refreshToken: {
-    expiresInDays: parseInt(
-      process.env.JWT_REFRESH_TOKEN_EXPIRES_IN_DAYS || "30"
+    expiresInDays: Number.parseInt(
+      process.env.JWT_REFRESH_TOKEN_EXPIRES_IN_DAYS || "30",
+      10,
     ),
-    maxAgeMs: parseInt(
-      process.env.JWT_REFRESH_TOKEN_MAX_AGE_MS || "2592000000"
+    maxAgeMs: Number.parseInt(
+      process.env.JWT_REFRESH_TOKEN_MAX_AGE_MS || "2592000000",
+      10,
     ), // 30 days in milliseconds
   },
   cookie: {
-    accessTokenMaxAgeMs: parseInt(
-      process.env.COOKIE_ACCESS_TOKEN_MAX_AGE_MS || "900000"
+    accessTokenMaxAgeMs: Number.parseInt(
+      process.env.COOKIE_ACCESS_TOKEN_MAX_AGE_MS || "900000",
+      10,
     ), // 15 minutes
-    refreshTokenMaxAgeMs: parseInt(
-      process.env.COOKIE_REFRESH_TOKEN_MAX_AGE_MS || "604800000"
+    refreshTokenMaxAgeMs: Number.parseInt(
+      process.env.COOKIE_REFRESH_TOKEN_MAX_AGE_MS || "604800000",
+      10,
     ), // 7 days
   },
 };

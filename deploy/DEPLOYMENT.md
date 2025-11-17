@@ -209,29 +209,19 @@ This script will:
 - Install Git
 - Create a `deploy` user
 - Create `/opt/dharma` directory
+- Generate SSH keys for GitHub Actions
+- Configure GitHub Container Registry (GHCR) authentication
 
-### 3.3 Set Up Deploy User
+**During the script, you'll be prompted for:**
+1. **GitHub username** - Your GitHub account username
+2. **GitHub Personal Access Token (PAT)** - Create one at https://github.com/settings/tokens/new with `read:packages` scope
 
-```bash
-# Switch to deploy user
-sudo su - deploy
+**The script will output:**
+- The SSH private key to copy to GitHub Secrets (EC2_SSH_KEY)
 
-# Generate SSH key for GitHub Actions
-ssh-keygen -t ed25519 -C "github-actions" -f ~/.ssh/github_actions -N ""
+> **Note**: If you skip the GHCR setup during the script, you can configure it later by following `deploy/EC2_SETUP.md`
 
-# Add public key to authorized_keys
-cat ~/.ssh/github_actions.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-
-# Display private key (copy this for GitHub Secrets)
-cat ~/.ssh/github_actions
-# Copy the entire output including "-----BEGIN OPENSSH PRIVATE KEY-----" and "-----END OPENSSH PRIVATE KEY-----"
-
-# Exit deploy user
-exit
-```
-
-### 3.4 Clone Repository
+### 3.3 Clone Repository
 
 ```bash
 # Switch back to deploy user
@@ -248,7 +238,7 @@ chmod +x deploy/deploy.sh
 exit
 ```
 
-### 3.5 Configure Nginx
+### 3.4 Configure Nginx
 
 ```bash
 # Copy nginx configuration

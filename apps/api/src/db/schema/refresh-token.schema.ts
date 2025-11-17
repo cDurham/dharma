@@ -1,6 +1,13 @@
-import { pgTable, varchar, timestamp, boolean, uuid, index } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
-import { user } from "./user.schema";
+import {
+  boolean,
+  index,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
+import { baseColumns } from "./base.schema.js";
+import { user } from "./user.schema.js";
 
 /**
  * RefreshToken table - for JWT refresh token management
@@ -19,6 +26,5 @@ export const refreshToken = pgTable(
   },
   (table) => ({
     tokenHashIdx: index("refresh_token_token_hash_idx").on(table.tokenHash),
-  })
+  }),
 );
-

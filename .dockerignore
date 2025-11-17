@@ -1,0 +1,33 @@
+# Node / package managers
+node_modules
+pnpm-store
+.npm
+.pnp.*
+*.log
+
+# Builds / coverage
+dist
+apps/**/dist
+coverage
+.nx/cache
+.nx/workspace-data
+
+# Vite / tooling caches
+.vite
+.esbuild
+.turbo
+.cache
+
+# Env & local
+.env
+.env.*
+!.env.example
+
+# VCS / IDE
+.git
+.gitignore
+.gitattributes
+.github
+.idea
+.vscode
+.DS_Store

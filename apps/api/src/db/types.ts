@@ -1,5 +1,5 @@
-import { InferSelectModel } from "drizzle-orm";
-import * as schema from "./schema";
+import type { InferSelectModel } from "drizzle-orm";
+import type * as schema from "./schema/index.js";
 
 /**
  * Inferred types from Drizzle schemas
@@ -9,4 +9,3 @@ export type UserRow = InferSelectModel<typeof schema.user>;
 export type MemberRow = InferSelectModel<typeof schema.member>;
 export type RetreatRow = InferSelectModel<typeof schema.retreat>;
 export type RefreshTokenRow = InferSelectModel<typeof schema.refreshToken>;
-

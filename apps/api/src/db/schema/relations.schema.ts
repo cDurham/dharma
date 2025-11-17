@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
-import { user } from "./user.schema";
-import { member } from "./member.schema";
-import { refreshToken } from "./refresh-token.schema";
+import { member } from "./member.schema.js";
+import { refreshToken } from "./refresh-token.schema.js";
+import { user } from "./user.schema.js";
 
 /**
  * User relations

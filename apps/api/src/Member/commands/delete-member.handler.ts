@@ -1,13 +1,13 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { member } from "../../db/schema";
-import { DeleteMemberCommand } from "./delete-member.command";
-import { Member } from "../member.entity";
-import { MemberDeletedEvent } from "../events/member-deleted.event";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { member } from "../../db/schema/index.js";
+import { MemberDeletedEvent } from "../events/member-deleted.event.js";
+import type { MemberEntity } from "../member.entity.js";
+import { DeleteMemberCommand } from "./delete-member.command.js";
 
 @CommandHandler(DeleteMemberCommand)
 export class DeleteMemberHandler
@@ -16,10 +16,10 @@ export class DeleteMemberHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
-  async execute({ memberUuid }: DeleteMemberCommand): Promise<Member> {
+  async execute({ memberUuid }: DeleteMemberCommand): Promise<MemberEntity> {
     // Fetch member before deleting
     const [memberToDelete] = await this.db
       .select()

@@ -1,13 +1,14 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { retreat } from "../../db/schema";
-import { RetreatUpdatedEvent } from "../events/retreat-updated.event";
-import { Retreat } from "../retreat.entity";
-import { UpdateRetreatCommand } from "./update-retreat.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { retreat } from "../../db/schema/index.js";
+import { RetreatUpdatedEvent } from "../events/retreat-updated.event.js";
+import type { RetreatEntity } from "../retreat.entity.js";
+import type { UpdateRetreatData } from "../retreat.schema.js";
+import { UpdateRetreatCommand } from "./update-retreat.command.js";
 
 @CommandHandler(UpdateRetreatCommand)
 export class UpdateRetreatHandler
@@ -16,15 +17,13 @@ export class UpdateRetreatHandler
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute({
     retreatUuid,
     data,
-  }: UpdateRetreatCommand): Promise<Retreat | null> {
-    const { name, startAt, endAt } = data;
-
+  }: UpdateRetreatCommand): Promise<RetreatEntity | null> {
     // Check if retreat exists
     const [existingRetreat] = await this.db
       .select()
@@ -35,10 +34,11 @@ export class UpdateRetreatHandler
       return null;
     }
 
-    // Update retreat
+    const updateData: UpdateRetreatData = data;
+
     await this.db
       .update(retreat)
-      .set({ name, startAt, endAt, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(retreat.uuid, retreatUuid));
 
     // Fetch updated retreat

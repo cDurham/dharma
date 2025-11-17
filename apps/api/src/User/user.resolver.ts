@@ -1,74 +1,97 @@
 import { UseGuards } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { JwtAuthGuard } from "../Auth/jwt-auth.guard";
-import { CurrentUser } from "../Auth/current-user.decorator";
-import { CreateUserInput, UpdateUserInput, User } from ".";
-import { CreateUserCommand } from "./command/create-user.command";
-import { DeleteUserCommand } from "./command/delete-user.command";
-import { GetUserByEmailQuery } from "./command/get-user-by-email.query";
-import { GetUserQuery } from "./command/get-user.query";
-import { GetUsersQuery } from "./command/get-users.query";
-import { UpdateUserCommand } from "./command/update-user.command";
-import { VerifyEmailCommand } from "./command/verify-email.command";
+import { CurrentUser } from "../Auth/current-user.decorator.js";
+import { JwtAuthGuard } from "../Auth/jwt-auth.guard.js";
+import { CreateUserCommand } from "./command/create-user.command.js";
+import { DeleteUserCommand } from "./command/delete-user.command.js";
+import { GetUserQuery } from "./command/get-user.query.js";
+import { GetUserByEmailQuery } from "./command/get-user-by-email.query.js";
+import { GetUsersQuery } from "./command/get-users.query.js";
+import { ResendVerificationEmailCommand } from "./command/resend-verification-email.command.js";
+import { UpdateUserCommand } from "./command/update-user.command.js";
+import { VerifyEmailCommand } from "./command/verify-email.command.js";
+import type { UserEntity } from "./user.entity.js";
+import { CreateUserInput, UpdateUserInput } from "./user.input.js";
+import type { AuthenticatedUser } from "./user.schema.js";
+import { User } from "./user.type.js";
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(
     private commandBus: CommandBus,
-    private queryBus: QueryBus
+    private queryBus: QueryBus,
   ) {}
 
-  @Query((returns) => User)
+  @Query(() => User)
   async user(@Args("uuid") uuid: string): Promise<User | null> {
-    const result = await this.queryBus.execute(new GetUserQuery(uuid));
-    return result;
+    const entity = await this.queryBus.execute(new GetUserQuery(uuid));
+    return entity ? this.mapToGraphQL(entity) : null;
   }
 
-  @Query((returns) => [User])
+  @Query(() => [User])
   async users(): Promise<User[]> {
     const result = await this.queryBus.execute(new GetUsersQuery());
-    return result;
+    return result.map((entity) => this.mapToGraphQL(entity));
   }
 
-  @Mutation((returns) => User)
+  @Mutation(() => User)
   async createUser(@Args("data") data: CreateUserInput): Promise<User> {
-    const result = await this.commandBus.execute(new CreateUserCommand(data));
-    return result;
+    const entity = await this.commandBus.execute(new CreateUserCommand(data));
+    return this.mapToGraphQL(entity);
   }
 
-  @Mutation((returns) => User)
+  @Mutation(() => User)
   async updateUser(
     @Args("uuid") uuid: string,
-    @Args("data") data: UpdateUserInput
+    @Args("data") data: UpdateUserInput,
   ): Promise<User | null> {
-    const result = await this.commandBus.execute(
-      new UpdateUserCommand(uuid, data)
+    const entity = await this.commandBus.execute(
+      new UpdateUserCommand(uuid, data),
     );
-    return result;
+    return entity ? this.mapToGraphQL(entity) : null;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async deleteUser(@Args("uuid") uuid: string): Promise<boolean> {
     const result = await this.commandBus.execute(new DeleteUserCommand(uuid));
     return result;
   }
 
-  @Query((returns) => User)
+  @Query(() => User)
   async getUserByEmail(@Args("email") email: string): Promise<User | null> {
-    const result = await this.queryBus.execute(new GetUserByEmailQuery(email));
-    return result;
+    const entity = await this.queryBus.execute(new GetUserByEmailQuery(email));
+    return entity ? this.mapToGraphQL(entity) : null;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation(() => Boolean)
   async verifyEmail(@Args("token") token: string): Promise<boolean> {
     const result = await this.commandBus.execute(new VerifyEmailCommand(token));
     return result;
   }
 
-  @Query((returns) => User)
+  @Mutation(() => Boolean)
+  async resendVerificationEmail(
+    @Args("email") email: string,
+  ): Promise<boolean> {
+    return this.commandBus.execute(new ResendVerificationEmailCommand(email));
+  }
+
+  @Query(() => User)
   @UseGuards(JwtAuthGuard)
-  async me(@CurrentUser() user: User): Promise<User> {
-    return user;
+  me(@CurrentUser() user: AuthenticatedUser): User {
+    return this.mapToGraphQL(user as unknown as UserEntity);
+  }
+
+  private mapToGraphQL(entity: UserEntity): User {
+    return {
+      uuid: entity.uuid,
+      firstName: entity.firstName,
+      lastName: entity.lastName,
+      email: entity.email,
+      verificationToken: entity.verificationToken ?? null,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
   }
 }

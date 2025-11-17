@@ -147,3 +147,39 @@ export function execInContainer(serviceName: string, command: string): CommandRe
   return runCommand(fullCommand);
 }
 
+/**
+ * Open an interactive shell inside a container
+ */
+export async function execShellInContainer(
+  serviceName: string,
+  shell: 'bash' | 'sh' = 'bash'
+): Promise<CommandResult> {
+  const service = serviceRegistry.getService(serviceName);
+
+  if (!service) {
+    printError(`Service "${serviceName}" not found`);
+    return { success: false, error: `Unknown service: ${serviceName}` };
+  }
+
+  const status = getContainerStatus();
+  const containerStatus = status[service.containerName];
+
+  if (!containerStatus) {
+    printError(`Container "${service.containerName}" does not exist`);
+    printInfo(`Run 'dharma dev up' to start the environment`);
+    return { success: false, error: 'Container not found' };
+  }
+
+  if (!containerStatus.running) {
+    printError(`Container "${service.containerName}" is not running`);
+    printInfo(`Run 'dharma dev up' to start the environment`);
+    return { success: false, error: 'Container not running' };
+  }
+
+  // Prefer bash, fall back to sh if bash fails
+  const command = shell === 'bash'
+    ? `docker exec -it ${service.containerName} bash || docker exec -it ${service.containerName} sh`
+    : `docker exec -it ${service.containerName} ${shell}`;
+
+  return runCommandAsync(command);
+}

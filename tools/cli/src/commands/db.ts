@@ -45,7 +45,11 @@ dbCommand
   .description('Open Drizzle Studio')
   .action(() => {
     printSuccess('Opening Drizzle Studio...');
-    runCommand('npm run db:studio');
+    const result = execInContainer('api-dev', 'npm run db:studio');
+    if (!result.success) {
+      printError('Failed to open Drizzle Studio');
+      process.exit(1);
+    }
   });
 
 dbCommand
@@ -61,7 +65,7 @@ dbCommand
   .description('Generate migration from schema changes')
   .action(() => {
     printSuccess('Generating migration...');
-    const result = runCommand('npm run db:generate');
+    const result = execInContainer('api-dev', 'npm run db:generate');
     if (!result.success) {
       printError('Failed to generate migration');
       process.exit(1);
@@ -73,7 +77,7 @@ dbCommand
   .description('Run pending migrations')
   .action(() => {
     printSuccess('Running migrations...');
-    const result = runCommand('npm run db:migrate');
+    const result = execInContainer('api-dev', 'npm run db:migrate');
     if (!result.success) {
       printError('Failed to run migrations');
       process.exit(1);

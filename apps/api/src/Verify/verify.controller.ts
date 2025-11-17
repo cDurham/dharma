@@ -1,20 +1,20 @@
 import { Controller, Get, Query, Redirect } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { CommandBus } from "@nestjs/cqrs";
-import { VerifyEmailCommand } from "../User/command/verify-email.command";
+import { VerifyEmailCommand } from "../User/command/verify-email.command.js";
 
 @Controller("verify")
 export class VerificationController {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   @Get()
   @Redirect("/", 302)
   async verifyEmail(@Query("token") token: string) {
     const verified = await this.commandBus.execute(
-      new VerifyEmailCommand(token)
+      new VerifyEmailCommand(token),
     );
     const frontendUrl = this.configService.get<string>("FRONTEND_URL");
 

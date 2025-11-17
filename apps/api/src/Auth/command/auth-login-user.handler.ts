@@ -1,11 +1,11 @@
-import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandBus, CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
-import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command";
-import { AuthLoginUserCommand } from "./auth-login-user.command";
 import {
   authConfig,
   getRefreshTokenExpiresInMs,
-} from "../../config/auth.config";
+} from "../../config/auth.config.js";
+import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command.js";
+import { AuthLoginUserCommand } from "./auth-login-user.command.js";
 
 @CommandHandler(AuthLoginUserCommand)
 export class AuthLoginUserHandler
@@ -13,7 +13,7 @@ export class AuthLoginUserHandler
 {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly commandBus: CommandBus
+    private readonly commandBus: CommandBus,
   ) {}
 
   async execute({ user }: AuthLoginUserCommand): Promise<{
@@ -26,7 +26,10 @@ export class AuthLoginUserHandler
     });
 
     const refreshToken = await this.commandBus.execute(
-      new AuthCreateRefreshTokenCommand(user.uuid, getRefreshTokenExpiresInMs())
+      new AuthCreateRefreshTokenCommand(
+        user.uuid,
+        getRefreshTokenExpiresInMs(),
+      ),
     );
 
     return { access_token: token, refresh_token: refreshToken };

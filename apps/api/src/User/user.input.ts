@@ -1,9 +1,12 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { PersonInput, UpdatePersonInput } from "../Person/person.input";
-import { User } from "./user.entity";
+import { PersonInput, UpdatePersonInput } from "../Person/person.input.js";
+import type { UserEntity } from "./user.entity.js";
 
 @InputType()
-export class CreateUserInput extends PersonInput implements Partial<User> {
+export class CreateUserInput
+  extends PersonInput
+  implements Partial<UserEntity>
+{
   @Field()
   email!: string;
 
@@ -14,7 +17,7 @@ export class CreateUserInput extends PersonInput implements Partial<User> {
 @InputType()
 export class UpdateUserInput
   extends UpdatePersonInput
-  implements Partial<User>
+  implements Partial<UserEntity>
 {
   @Field({ nullable: true })
   email?: string;

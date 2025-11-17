@@ -1,24 +1,28 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
-import { User } from "../user.entity";
-import { UpdateUserCommand } from "./update-user.command";
-import { UserUpdatedEvent } from "../event/user-updated.event";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { user } from "../../db/schema/index.js";
+import { UserUpdatedEvent } from "../event/user-updated.event.js";
+import type { UserEntity } from "../user.entity.js";
+import type { UpdateUserData } from "../user.schema.js";
+import { UpdateUserCommand } from "./update-user.command.js";
 
 @CommandHandler(UpdateUserCommand)
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private readonly eventBus: EventBus
+    private readonly eventBus: EventBus,
   ) {}
 
-  async execute({ userUuid, data }: UpdateUserCommand): Promise<User | null> {
+  async execute({
+    userUuid,
+    data,
+  }: UpdateUserCommand): Promise<UserEntity | null> {
     const { email, password } = data;
 
     // Check if user exists
@@ -31,17 +35,16 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
       return null;
     }
 
-    // Hash password if provided
-    const updateData: any = { updatedAt: new Date() };
+    // Build update data with password hashing
+    const updateData: UpdateUserData = {};
     if (email !== undefined) updateData.email = email;
     if (password !== undefined) {
       updateData.password = await bcrypt.hash(password, 12);
     }
 
-    // Update user
     await this.db
       .update(user)
-      .set(updateData)
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(user.uuid, userUuid));
 
     // Fetch updated user

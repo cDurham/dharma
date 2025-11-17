@@ -1,26 +1,25 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
-import { v4 as uuidv4 } from "uuid";
-import { v7 as uuidv7 } from "uuid";
+import { CommandHandler, EventBus, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
+import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
-import { UserCreatedEvent } from "../event/user-created.event";
-import { User } from "../user.entity";
-import { CreateUserCommand } from "./create-user.command";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { user } from "../../db/schema/index.js";
+import { UserCreatedEvent } from "../event/user-created.event.js";
+import type { UserEntity } from "../user.entity.js";
+import { CreateUserCommand } from "./create-user.command.js";
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
-    private eventBus: EventBus
+    private eventBus: EventBus,
   ) {}
 
-  async execute({ data }: CreateUserCommand): Promise<User> {
+  async execute({ data }: CreateUserCommand): Promise<UserEntity> {
     const newUserId = uuidv7();
     const verificationToken = uuidv4();
 
@@ -49,8 +48,8 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
         savedUser.uuid,
         savedUser.email,
         verificationToken, // We need this, not in DB
-        savedUser.firstName
-      )
+        savedUser.firstName,
+      ),
     );
 
     return savedUser;

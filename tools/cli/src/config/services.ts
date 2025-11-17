@@ -1,6 +1,4 @@
 import { parseDockerCompose, ServiceConfig } from './docker-compose-parser.js';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
 
 /**
  * Service name aliases for convenience
@@ -20,11 +18,9 @@ class ServiceRegistry {
   private projectRoot: string;
 
   private constructor() {
-    // Get project root in ES module context
-    // Current file: tools/cli/dist/config/services.js
-    // Project root: 4 levels up
-    const currentDir = dirname(fileURLToPath(import.meta.url));
-    this.projectRoot = resolve(currentDir, '../../../../');
+    // Use process.cwd() to find project root
+    // The CLI should be run from the project root directory
+    this.projectRoot = process.cwd();
     this.services = parseDockerCompose(this.projectRoot);
   }
 

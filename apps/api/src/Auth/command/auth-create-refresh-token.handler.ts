@@ -1,14 +1,14 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import crypto from "node:crypto";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { v7 as uuidv7 } from "uuid";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { refreshToken } from "../../db/schema";
-import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command";
-import { hashToken } from "../utils";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { refreshToken } from "../../db/schema/index.js";
+import { hashToken } from "../utils.js";
+import { AuthCreateRefreshTokenCommand } from "./auth-create-refresh-token.command.js";
 
 @CommandHandler(AuthCreateRefreshTokenCommand)
 export class AuthCreateRefreshTokenHandler
@@ -16,11 +16,11 @@ export class AuthCreateRefreshTokenHandler
 {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
   public async execute(
-    command: AuthCreateRefreshTokenCommand
+    command: AuthCreateRefreshTokenCommand,
   ): Promise<string> {
     const { userId, expiresIn } = command;
 

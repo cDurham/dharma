@@ -1,15 +1,15 @@
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { KafkaModule } from "../kafka/kafka.module";
-import { CreateMemberHandler } from "./commands/create-member.handler";
-import { DeleteMemberHandler } from "./commands/delete-member.handler";
-import { GetMemberHandler } from "./commands/get-member.handler";
-import { GetMembersHandler } from "./commands/get-members.handler";
-import { UpdateMemberHandler } from "./commands/update-member.handler";
-import { MemberCreatedHandler } from "./events/member-created.handler";
-import { MemberDeletedHandler } from "./events/member-deleted.handler";
-import { MemberUpdatedHandler } from "./events/member-updated.handler";
-import { MemberResolver } from "./member.resolver";
+import { KafkaModule } from "../kafka/kafka.module.js";
+import { CreateMemberHandler } from "./commands/create-member.handler.js";
+import { DeleteMemberHandler } from "./commands/delete-member.handler.js";
+import { GetMemberHandler } from "./commands/get-member.handler.js";
+import { GetMembersHandler } from "./commands/get-members.handler.js";
+import { UpdateMemberHandler } from "./commands/update-member.handler.js";
+import { MemberCreatedHandler } from "./events/member-created.handler.js";
+import { MemberDeletedHandler } from "./events/member-deleted.handler.js";
+import { MemberUpdatedHandler } from "./events/member-updated.handler.js";
+import { MemberResolver } from "./member.resolver.js";
 
 @Module({
   imports: [KafkaModule, CqrsModule],

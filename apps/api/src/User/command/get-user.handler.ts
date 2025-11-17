@@ -1,32 +1,28 @@
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
-import { User } from "../user.entity";
-import { GetUserQuery } from "./get-user.query";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { user } from "../../db/schema/index.js";
+import type { UserEntity } from "../user.entity.js";
+import { GetUserQuery } from "./get-user.query.js";
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler
-  implements IQueryHandler<GetUserQuery, User | null>
+  implements IQueryHandler<GetUserQuery, UserEntity | null>
 {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
-  async execute({ userUuid }: GetUserQuery): Promise<User> {
+  async execute({ userUuid }: GetUserQuery): Promise<UserEntity | null> {
     const [result] = await this.db
       .select()
       .from(user)
       .where(eq(user.uuid, userUuid));
 
-    if (!result) {
-      throw new Error("User not found");
-    }
-
-    return result;
+    return result || null;
   }
 }

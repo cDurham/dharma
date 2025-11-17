@@ -1,6 +1,6 @@
-import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { KafkaService } from "../../kafka/kafka.service";
-import { RetreatCreatedEvent } from "./retreat-created.event";
+import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
+import { KafkaService } from "../../kafka/kafka.service.js";
+import { RetreatCreatedEvent } from "./retreat-created.event.js";
 
 @EventsHandler(RetreatCreatedEvent)
 export class RetreatCreatedHandler
@@ -15,7 +15,7 @@ export class RetreatCreatedHandler
         retreatUuid: event.retreatUuid,
         name: event.name,
       },
-      "retreat-created"
+      "retreat-created",
     );
     console.log("Retreat created event published", event);
   }

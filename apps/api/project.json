@@ -5,35 +5,45 @@
   "sourceRoot": "apps/api/src",
   "targets": {
     "serve": {
-      "executor": "@nx/js:node",
+      "executor": "nx:run-commands",
       "options": {
-        "buildTarget": "api:build",
-        "watch": true,
-        "buildTargetOptions": { "watch": true }
+        "commands": [
+          "tsc -b tsconfig.app.json",
+          "find src -name '*.graphql' -exec sh -c 'mkdir -p ../../dist/apps/api/$(dirname {}) && cp {} ../../dist/apps/api/{}' \\;",
+          "sh -c 'tsc -b tsconfig.app.json --watch --preserveWatchOutput & node --watch --enable-source-maps ../../dist/apps/api/src/index.js'"
+        ],
+        "parallel": false,
+        "cwd": "apps/api"
       }
     },
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": ["{workspaceRoot}/dist/apps/api"],
       "options": {
-        "outputPath": "dist/apps/api",
         "main": "apps/api/src/index.ts",
+        "outputPath": "dist/apps/api",
         "tsConfig": "apps/api/tsconfig.app.json",
-        "assets": ["apps/api/src/**/*.graphql"]
+        "assets": [
+          {
+            "input": "apps/api/src",
+            "glob": "**/*.graphql",
+            "output": "src"
+          }
+        ],
+        "generatePackageJson": false
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["apps/api/**/*.ts"]
+        "command": "biome check --write {projectRoot}"
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/api"],
       "options": {
-        "jestConfig": "apps/api/jest.config.ts",
-        "passWithNoTests": true
+        "configFile": "apps/api/vitest.config.ts"
       }
     },
     "codegen": {
@@ -45,42 +55,66 @@
     "db-generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit generate --config=apps/api/drizzle.config.ts",
+        "commands": [
+          "tsc -b apps/api/tsconfig.app.json",
+          "drizzle-kit generate --config=apps/api/drizzle.config.cjs"
+        ],
+        "parallel": false,
         "cwd": "."
       }
     },
     "db-push": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit push --force --config=apps/api/drizzle.config.ts",
+        "commands": [
+          "tsc -b apps/api/tsconfig.app.json",
+          "drizzle-kit push --force --config=apps/api/drizzle.config.cjs"
+        ],
+        "parallel": false,
         "cwd": "."
       }
     },
     "db-migrate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit migrate --config=apps/api/drizzle.config.ts",
+        "commands": [
+          "tsc -b apps/api/tsconfig.app.json",
+          "drizzle-kit migrate --config=apps/api/drizzle.config.cjs"
+        ],
+        "parallel": false,
         "cwd": "."
       }
     },
     "db-studio": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit studio --config=apps/api/drizzle.config.ts",
+        "commands": [
+          "tsc -b apps/api/tsconfig.app.json",
+          "drizzle-kit studio --config=apps/api/drizzle.config.cjs"
+        ],
+        "parallel": false,
         "cwd": "."
       }
     },
     "db-drop": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit drop --config=apps/api/drizzle.config.ts",
+        "commands": [
+          "tsc -b apps/api/tsconfig.app.json",
+          "drizzle-kit drop --config=apps/api/drizzle.config.cjs"
+        ],
+        "parallel": false,
         "cwd": "."
       }
     },
     "db-reset": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit drop --config=apps/api/drizzle.config.ts && drizzle-kit push --force --config=apps/api/drizzle.config.ts && npx tsx apps/api/src/db/seed.ts",
+        "commands": [
+          "tsc -b apps/api/tsconfig.app.json",
+          "drizzle-kit drop --config=apps/api/drizzle.config.cjs && drizzle-kit push --force --config=apps/api/drizzle.config.cjs && npx tsx apps/api/src/db/seed.ts"
+        ],
+        "parallel": false,
         "cwd": "."
       }
     },

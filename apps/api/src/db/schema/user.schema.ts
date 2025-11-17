@@ -1,5 +1,5 @@
-import { pgTable, varchar, unique } from "drizzle-orm/pg-core";
-import { baseColumns } from "./base.schema";
+import { pgTable, unique, varchar } from "drizzle-orm/pg-core";
+import { baseColumns } from "./base.schema.js";
 
 /**
  * User table - extends Person with authentication fields
@@ -16,6 +16,5 @@ export const user = pgTable(
   },
   (table) => ({
     emailUnique: unique().on(table.email),
-  })
+  }),
 );
-

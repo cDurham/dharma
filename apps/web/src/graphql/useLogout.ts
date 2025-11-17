@@ -10,7 +10,7 @@ const useLogout = () => {
     try {
       await logout({
         onCompleted: () => {
-          navigate("/");
+          void navigate("/");
         },
       });
     } catch (error) {

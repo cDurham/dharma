@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { runCommandAsync, withSpinner, createSpinner, printSuccess, printError, printInfo, execInContainer } from '../utils/docker.js';
+import { runCommandAsync, withSpinner, createSpinner, printSuccess, printError, printInfo, execInContainer, execShellInContainer } from '../utils/docker.js';
 import { serviceRegistry } from '../config/services.js';
 
 export const devCommand = new Command('dev')
@@ -132,6 +132,33 @@ devCommand
   });
 
 devCommand
+  .command('shell')
+  .description('Open an interactive shell in a dev container')
+  .argument('[service]', 'Service to exec into', 'api')
+  .option('-s, --shell <shell>', 'Shell to use (bash|sh)', 'bash')
+  .action(async (service, options) => {
+    const resolvedService = serviceRegistry.resolveServiceName(service);
+    const serviceConfig = serviceRegistry.getService(resolvedService);
+
+    if (!serviceConfig) {
+      printError(`Invalid service: ${service} (${resolvedService})`);
+      const execable = serviceRegistry.getExecableServices().map(s => s.name).join(', ');
+      printInfo(`Exec-able services: ${execable}`);
+      process.exit(1);
+    }
+
+    if (!serviceConfig.capabilities.canExec) {
+      printError(`Service ${service} (${resolvedService}) is not exec-able`);
+      const execable = serviceRegistry.getExecableServices().map(s => s.name).join(', ');
+      printInfo(`Exec-able services: ${execable}`);
+      process.exit(1);
+    }
+
+    printInfo(`Opening shell in ${serviceRegistry.getDisplayName(service)}...`);
+    await execShellInContainer(resolvedService, options.shell);
+  });
+
+devCommand
   .command('nuke')
   .description('Complete teardown (stop, remove volumes, prune)')
   .action(async () => {
@@ -200,4 +227,3 @@ devCommand
     printSuccess('✨ Environment reset complete!');
     printInfo('Run "dharma logs" to view logs');
   });
-

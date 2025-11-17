@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client/react";
+import { useNavigate } from "react-router-dom";
 import { LoginDocument } from "./types";
 
 const useLogin = () => {
@@ -13,7 +13,7 @@ const useLogin = () => {
         variables: { data: { email, password } },
         onCompleted: (data) => {
           if (data?.login) {
-            navigate("/dashboard");
+            void navigate("/dashboard");
           }
         },
       });

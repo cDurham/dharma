@@ -6,3 +6,4 @@ coverage/
 .vite/
 .nx/
 
+.pnpm-store/

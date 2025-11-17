@@ -1,50 +1,38 @@
 services:
   # Database service removed - using AWS RDS instead
+  # Kafka and Zookeeper removed - not needed (no consumers)
   
-  zookeeper:
-    image: zookeeper:3.8
-    ports: [2181:2181]
-    networks: [app-net]
-    restart: unless-stopped
-
-  kafka:
-    image: wurstmeister/kafka:2.12-2.5.0
-    depends_on: [zookeeper]
-    environment:
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports: [9092:9092]
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "9092"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks: [app-net]
-    restart: unless-stopped
-
   api:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-      target: runtime_api
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/api:latest
     env_file: ../.env
-    depends_on:
-      kafka: { condition: service_healthy }
     ports: [3000:3000]
     networks: [app-net]
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/graphql"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.8'
 
   web:
-    build:
-      context: ..
-      dockerfile: Dockerfile
-      target: runtime_web
-    depends_on: [api]
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/web:latest
+    depends_on:
+      api:
+        condition: service_healthy
     ports: [8080:80]
     networks: [app-net]
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
 
 networks:
   app-net: { driver: bridge }

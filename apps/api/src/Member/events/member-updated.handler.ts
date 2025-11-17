@@ -1,6 +1,6 @@
-import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { KafkaService } from "../../kafka/kafka.service";
-import { MemberUpdatedEvent } from "./member-updated.event";
+import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
+import { KafkaService } from "../../kafka/kafka.service.js";
+import { MemberUpdatedEvent } from "./member-updated.event.js";
 
 @EventsHandler(MemberUpdatedEvent)
 export class MemberUpdatedHandler implements IEventHandler<MemberUpdatedEvent> {
@@ -12,7 +12,7 @@ export class MemberUpdatedHandler implements IEventHandler<MemberUpdatedEvent> {
       {
         memberUuid: event.memberUuid,
       },
-      "member-updated"
+      "member-updated",
     );
     console.log("Member updated event published", event);
   }

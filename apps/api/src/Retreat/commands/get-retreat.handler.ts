@@ -1,23 +1,23 @@
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { retreat } from "../../db/schema";
-import { Retreat } from "../retreat.entity";
-import { GetRetreatQuery } from "./get-retreat.query";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { retreat } from "../../db/schema/index.js";
+import type { RetreatEntity } from "../retreat.entity.js";
+import { GetRetreatQuery } from "./get-retreat.query.js";
 
 @QueryHandler(GetRetreatQuery)
 export class GetRetreatHandler
-  implements IQueryHandler<GetRetreatQuery, Retreat | null>
+  implements IQueryHandler<GetRetreatQuery, RetreatEntity | null>
 {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
-  async execute({ uuid }: GetRetreatQuery): Promise<Retreat | null> {
+  async execute({ uuid }: GetRetreatQuery): Promise<RetreatEntity | null> {
     const [result] = await this.db
       .select()
       .from(retreat)

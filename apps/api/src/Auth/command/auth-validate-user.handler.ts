@@ -1,8 +1,9 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { CommandHandler, ICommandHandler, QueryBus } from "@nestjs/cqrs";
+import { CommandHandler, type ICommandHandler, QueryBus } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
-import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query";
-import { ValidateUserCommand } from "./auth-validate-user.command";
+import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query.js";
+import type { UserEntity } from "../../User/user.entity.js";
+import { ValidateUserCommand } from "./auth-validate-user.command.js";
 
 @CommandHandler(ValidateUserCommand)
 export class ValidateUserHandler
@@ -10,9 +11,13 @@ export class ValidateUserHandler
 {
   constructor(private readonly queryBus: QueryBus) {}
 
-  async execute({ input }: ValidateUserCommand) {
+  async execute({
+    input,
+  }: ValidateUserCommand): Promise<Omit<UserEntity, "password">> {
     const { email, password } = input;
-    const user = await this.queryBus.execute(new GetUserByEmailQuery(email));
+    const user = await this.queryBus.execute<UserEntity | null>(
+      new GetUserByEmailQuery(email),
+    );
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
@@ -24,7 +29,8 @@ export class ValidateUserHandler
       throw new UnauthorizedException("Email not verified");
     }
 
-    const { password: _, ...result } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...result } = user;
     return result;
   }
 }

@@ -1,20 +1,20 @@
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { type IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { user } from "../../db/schema";
-import { User } from "../user.entity";
-import { GetUsersQuery } from "./get-users.query";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { user } from "../../db/schema/index.js";
+import type { UserEntity } from "../user.entity.js";
+import { GetUsersQuery } from "./get-users.query.js";
 
 @QueryHandler(GetUsersQuery)
 export class GetUsersHandler implements IQueryHandler<GetUsersQuery> {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
-  async execute(): Promise<User[]> {
+  async execute(): Promise<UserEntity[]> {
     return await this.db.select().from(user);
   }
 }

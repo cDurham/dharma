@@ -1,5 +1,5 @@
+import { loadDevMessages, loadErrorMessages } from "@apollo/client/dev";
 import { ApolloProvider } from "@apollo/client/react";
-import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
@@ -11,11 +11,17 @@ if (import.meta.env.DEV) {
   loadErrorMessages();
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root")!);
+const container = document.getElementById("root");
+
+if (!container) {
+  throw new Error("Root element not found");
+}
+
+const root = ReactDOM.createRoot(container);
 root.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </ApolloProvider>
+  </ApolloProvider>,
 );

@@ -1,0 +1,104 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [trunk]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api, web]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set lowercase repository name
+        id: repo
+        run: echo "repository_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Short SHA tag
+        id: meta
+        run: echo "tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push ${{ matrix.service }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runtime_${{ matrix.service }}
+          push: true
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.repository_lower }}/${{ matrix.service }}:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ steps.repo.outputs.repository_lower }}/${{ matrix.service }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          build-args: |
+            CACHEBUST=${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set lowercase repository name
+        id: repo
+        run: echo "repository_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Short SHA tag
+        id: tag
+        run: echo "image_tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_USER_PASSWORD: ${{ secrets.EMAIL_USER_PASSWORD }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          GITHUB_REPOSITORY: ${{ steps.repo.outputs.repository_lower }}
+          IMAGE_TAG: ${{ steps.tag.outputs.image_tag }}
+          GIT_BRANCH: ${{ github.ref_name }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 20m
+          envs: DB_HOST,DB_PASSWORD,JWT_SECRET,COOKIE_SECRET,EMAIL_USER,EMAIL_USER_PASSWORD,FRONTEND_URL,GITHUB_REPOSITORY,IMAGE_TAG,GIT_BRANCH
+          script: |
+            cd /opt/dharma
+            export DB_HOST="$DB_HOST"
+            export DB_PASSWORD="$DB_PASSWORD"
+            export JWT_SECRET="$JWT_SECRET"
+            export COOKIE_SECRET="$COOKIE_SECRET"
+            export EMAIL_USER="$EMAIL_USER"
+            export EMAIL_USER_PASSWORD="$EMAIL_USER_PASSWORD"
+            export FRONTEND_URL="$FRONTEND_URL"
+            export GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+            export IMAGE_TAG="$IMAGE_TAG"
+            export GIT_BRANCH="$GIT_BRANCH"
+            bash deploy/deploy.sh

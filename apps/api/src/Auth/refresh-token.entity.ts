@@ -1,4 +1,4 @@
-import { RefreshTokenRow } from "../db/types";
+import type { RefreshTokenRow } from "../db/types.js";
 
 export class RefreshToken implements RefreshTokenRow {
   uuid!: string;

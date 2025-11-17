@@ -1,12 +1,12 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { Inject } from "@nestjs/common";
+import { CommandHandler, type ICommandHandler } from "@nestjs/cqrs";
 import { eq } from "drizzle-orm";
 
-import { DB_TOKEN } from "../../db/database.module";
-import { db as DbType } from "../../db/data-source";
-import { refreshToken } from "../../db/schema";
-import { AuthRevokeRefreshTokenCommand } from "./auth-revoke-refresh-token.command";
-import { hashToken } from "../utils";
+import type { db as DbType } from "../../db/data-source.js";
+import { DB_TOKEN } from "../../db/database.module.js";
+import { refreshToken } from "../../db/schema/index.js";
+import { hashToken } from "../utils.js";
+import { AuthRevokeRefreshTokenCommand } from "./auth-revoke-refresh-token.command.js";
 
 @CommandHandler(AuthRevokeRefreshTokenCommand)
 export class AuthRevokeRefreshTokenHandler
@@ -14,7 +14,7 @@ export class AuthRevokeRefreshTokenHandler
 {
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType
+    private readonly db: typeof DbType,
   ) {}
 
   async execute({ token }: AuthRevokeRefreshTokenCommand): Promise<void> {

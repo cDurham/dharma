@@ -1,8 +1,8 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { Retreat } from "./retreat.entity";
+import type { RetreatEntity } from "./retreat.entity.js";
 
 @InputType()
-export class CreateRetreatInput implements Partial<Retreat> {
+export class CreateRetreatInput implements Partial<RetreatEntity> {
   @Field()
   name!: string;
 
@@ -14,7 +14,7 @@ export class CreateRetreatInput implements Partial<Retreat> {
 }
 
 @InputType()
-export class UpdateRetreatInput implements Partial<Retreat> {
+export class UpdateRetreatInput implements Partial<RetreatEntity> {
   @Field({ nullable: true })
   name?: string;
 
