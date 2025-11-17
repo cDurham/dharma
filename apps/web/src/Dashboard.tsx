@@ -1,7 +1,12 @@
 import { useState, useTransition } from "react";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { CreateMemberDocument, MembersDocument } from "./graphql/types";
+import {
+  CreateMemberDocument,
+  DeleteUserDocument,
+  GetUsersDocument,
+  MembersDocument,
+} from "./graphql/types";
 import useLogout from "./graphql/useLogout";
 
 export const Dashboard = () => {
@@ -9,7 +14,20 @@ export const Dashboard = () => {
   const [isPending, startTransition] = useTransition();
 
   const [createMember] = useMutation(CreateMemberDocument);
-  const { loading, error, data, refetch } = useQuery(MembersDocument);
+  const {
+    loading: membersLoading,
+    error: membersError,
+    data: membersData,
+    refetch: refetchMembers,
+  } = useQuery(MembersDocument);
+  const {
+    loading: usersLoading,
+    error: usersError,
+    data: usersData,
+    refetch: refetchUsers,
+  } = useQuery(GetUsersDocument);
+  const [deleteUser, { loading: deleteUserLoading, error: deleteUserError }] =
+    useMutation(DeleteUserDocument);
 
   const createMemberAction = (formData: FormData) => {
     const firstName = formData.get("firstName") as string;
@@ -21,7 +39,7 @@ export const Dashboard = () => {
           variables: { data: { firstName, lastName } },
         });
         setIsDialogOpen(false);
-        void refetch();
+        void refetchMembers();
       } catch (error) {
         console.error("Error creating member:", error);
       }
@@ -31,7 +49,24 @@ export const Dashboard = () => {
   const handleGetMembers = () => {
     console.log("Fetching members...");
     startTransition(() => {
-      void refetch();
+      void refetchMembers();
+    });
+  };
+
+  const handleDeleteUser = (uuid: string) => {
+    startTransition(async () => {
+      try {
+        await deleteUser({ variables: { uuid } });
+        await refetchUsers();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    });
+  };
+
+  const handleRefreshUsers = () => {
+    startTransition(() => {
+      void refetchUsers();
     });
   };
 
@@ -40,18 +75,48 @@ export const Dashboard = () => {
 
   return (
     <div>
-      <button onClick={handleGetMembers} disabled={isPending}>
-        {isPending ? "Loading..." : "Fetch Members"}
-      </button>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-      {data && (
-        <ul>
-          {data.members.map((member) => (
-            <li key={member.uuid}>{member.firstName}</li>
-          ))}
-        </ul>
-      )}
+      <section>
+        <h2>Members</h2>
+        <button onClick={handleGetMembers} disabled={isPending}>
+          {isPending ? "Loading..." : "Fetch Members"}
+        </button>
+        {membersLoading && <p>Loading members...</p>}
+        {membersError && <p>Error: {membersError.message}</p>}
+        {membersData && (
+          <ul>
+            {membersData.members.map((member) => (
+              <li key={member.uuid}>{member.firstName}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2>Users</h2>
+        <button onClick={handleRefreshUsers} disabled={isPending}>
+          {isPending ? "Loading..." : "Refresh Users"}
+        </button>
+        {usersLoading && <p>Loading users...</p>}
+        {usersError && <p>Error: {usersError.message}</p>}
+        {usersData && (
+          <ul>
+            {usersData.users.map((user) => (
+              <li key={user.uuid}>
+                {user.firstName} {user.lastName} ({user.email})
+                <button
+                  onClick={() => handleDeleteUser(user.uuid)}
+                  disabled={deleteUserLoading || isPending}
+                  style={{ marginLeft: "0.5rem" }}
+                >
+                  {deleteUserLoading ? "Deleting..." : "Delete"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {deleteUserError && <p>Error deleting user: {deleteUserError.message}</p>}
+      </section>
+
       <button onClick={() => void handleLogout()} disabled={logoutLoading}>
         {logoutLoading ? "Logging out..." : "Logout"}
       </button>
