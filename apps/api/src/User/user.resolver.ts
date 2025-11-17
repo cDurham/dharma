@@ -8,6 +8,7 @@ import { DeleteUserCommand } from "./command/delete-user.command.js";
 import { GetUserByEmailQuery } from "./command/get-user-by-email.query.js";
 import { GetUserQuery } from "./command/get-user.query.js";
 import { GetUsersQuery } from "./command/get-users.query.js";
+import { ResendVerificationEmailCommand } from "./command/resend-verification-email.command.js";
 import { UpdateUserCommand } from "./command/update-user.command.js";
 import { VerifyEmailCommand } from "./command/verify-email.command.js";
 import type { AuthenticatedUser } from "./user.schema.js";
@@ -69,6 +70,13 @@ export class UserResolver {
   async verifyEmail(@Args("token") token: string): Promise<boolean> {
     const result = await this.commandBus.execute(new VerifyEmailCommand(token));
     return result;
+  }
+
+  @Mutation(() => Boolean)
+  async resendVerificationEmail(@Args("email") email: string): Promise<boolean> {
+    return this.commandBus.execute(
+      new ResendVerificationEmailCommand(email),
+    );
   }
 
   @Query(() => User)

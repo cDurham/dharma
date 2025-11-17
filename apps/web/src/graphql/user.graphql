@@ -32,6 +32,10 @@ mutation VerifyEmail($token: String!) {
   verifyEmail(token: $token)
 }
 
+mutation ResendVerificationEmail($email: String!) {
+  resendVerificationEmail(email: $email)
+}
+
 query GetUser($uuid: String!) {
   user(uuid: $uuid) {
     uuid

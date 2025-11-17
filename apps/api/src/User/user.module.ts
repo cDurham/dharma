@@ -8,6 +8,7 @@ import { DeleteUserHandler } from "./command/delete-user.handler.js";
 import { GetUserByEmailHandler } from "./command/get-user-by-email.handler.js";
 import { GetUserHandler } from "./command/get-user.handler.js";
 import { GetUsersHandler } from "./command/get-users.handler.js";
+import { ResendVerificationEmailHandler } from "./command/resend-verification-email.handler.js";
 import { UpdateUserHandler } from "./command/update-user.handler.js";
 import { VerifyEmailHandler } from "./command/verify-email.handler.js";
 import { UserCreatedHandler } from "./event/user-created.handler.js";
@@ -27,6 +28,7 @@ import { UserResolver } from "./user.resolver.js";
     GetUserByEmailHandler,
     GetUserHandler,
     GetUsersHandler,
+    ResendVerificationEmailHandler,
     VerifyEmailHandler,
     // Event handlers
     UserCreatedHandler,
