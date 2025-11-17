@@ -1,7 +1,4 @@
-services:
-  # Database service removed - using AWS RDS instead
-  # Kafka and Zookeeper removed - not needed (no consumers)
-  
+services:  
   api:
     image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/api:latest
     env_file: ../.env
@@ -9,7 +6,7 @@ services:
     networks: [app-net]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/.well-known/apollo/server-health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
       timeout: 5s
       retries: 5

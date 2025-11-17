@@ -11,6 +11,7 @@ import type { Request, Response } from "express";
 
 import { AuthModule } from "./Auth/index.js";
 import { DatabaseModule } from "./db/database.module.js";
+import { HealthController } from "./health/health.controller.js";
 import { KafkaModule } from "./kafka/kafka.module.js";
 import { MemberModule } from "./Member/member.module.js";
 import { RetreatModule } from "./Retreat/index.js";
@@ -50,7 +51,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
       },
     ]),
   ],
-  controllers: [VerificationController],
+  controllers: [VerificationController, HealthController],
   providers: [],
 })
 export class AppModule {}

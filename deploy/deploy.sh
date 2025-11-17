@@ -6,8 +6,8 @@ cd $APP_DIR
 
 echo "🚀 Starting deployment..."
 
-# Apollo exposes a standard health endpoint that works in production mode
-API_HEALTH_URL="http://localhost:3000/.well-known/apollo/server-health"
+# Custom health endpoint
+API_HEALTH_URL="http://localhost:3000/health"
 
 # Ensure the image repository is lowercase for GHCR
 export GITHUB_REPOSITORY=$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')
