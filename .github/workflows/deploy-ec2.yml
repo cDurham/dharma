@@ -49,8 +49,6 @@ jobs:
             ghcr.io/${{ steps.repo.outputs.repository_lower }}/${{ matrix.service }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
-          build-args: |
-            CACHEBUST=${{ github.sha }}
 
   deploy:
     needs: build-and-push

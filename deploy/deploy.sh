@@ -6,6 +6,9 @@ cd $APP_DIR
 
 echo "🚀 Starting deployment..."
 
+# Apollo exposes a standard health endpoint that works in production mode
+API_HEALTH_URL="http://localhost:3000/.well-known/apollo/server-health"
+
 # Ensure the image repository is lowercase for GHCR
 export GITHUB_REPOSITORY=$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')
 
@@ -71,7 +74,7 @@ fi
 # Wait for API to be ready with intelligent health check
 echo "⏳ Waiting for API to be ready..."
 for i in {1..60}; do
-  if curl -f http://localhost:3000/graphql > /dev/null 2>&1; then
+  if curl -f "$API_HEALTH_URL" > /dev/null 2>&1; then
     echo "✅ API is ready after $i seconds"
     break
   fi
@@ -89,7 +92,7 @@ docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push
 
 # Final health check
 echo "🏥 Running final health check..."
-if curl -f http://localhost:3000/graphql > /dev/null 2>&1; then
+if curl -f "$API_HEALTH_URL" > /dev/null 2>&1; then
     echo "✅ Deployment successful!"
 else
     echo "❌ Health check failed!"

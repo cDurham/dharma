@@ -9,7 +9,7 @@ services:
     networks: [app-net]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/.well-known/apollo/server-health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,4 +36,3 @@ services:
 
 networks:
   app-net: { driver: bridge }
-

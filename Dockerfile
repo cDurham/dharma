@@ -29,8 +29,6 @@ CMD ["pnpm", "run", "web:serve"]
 
 # ---------- build (build both apps together for maximal cache reuse)
 FROM deps AS build
-ARG CACHEBUST
-RUN echo "Cache bust: ${CACHEBUST}"
 COPY . .
 # Persist Nx cache across Docker builds
 RUN --mount=type=cache,target=/workspace/.nx/cache \
