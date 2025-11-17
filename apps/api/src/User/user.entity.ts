@@ -1,6 +1,6 @@
 import type { UserRow } from "../db/types.js";
 
-export class User implements UserRow {
+export class UserEntity implements UserRow {
   uuid!: string;
   firstName!: string;
   lastName!: string;

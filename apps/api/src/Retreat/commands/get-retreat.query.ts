@@ -1,7 +1,7 @@
 import { Query } from "@nestjs/cqrs";
-import type { Retreat } from "../retreat.entity.js";
+import type { RetreatEntity } from "../retreat.entity.js";
 
-export class GetRetreatQuery extends Query<Retreat | null> {
+export class GetRetreatQuery extends Query<RetreatEntity | null> {
   constructor(public readonly uuid: string) {
     super();
   }

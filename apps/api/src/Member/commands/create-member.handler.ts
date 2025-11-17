@@ -7,7 +7,7 @@ import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { member } from "../../db/schema/index.js";
 import { MemberCreatedEvent } from "../events/member-created.event.js";
-import type { Member } from "../member.entity.js";
+import type { MemberEntity } from "../member.entity.js";
 import { CreateMemberCommand } from "./create-member.command.js";
 
 @CommandHandler(CreateMemberCommand)
@@ -20,7 +20,7 @@ export class CreateMemberHandler
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute(command: CreateMemberCommand): Promise<Member> {
+  async execute(command: CreateMemberCommand): Promise<MemberEntity> {
     const { firstName, lastName } = command.input;
 
     const newMemberId = uuidv7();

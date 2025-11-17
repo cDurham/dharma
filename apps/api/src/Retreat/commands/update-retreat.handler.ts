@@ -6,7 +6,7 @@ import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { retreat } from "../../db/schema/index.js";
 import { RetreatUpdatedEvent } from "../events/retreat-updated.event.js";
-import type { Retreat } from "../retreat.entity.js";
+import type { RetreatEntity } from "../retreat.entity.js";
 import type { UpdateRetreatData } from "../retreat.schema.js";
 import { UpdateRetreatCommand } from "./update-retreat.command.js";
 
@@ -23,7 +23,7 @@ export class UpdateRetreatHandler
   async execute({
     retreatUuid,
     data,
-  }: UpdateRetreatCommand): Promise<Retreat | null> {
+  }: UpdateRetreatCommand): Promise<RetreatEntity | null> {
     // Check if retreat exists
     const [existingRetreat] = await this.db
       .select()

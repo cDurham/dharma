@@ -7,7 +7,7 @@ import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { user } from "../../db/schema/index.js";
 import { UserUpdatedEvent } from "../event/user-updated.event.js";
-import type { User } from "../user.entity.js";
+import type { UserEntity } from "../user.entity.js";
 import type { UpdateUserData } from "../user.schema.js";
 import { UpdateUserCommand } from "./update-user.command.js";
 
@@ -19,7 +19,10 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute({ userUuid, data }: UpdateUserCommand): Promise<User | null> {
+  async execute({
+    userUuid,
+    data,
+  }: UpdateUserCommand): Promise<UserEntity | null> {
     const { email, password } = data;
 
     // Check if user exists

@@ -1,13 +1,11 @@
-import type { User } from "../User/user.entity.js";
 import type { MemberRow } from "../db/types.js";
 
-export class Member implements Omit<MemberRow, "userUuid"> {
+export class MemberEntity implements MemberRow {
   uuid!: string;
   firstName!: string;
   lastName!: string;
   joinDate!: Date;
-  user?: User | null;
+  userUuid!: string | null;
   createdAt!: Date;
   updatedAt!: Date;
-  userUuid?: string | null;
 }

@@ -1,17 +1,32 @@
-import type { Retreat } from "./retreat.entity.js";
+import { Field, InputType } from "@nestjs/graphql";
+import type { RetreatEntity } from "./retreat.entity.js";
 
-export class CreateRetreatInput implements Partial<Retreat> {
+@InputType()
+export class CreateRetreatInput implements Partial<RetreatEntity> {
+  @Field()
   name!: string;
+
+  @Field()
   startAt!: Date;
+
+  @Field()
   endAt!: Date;
 }
 
-export class UpdateRetreatInput implements Partial<Retreat> {
+@InputType()
+export class UpdateRetreatInput implements Partial<RetreatEntity> {
+  @Field({ nullable: true })
   name?: string;
+
+  @Field({ nullable: true })
   startAt?: Date;
+
+  @Field({ nullable: true })
   endAt?: Date;
 }
 
+@InputType()
 export class DeleteRetreatInput {
+  @Field()
   uuid!: string;
 }

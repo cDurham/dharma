@@ -5,19 +5,19 @@ import { eq } from "drizzle-orm";
 import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { user } from "../../db/schema/index.js";
-import type { User } from "../user.entity.js";
+import type { UserEntity } from "../user.entity.js";
 import { GetUserQuery } from "./get-user.query.js";
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler
-  implements IQueryHandler<GetUserQuery, User | null>
+  implements IQueryHandler<GetUserQuery, UserEntity | null>
 {
   constructor(
     @Inject(DB_TOKEN)
     private readonly db: typeof DbType,
   ) {}
 
-  async execute({ userUuid }: GetUserQuery): Promise<User | null> {
+  async execute({ userUuid }: GetUserQuery): Promise<UserEntity | null> {
     const [result] = await this.db
       .select()
       .from(user)

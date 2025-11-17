@@ -5,7 +5,7 @@ import { authConfig } from "../config/auth.config.js";
 import type { GraphQLContext } from "../graphql-context.type.js";
 import { getRefreshToken } from "./auth.cookies.js";
 import { LoginResponse } from "./auth.dto.js";
-import type { ValidateUserInput } from "./auth.input.js";
+import { ValidateUserInput } from "./auth.input.js";
 import { AuthLoginUserCommand } from "./command/auth-login-user.command.js";
 import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-token.command.js";
 import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command.js";

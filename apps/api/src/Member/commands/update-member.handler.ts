@@ -6,7 +6,7 @@ import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { member } from "../../db/schema/index.js";
 import { MemberUpdatedEvent } from "../events/member-updated.event.js";
-import type { Member } from "../member.entity.js";
+import type { MemberEntity } from "../member.entity.js";
 import type { UpdateMemberData } from "../member.schema.js";
 import { UpdateMemberCommand } from "./update-member.command.js";
 
@@ -20,7 +20,10 @@ export class UpdateMemberHandler
     private readonly eventBus: EventBus,
   ) {}
 
-  async execute({ memberUuid, data }: UpdateMemberCommand): Promise<Member> {
+  async execute({
+    memberUuid,
+    data,
+  }: UpdateMemberCommand): Promise<MemberEntity> {
     // Check if member exists
     const [existingMember] = await this.db
       .select()

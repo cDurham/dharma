@@ -5,8 +5,8 @@ import { PassportStrategy } from "@nestjs/passport";
 import type { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { GetUserQuery } from "../User/command/get-user.query.js";
-import type { User } from "../User/user.entity.js";
 import type { AuthenticatedUser } from "../User/user.schema.js";
+import type { UserEntity } from "../User/user.entity.js";
 import { getAccessToken } from "./auth.cookies.js";
 
 @Injectable()
@@ -38,7 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     sub: string;
     email: string;
   }): Promise<AuthenticatedUser> {
-    const user = await this.queryBus.execute<User | null>(
+    const user = await this.queryBus.execute<UserEntity | null>(
       new GetUserQuery(payload.sub),
     );
 

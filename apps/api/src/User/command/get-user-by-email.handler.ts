@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import type { db as DbType } from "../../db/data-source.js";
 import { DB_TOKEN } from "../../db/database.module.js";
 import { user } from "../../db/schema/index.js";
-import type { User } from "../user.entity.js";
+import type { UserEntity } from "../user.entity.js";
 import { GetUserByEmailQuery } from "./get-user-by-email.query.js";
 
 @QueryHandler(GetUserByEmailQuery)
@@ -17,7 +17,7 @@ export class GetUserByEmailHandler
     private readonly db: typeof DbType,
   ) {}
 
-  async execute({ email }: GetUserByEmailQuery): Promise<User | null> {
+  async execute({ email }: GetUserByEmailQuery): Promise<UserEntity | null> {
     const [result] = await this.db
       .select()
       .from(user)

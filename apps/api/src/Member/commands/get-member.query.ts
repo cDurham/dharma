@@ -1,7 +1,7 @@
 import { Query } from "@nestjs/cqrs";
-import type { Member } from "../member.entity.js";
+import type { MemberEntity } from "../member.entity.js";
 
-export class GetMemberQuery extends Query<Member | null> {
+export class GetMemberQuery extends Query<MemberEntity | null> {
   constructor(public readonly memberUuid: string) {
     super();
   }

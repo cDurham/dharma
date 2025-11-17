@@ -18,8 +18,6 @@ import { DatabaseModule } from "./db/database.module.js";
 import { KafkaModule } from "./kafka/kafka.module.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const graphqlTypePaths = [join(__dirname, "**/*.graphql")];
-
 @Module({
   imports: [
     CqrsModule.forRoot(),
@@ -31,8 +29,8 @@ const graphqlTypePaths = [join(__dirname, "**/*.graphql")];
     RetreatModule,
     KafkaModule,
     GraphQLModule.forRoot({
-      typePaths: graphqlTypePaths,
       driver: ApolloDriver,
+      autoSchemaFile: join(__dirname, "schema.gql"),
       sortSchema: true,
       introspection: process.env.NODE_ENV !== "production",
       context: ({ req, res }: { req: Request; res: Response }) => ({

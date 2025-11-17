@@ -6,7 +6,7 @@ import {
 } from "@nestjs/cqrs";
 import bcrypt from "bcryptjs";
 import { GetUserByEmailQuery } from "../../User/command/get-user-by-email.query.js";
-import type { User } from "../../User/user.entity.js";
+import type { UserEntity } from "../../User/user.entity.js";
 import { ValidateUserCommand } from "./auth-validate-user.command.js";
 
 @CommandHandler(ValidateUserCommand)
@@ -17,9 +17,11 @@ export class ValidateUserHandler
 
   async execute({
     input,
-  }: ValidateUserCommand): Promise<Omit<User, "password">> {
+  }: ValidateUserCommand): Promise<Omit<UserEntity, "password">> {
     const { email, password } = input;
-    const user = await this.queryBus.execute(new GetUserByEmailQuery(email));
+    const user = await this.queryBus.execute<UserEntity | null>(
+      new GetUserByEmailQuery(email),
+    );
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
