@@ -6,6 +6,9 @@ cd $APP_DIR
 
 echo "🚀 Starting deployment..."
 
+# Ensure the image repository is lowercase for GHCR
+GITHUB_REPOSITORY=$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')
+
 # Pull latest code
 git pull origin ${GIT_BRANCH:-trunk}
 
