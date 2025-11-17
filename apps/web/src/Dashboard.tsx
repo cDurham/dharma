@@ -1,6 +1,5 @@
-import { useState, useTransition } from "react";
-
 import { useMutation, useQuery } from "@apollo/client/react";
+import { useState, useTransition } from "react";
 import {
   CreateMemberDocument,
   DeleteUserDocument,
@@ -77,7 +76,7 @@ export const Dashboard = () => {
     <div>
       <section>
         <h2>Members</h2>
-        <button onClick={handleGetMembers} disabled={isPending}>
+        <button type="button" onClick={handleGetMembers} disabled={isPending}>
           {isPending ? "Loading..." : "Fetch Members"}
         </button>
         {membersLoading && <p>Loading members...</p>}
@@ -93,7 +92,7 @@ export const Dashboard = () => {
 
       <section>
         <h2>Users</h2>
-        <button onClick={handleRefreshUsers} disabled={isPending}>
+        <button type="button" onClick={handleRefreshUsers} disabled={isPending}>
           {isPending ? "Loading..." : "Refresh Users"}
         </button>
         {usersLoading && <p>Loading users...</p>}
@@ -104,6 +103,7 @@ export const Dashboard = () => {
               <li key={user.uuid}>
                 {user.firstName} {user.lastName} ({user.email})
                 <button
+                  type="button"
                   onClick={() => handleDeleteUser(user.uuid)}
                   disabled={deleteUserLoading || isPending}
                   style={{ marginLeft: "0.5rem" }}
@@ -114,15 +114,23 @@ export const Dashboard = () => {
             ))}
           </ul>
         )}
-        {deleteUserError && <p>Error deleting user: {deleteUserError.message}</p>}
+        {deleteUserError && (
+          <p>Error deleting user: {deleteUserError.message}</p>
+        )}
       </section>
 
-      <button onClick={() => void handleLogout()} disabled={logoutLoading}>
+      <button
+        type="button"
+        onClick={() => void handleLogout()}
+        disabled={logoutLoading}
+      >
         {logoutLoading ? "Logging out..." : "Logout"}
       </button>
       {logoutError && <p>Error: {logoutError.message}</p>}
 
-      <button onClick={() => setIsDialogOpen(true)}>Create Member</button>
+      <button type="button" onClick={() => setIsDialogOpen(true)}>
+        Create Member
+      </button>
 
       {isDialogOpen && (
         <div className="dialog">

@@ -53,8 +53,9 @@ const LoginForm = () => {
   const isUnverifiedError = (err: unknown) => {
     if (isApolloLikeError(err)) {
       const graphQlMatches =
-        err.graphQLErrors?.some((gqlErr) => includesUnverified(gqlErr.message)) ??
-        false;
+        err.graphQLErrors?.some((gqlErr) =>
+          includesUnverified(gqlErr.message),
+        ) ?? false;
       const messageMatches = includesUnverified(err.message);
       return graphQlMatches || messageMatches;
     }
