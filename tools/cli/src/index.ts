@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { dbCommand } from "./commands/db.js";
 import { devCommand } from "./commands/dev.js";
+import { prodCommand } from "./commands/prod.js";
 import { execCommand } from "./commands/exec.js";
 import { lintCommand } from "./commands/lint.js";
 import { logsCommand } from "./commands/logs.js";
@@ -23,6 +24,7 @@ if (shouldShowBanner) {
 }
 
 program.addCommand(devCommand);
+program.addCommand(prodCommand);
 program.addCommand(logsCommand);
 program.addCommand(dbCommand);
 program.addCommand(execCommand);

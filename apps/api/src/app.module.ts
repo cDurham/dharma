@@ -31,7 +31,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
     KafkaModule,
     GraphQLModule.forRoot({
       driver: ApolloDriver,
-      autoSchemaFile: join(__dirname, "schema.gql"),
+      autoSchemaFile:
+        process.env.NODE_ENV === "production"
+          ? false
+          : join(__dirname, "schema.gql"),
       sortSchema: true,
       introspection: process.env.NODE_ENV !== "production",
       context: ({ req, res }: { req: Request; res: Response }) => ({
