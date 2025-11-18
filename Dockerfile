@@ -69,4 +69,3 @@ CMD ["node", "dist/apps/api/src/index.js"]
 # ---------- runtime_web
 FROM nginx:1.27-alpine AS runtime_web
 COPY --from=build /workspace/dist/apps/web /usr/share/nginx/html
-USER nginx
