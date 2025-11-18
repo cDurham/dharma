@@ -24,6 +24,8 @@ services:
     build:
       context: .
       target: runtime_api
+    environment:
+      NODE_ENV: production
     env_file: .env
     depends_on:
       db: { condition: service_started }
@@ -35,6 +37,8 @@ services:
     build:
       context: .
       target: runtime_web
+    environment:
+      NODE_ENV: production
     depends_on: [api]
     ports: [8080:80] # host:container (nginx serves on 80)
     networks: [app-net]
