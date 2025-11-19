@@ -68,6 +68,19 @@ jobs:
         id: tag
         run: echo "image_tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
+      - name: Cleanup Docker resources
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            cd /opt/dharma
+            # Ensure script is executable (just in case)
+            chmod +x deploy/cleanup.sh
+            bash deploy/cleanup.sh
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         env:

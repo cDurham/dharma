@@ -52,6 +52,8 @@ CURRENT_TAG=$(docker inspect ghcr.io/${GITHUB_REPOSITORY}/api:latest --format='{
 echo "📦 Current deployment: ${CURRENT_TAG}"
 echo "📦 Target deployment: ${IMAGE_TAG:-latest}"
 
+
+
 # 1. Pull new images
 echo "🐳 Pulling new images..."
 docker compose -f deploy/docker-compose.prod.yml pull
@@ -72,5 +74,3 @@ else
 fi
 
 echo "🎉 Deployment complete!"
-
-
