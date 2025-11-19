@@ -43,6 +43,19 @@ services:
     ports: [8080:80] # host:container (nginx serves on 80)
     networks: [app-net]
 
+  migrator:
+    profiles: ["prod"]
+    build:
+      context: .
+      target: migrations
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+    env_file: .env
+    depends_on:
+      db: { condition: service_started }
+    networks: [app-net]
+
   #############################
   # Development profile
   #############################

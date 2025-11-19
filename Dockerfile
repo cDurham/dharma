@@ -40,6 +40,11 @@ RUN pnpm prune --prod
 # (Optional, smaller: with pnpm >= 8.9)
 # RUN pnpm --filter ./apps/api... deploy --prod /workspace/deploy/api
 
+# ---------- migrations
+FROM deps AS migrations
+COPY . .
+CMD ["pnpm", "run", "db:push"]
+
 # ---------- runtime_api
 FROM node:22-slim AS runtime_api
 WORKDIR /app
