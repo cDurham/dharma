@@ -11,8 +11,10 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Copy per-project manifests so pnpm can resolve workspace graph without copying the whole repo yet
 # (only tools/cli has its own package.json; apps live under the root package)
-RUN mkdir -p tools/cli
+RUN mkdir -p tools/cli apps/api apps/web
 COPY tools/cli/package.json ./tools/cli/package.json
+COPY apps/api/package.json ./apps/api/package.json
+COPY apps/web/package.json ./apps/web/package.json
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
@@ -36,9 +38,7 @@ RUN --mount=type=cache,target=/workspace/.nx/cache \
 
 # ---------- prune (production-only dependencies)
 FROM deps AS prune
-RUN pnpm prune --prod
-# (Optional, smaller: with pnpm >= 8.9)
-# RUN pnpm --filter ./apps/api... deploy --prod /workspace/deploy/api
+RUN pnpm --filter=api --prod deploy /deploy/api
 
 # ---------- migrations
 FROM deps AS migrations
@@ -50,16 +50,12 @@ FROM node:22-slim AS runtime_api
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Minimal runtime package.json for ESM semantics
-RUN printf '{"name":"dharma-api","type":"module","private":true}\n' > package.json
-
 # Copy built API
 COPY --from=build /workspace/dist/apps/api ./dist/apps/api
 
-# Copy pruned production-only node_modules
-COPY --from=prune /workspace/node_modules ./node_modules
-# If you used the optional pnpm deploy above, prefer:
-# COPY --from=prune /workspace/deploy/api/node_modules ./node_modules
+# Copy pruned production-only node_modules and package.json from deploy
+COPY --from=prune /deploy/api/node_modules ./node_modules
+COPY --from=prune /deploy/api/package.json ./package.json
 
 # Run as non-root user
 USER node
