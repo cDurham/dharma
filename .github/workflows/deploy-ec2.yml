@@ -76,10 +76,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           command_timeout: 10m
           script: |
-            cd /opt/dharma
-            # Ensure script is executable (just in case)
-            chmod +x deploy/cleanup.sh
-            bash deploy/cleanup.sh
+            echo "🧹 Cleaning up old docker resources..."
+            docker system prune -f || true
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
