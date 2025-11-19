@@ -5,6 +5,10 @@ on:
     branches: [trunk]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -16,9 +20,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Set lowercase repository name
         id: repo
         run: echo "repository_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
@@ -53,13 +54,13 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment:
       name: production
+    permissions:
+      contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Set lowercase repository name
         id: repo
         run: echo "repository_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
@@ -69,7 +70,7 @@ jobs:
         run: echo "image_tag=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
       - name: Cleanup Docker resources
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -80,7 +81,7 @@ jobs:
             docker system prune -f || true
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@91f3272fc5907f4699dcf59761eb622a07342f5a
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}

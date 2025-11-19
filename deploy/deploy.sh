@@ -1,21 +1,20 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 APP_DIR="/opt/dharma"
-cd $APP_DIR
+cd "$APP_DIR"
 
 echo "🚀 Starting deployment..."
 
-# Custom health endpoint
-API_HEALTH_URL="http://localhost:3000/health"
-
 # Ensure the image repository is lowercase for GHCR
-export GITHUB_REPOSITORY=$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')
+export GITHUB_REPOSITORY="$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')"
+TARGET_TAG="${IMAGE_TAG:-latest}"
 
 # Pull latest code
-git pull origin ${GIT_BRANCH:-trunk}
+git pull origin "${GIT_BRANCH:-trunk}"
 
 # Create .env from environment variables (passed by GitHub Actions)
+umask 077
 cat > .env << EOF
 # Database (RDS)
 DB_HOST=${DB_HOST}
@@ -48,9 +47,9 @@ NODE_ENV=production
 EOF
 
 # Check if we need to update images
-CURRENT_TAG=$(docker inspect ghcr.io/${GITHUB_REPOSITORY}/api:latest --format='{{index .RepoDigests 0}}' 2>/dev/null || echo "none")
+CURRENT_TAG=$(docker inspect "ghcr.io/${GITHUB_REPOSITORY}/api:${TARGET_TAG}" --format='{{index .RepoDigests 0}}' 2>/dev/null || echo "none")
 echo "📦 Current deployment: ${CURRENT_TAG}"
-echo "📦 Target deployment: ${IMAGE_TAG:-latest}"
+echo "📦 Target deployment: ${TARGET_TAG}"
 
 
 
@@ -69,7 +68,8 @@ if docker compose -f deploy/docker-compose.prod.yml up --wait; then
     echo "✅ Deployment successful!"
 else
     echo "❌ Deployment failed! Health checks did not pass."
-    docker compose -f deploy/docker-compose.prod.yml logs api
+    docker compose -f deploy/docker-compose.prod.yml ps
+    docker compose -f deploy/docker-compose.prod.yml logs --tail=200 api web migrator
     exit 1
 fi
 

@@ -63,10 +63,6 @@ COPY --from=prune /deploy/api/package.json ./package.json
 # Run as non-root user
 USER node
 
-# Health check for API readiness
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
-
 EXPOSE 3000
 CMD ["node", "dist/apps/api/src/index.js"]
 

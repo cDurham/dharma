@@ -1,6 +1,6 @@
 services:  
   api:
-    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/api:latest
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/api:${IMAGE_TAG:-latest}
     environment:
       NODE_ENV: production
     env_file: ../.env
@@ -20,7 +20,7 @@ services:
           cpus: '0.8'
 
   web:
-    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/web:latest
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/web:${IMAGE_TAG:-latest}
     depends_on:
       api:
         condition: service_healthy
@@ -36,10 +36,9 @@ services:
           cpus: '0.2'
 
   migrator:
-    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/migrator:latest
+    image: ghcr.io/${GITHUB_REPOSITORY:-dharma}/migrator:${IMAGE_TAG:-latest}
     environment:
       NODE_ENV: production
-      DB_HOST: db
     env_file: ../.env
     networks: [app-net]
     deploy:
