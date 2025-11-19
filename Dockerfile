@@ -45,6 +45,9 @@ FROM deps AS migrations
 COPY . .
 CMD ["pnpm", "run", "db:push"]
 
+# ---------- runtime_migrator (alias for consistency with CI)
+FROM migrations AS runtime_migrator
+
 # ---------- runtime_api
 FROM node:22-slim AS runtime_api
 WORKDIR /app

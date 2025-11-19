@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [api, web]
+        service: [api, web, migrator]
     permissions:
       contents: read
       packages: write
