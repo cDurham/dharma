@@ -20,6 +20,9 @@ jobs:
       packages: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4      
+
       - name: Set lowercase repository name
         id: repo
         run: echo "repository_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
