@@ -41,11 +41,6 @@ services:
       NODE_ENV: production
     env_file: ../.env
     networks: [app-net]
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: '0.5'
 
 networks:
   app-net: { driver: bridge }
