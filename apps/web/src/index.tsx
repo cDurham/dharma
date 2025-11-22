@@ -2,6 +2,7 @@ import { loadDevMessages, loadErrorMessages } from "@apollo/client/dev";
 import { ApolloProvider } from "@apollo/client/react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import "./styles.css";
 
 import { App } from "./App";
 import client from "./graphql/client";
