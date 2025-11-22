@@ -1,21 +1,20 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 APP_DIR="/opt/dharma"
-cd $APP_DIR
+cd "$APP_DIR"
 
 echo "🚀 Starting deployment..."
 
-# Custom health endpoint
-API_HEALTH_URL="http://localhost:3000/health"
-
 # Ensure the image repository is lowercase for GHCR
-export GITHUB_REPOSITORY=$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')
+export GITHUB_REPOSITORY="$(echo "${GITHUB_REPOSITORY:-dharma}" | tr '[:upper:]' '[:lower:]')"
+TARGET_TAG="${IMAGE_TAG:-latest}"
 
 # Pull latest code
-git pull origin ${GIT_BRANCH:-trunk}
+git pull origin "${GIT_BRANCH:-trunk}"
 
 # Create .env from environment variables (passed by GitHub Actions)
+umask 077
 cat > .env << EOF
 # Database (RDS)
 DB_HOST=${DB_HOST}
@@ -47,55 +46,30 @@ FRONTEND_URL=${FRONTEND_URL}
 NODE_ENV=production
 EOF
 
-# Run migrations on existing containers if they exist (zero-downtime)
-if docker compose -f deploy/docker-compose.prod.yml ps api | grep -q "Up"; then
-  echo "📊 Running database migrations on existing container..."
-  docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push || echo "⚠️ Migration on old container failed, will retry after deployment"
-fi
-
 # Check if we need to update images
-CURRENT_TAG=$(docker inspect ghcr.io/${GITHUB_REPOSITORY}/api:latest --format='{{index .RepoDigests 0}}' 2>/dev/null || echo "none")
+CURRENT_TAG=$(docker inspect "ghcr.io/${GITHUB_REPOSITORY}/api:${TARGET_TAG}" --format='{{index .RepoDigests 0}}' 2>/dev/null || echo "none")
 echo "📦 Current deployment: ${CURRENT_TAG}"
-echo "📦 Target deployment: ${IMAGE_TAG:-latest}"
+echo "📦 Target deployment: ${TARGET_TAG}"
 
-# Build and deploy with Docker Compose
+
+
+# 1. Pull new images
 echo "🐳 Pulling new images..."
 docker compose -f deploy/docker-compose.prod.yml pull
 
-# Only recreate if images actually changed
-if docker compose -f deploy/docker-compose.prod.yml ps --quiet api web | grep -q .; then
-  echo "🔄 Updating running containers..."
-  docker compose -f deploy/docker-compose.prod.yml up -d --no-deps
-else
-  echo "🚀 Starting containers for the first time..."
-  docker compose -f deploy/docker-compose.prod.yml up -d
-fi
-
-# Wait for API to be ready with intelligent health check
-echo "⏳ Waiting for API to be ready..."
-for i in {1..60}; do
-  if curl -f "$API_HEALTH_URL" > /dev/null 2>&1; then
-    echo "✅ API is ready after $i seconds"
-    break
-  fi
-  if [ $i -eq 60 ]; then
-    echo "❌ API failed to start within 60 seconds"
-    docker compose -f deploy/docker-compose.prod.yml logs api
-    exit 1
-  fi
-  sleep 1
-done
-
-# Run database migrations
+# 2. Run database migrations (Fail fast)
 echo "📊 Running database migrations..."
-docker compose -f deploy/docker-compose.prod.yml exec -T api npm run api:db:push
+docker compose -f deploy/docker-compose.prod.yml run --rm migrator
 
-# Final health check
-echo "🏥 Running final health check..."
-if curl -f "$API_HEALTH_URL" > /dev/null 2>&1; then
+# 3. Deploy and Wait for Health
+echo "🚀 Deploying and waiting for health checks..."
+# --wait implies -d and waits for healthchecks to pass
+if docker compose -f deploy/docker-compose.prod.yml up --wait; then
     echo "✅ Deployment successful!"
 else
-    echo "❌ Health check failed!"
+    echo "❌ Deployment failed! Health checks did not pass."
+    docker compose -f deploy/docker-compose.prod.yml ps
+    docker compose -f deploy/docker-compose.prod.yml logs --tail=200 api web migrator
     exit 1
 fi
 

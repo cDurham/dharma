@@ -18,12 +18,15 @@ export function runCommand(command: string, options: { silent?: boolean; stdio?:
   }
 }
 
-export function runCommandAsync(command: string): Promise<CommandResult> {
+export function runCommandAsync(
+  command: string,
+  options: { stdio?: 'inherit' | 'pipe' } = {}
+): Promise<CommandResult> {
   return new Promise((resolve) => {
     const child = spawn(command, {
       shell: true,
       cwd: process.cwd(),
-      stdio: 'inherit',
+      stdio: options.stdio || 'inherit',
     });
 
     child.on('close', (code) => {

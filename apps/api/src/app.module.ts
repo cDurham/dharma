@@ -19,6 +19,7 @@ import { UserModule } from "./User/index.js";
 import { VerificationController } from "./Verify/verify.controller.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const isProduction = process.env.NODE_ENV === "production";
 @Module({
   imports: [
     CqrsModule.forRoot(),
@@ -31,9 +32,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
     KafkaModule,
     GraphQLModule.forRoot({
       driver: ApolloDriver,
-      autoSchemaFile: join(__dirname, "schema.gql"),
+      autoSchemaFile: isProduction
+        ? true // generate schema in memory in prod to avoid filesystem writes
+        : join(__dirname, "schema.gql"),
       sortSchema: true,
-      introspection: process.env.NODE_ENV !== "production",
+      introspection: !isProduction,
       context: ({ req, res }: { req: Request; res: Response }) => ({
         req,
         res,
