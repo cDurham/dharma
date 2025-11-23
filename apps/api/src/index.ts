@@ -1,4 +1,4 @@
-import "dotenv/config"; // Must be first!
+import "dotenv/config.js"; // Must be first!
 import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";

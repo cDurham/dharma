@@ -57,7 +57,7 @@
       "options": {
         "commands": [
           "tsc -b apps/api/tsconfig.app.json",
-          "drizzle-kit generate --config=apps/api/drizzle.config.cjs"
+          "pnpm --filter api exec drizzle-kit generate --config=drizzle.config.cjs"
         ],
         "parallel": false,
         "cwd": "."
@@ -68,7 +68,7 @@
       "options": {
         "commands": [
           "tsc -b apps/api/tsconfig.app.json",
-          "drizzle-kit push --force --config=apps/api/drizzle.config.cjs"
+          "pnpm --filter api exec drizzle-kit push --force --config=drizzle.config.cjs"
         ],
         "parallel": false,
         "cwd": "."
@@ -79,7 +79,7 @@
       "options": {
         "commands": [
           "tsc -b apps/api/tsconfig.app.json",
-          "drizzle-kit migrate --config=apps/api/drizzle.config.cjs"
+          "pnpm --filter api exec drizzle-kit migrate --config=drizzle.config.cjs"
         ],
         "parallel": false,
         "cwd": "."
@@ -90,7 +90,7 @@
       "options": {
         "commands": [
           "tsc -b apps/api/tsconfig.app.json",
-          "drizzle-kit studio --config=apps/api/drizzle.config.cjs"
+          "pnpm --filter api exec drizzle-kit studio --config=drizzle.config.cjs"
         ],
         "parallel": false,
         "cwd": "."
@@ -101,7 +101,7 @@
       "options": {
         "commands": [
           "tsc -b apps/api/tsconfig.app.json",
-          "drizzle-kit drop --config=apps/api/drizzle.config.cjs"
+          "pnpm --filter api exec drizzle-kit drop --config=drizzle.config.cjs"
         ],
         "parallel": false,
         "cwd": "."
@@ -112,7 +112,7 @@
       "options": {
         "commands": [
           "tsc -b apps/api/tsconfig.app.json",
-          "drizzle-kit drop --config=apps/api/drizzle.config.cjs && drizzle-kit push --force --config=apps/api/drizzle.config.cjs && npx tsx apps/api/src/db/seed.ts"
+          "pnpm --filter api exec drizzle-kit drop --config=drizzle.config.cjs && pnpm --filter api exec drizzle-kit push --force --config=drizzle.config.cjs && npx tsx apps/api/src/db/seed.ts"
         ],
         "parallel": false,
         "cwd": "."

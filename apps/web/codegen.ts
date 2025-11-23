@@ -2,8 +2,12 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   overwrite: true,
-  schema: "http://localhost:3000/graphql",
-  documents: ["src/**/*.{ts,tsx,graphql}", "!src/graphql/types.ts"],
+  schema: "../api/src/schema.gql",
+  documents: [
+    "src/**/*.{ts,tsx,graphql}",
+    "!src/graphql/types.ts",
+    "!src/graphql/validators.ts",
+  ],
   ignoreNoDocuments: true,
   generates: {
     "src/graphql/types.ts": {
@@ -24,6 +28,13 @@ const config: CodegenConfig = {
         skipTypeNameForRoot: true,
         // Generates fragment types even for inline fragments
         inlineFragmentTypes: "combine",
+      },
+    },
+    "src/graphql/validators.ts": {
+      plugins: ["typescript-validation-schema"],
+      config: {
+        schema: "zod",
+        importFrom: "./types",
       },
     },
   },

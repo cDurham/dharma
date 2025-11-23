@@ -8,7 +8,7 @@ WORKDIR /workspace
 
 # ---------- deps (workspace install with cache)
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 # Copy per-project manifests so pnpm can resolve workspace graph without copying the whole repo yet
 # (only tools/cli has its own package.json; apps live under the root package)
 RUN mkdir -p tools/cli apps/api apps/web
