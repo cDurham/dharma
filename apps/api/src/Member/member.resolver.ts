@@ -16,7 +16,6 @@ import { DeleteMemberCommand } from "./commands/delete-member.command.js";
 import { GetMemberQuery } from "./commands/get-member.query.js";
 import { GetMembersQuery } from "./commands/get-members.query.js";
 import { UpdateMemberCommand } from "./commands/update-member.command.js";
-import { MemberEntity } from "./member.entity.js";
 import { CreateMemberInput, UpdateMemberInput } from "./member.input.js";
 import { Member } from "./member.type.js";
 
@@ -29,20 +28,17 @@ export class MemberResolver {
 
   @Query(() => Member, { nullable: true })
   async member(@Args("uuid") uuid: string): Promise<Member | null> {
-    const entity = await this.queryBus.execute(new GetMemberQuery(uuid));
-    return entity ? this.mapToGraphQL(entity) : null;
+    return this.queryBus.execute(new GetMemberQuery(uuid));
   }
 
   @Query(() => [Member])
   async members(): Promise<Member[]> {
-    const entities = await this.queryBus.execute(new GetMembersQuery());
-    return entities.map((entity) => this.mapToGraphQL(entity));
+    return this.queryBus.execute(new GetMembersQuery());
   }
 
   @Mutation(() => Member)
   async createMember(@Args("data") data: CreateMemberInput): Promise<Member> {
-    const entity = await this.commandBus.execute(new CreateMemberCommand(data));
-    return this.mapToGraphQL(entity);
+    return this.commandBus.execute(new CreateMemberCommand(data));
   }
 
   @Mutation(() => Member)
@@ -50,16 +46,12 @@ export class MemberResolver {
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateMemberInput,
   ): Promise<Member> {
-    const entity = await this.commandBus.execute(
-      new UpdateMemberCommand(uuid, data),
-    );
-    return this.mapToGraphQL(entity);
+    return this.commandBus.execute(new UpdateMemberCommand(uuid, data));
   }
 
   @Mutation(() => Member)
   async deleteMember(@Args("uuid") uuid: string): Promise<Member> {
-    const entity = await this.commandBus.execute(new DeleteMemberCommand(uuid));
-    return this.mapToGraphQL(entity);
+    return this.commandBus.execute(new DeleteMemberCommand(uuid));
   }
 
   @ResolveField(() => User, { nullable: true })
@@ -68,34 +60,6 @@ export class MemberResolver {
       return null;
     }
 
-    const userEntity = await this.queryBus.execute(
-      new GetUserQuery(member.userUuid),
-    );
-
-    return userEntity ? this.mapUserToGraphQL(userEntity) : null;
-  }
-
-  private mapToGraphQL(entity: MemberEntity): Member {
-    return {
-      uuid: entity.uuid,
-      firstName: entity.firstName,
-      lastName: entity.lastName,
-      joinDate: entity.joinDate,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      userUuid: entity.userUuid ?? null,
-    };
-  }
-
-  private mapUserToGraphQL(user: UserEntity): User {
-    return {
-      uuid: user.uuid,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      verificationToken: user.verificationToken ?? null,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return this.queryBus.execute(new GetUserQuery(member.userUuid));
   }
 }

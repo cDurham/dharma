@@ -1,9 +1,13 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { Button } from "../components/ui/button";
+import { Button, buttonVariants } from "../components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,7 +17,11 @@ import {
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Separator } from "../components/ui/separator";
+import type { CreateUserInput } from "../graphql/types";
+import useCreateUser from "../graphql/useCreateUser";
 import useLogin from "../graphql/useLogin";
+import { CreateUserInputSchema } from "../graphql/validators";
+import { cn } from "../lib/utils";
 
 const RESEND_VERIFICATION_EMAIL = gql`
   mutation ResendVerificationEmail($email: String!) {
@@ -66,10 +74,13 @@ const isUnverifiedError = (err: unknown) => {
 };
 
 export const LoginPage = () => {
+  const [formMode, setFormMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPending, startTransition] = useTransition();
   const [handleLogin, { loading, error }] = useLogin();
+  const [handleCreateUser, { loading: signupLoading, error: signupError }] =
+    useCreateUser();
   const [resendVerificationEmail, { loading: resendLoading }] = useMutation<
     ResendVerificationEmailResponse,
     ResendVerificationEmailVars
@@ -79,11 +90,73 @@ export const LoginPage = () => {
   );
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
+  const [signupSuccessMessage, setSignupSuccessMessage] = useState<
+    string | null
+  >(null);
+  const [signupErrorMessage, setSignupErrorMessage] = useState<string | null>(
+    null,
+  );
+
+  type SignupFormValues = CreateUserInput & { confirmPassword: string };
+
+  const signupSchema = useMemo(
+    () =>
+      CreateUserInputSchema()
+        .extend({
+          confirmPassword: z
+            .string()
+            .min(1, "Please confirm your password")
+            .min(8, "Password must be at least 8 characters"),
+        })
+        .superRefine((values, ctx) => {
+          if (values.password !== values.confirmPassword) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["confirmPassword"],
+              message: "Passwords must match",
+            });
+          }
+        }),
+    [],
+  );
+
+  const {
+    register: registerSignup,
+    handleSubmit: handleSignupSubmit,
+    formState: { errors: signupErrors },
+    reset: resetSignupForm,
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const handleSignup = handleSignupSubmit(async (values) => {
+    const { confirmPassword: _confirmPassword, ...userData } = values;
+    setSignupErrorMessage(null);
+    setSignupSuccessMessage(null);
+    try {
+      await handleCreateUser(userData);
+      setSignupSuccessMessage(
+        "Account created! Please verify your email before logging in.",
+      );
+      setFormMode("login");
+      setEmail(userData.email);
+      setPassword("");
+      resetSignupForm();
+    } catch (err) {
+      setSignupErrorMessage(getErrorMessage(err));
+    }
+  });
 
   const loginAction = (formData: FormData) => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
     startTransition(async () => {
       try {
         setLoginErrorMessage(null);
@@ -118,6 +191,21 @@ export const LoginPage = () => {
     }
   };
 
+  const switchToSignup = () => {
+    setSignupErrorMessage(null);
+    setSignupSuccessMessage(null);
+    resetSignupForm();
+    setFormMode("signup");
+  };
+
+  const switchToLogin = () => {
+    setSignupErrorMessage(null);
+    setFormMode("login");
+  };
+
+  const signupSubmissionError =
+    signupErrorMessage ?? (signupError ? getErrorMessage(signupError) : null);
+
   return (
     <div className="w-full max-w-md">
       <Card className="shadow-lg">
@@ -133,93 +221,215 @@ export const LoginPage = () => {
         </CardHeader>
 
         <CardContent>
-          <form action={loginAction} className="space-y-4">
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
+          {formMode === "login" ? (
+            <form action={loginAction} className="space-y-4">
+              {signupSuccessMessage && (
+                <Alert>
+                  <AlertDescription>{signupSuccessMessage}</AlertDescription>
+                </Alert>
+              )}
 
-            {/* Password Input */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
-                  required
-                />
+              {/* Email Input */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <button
-                type="button"
-                onClick={(e) => e.preventDefault()}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              {/* Password Input */}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Forgot Password Link */}
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={(e) => e.preventDefault()}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              {/* Error Messages */}
+              {(loginErrorMessage || error) && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {loginErrorMessage ?? "Login failed"}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Unverified Email Flow */}
+              {unverifiedEmail && (
+                <Alert>
+                  <AlertDescription className="space-y-2">
+                    <p>
+                      Your email is not verified. Resend the verification email?
+                    </p>
+                    <Button
+                      type="button"
+                      className={cn(
+                        buttonVariants({ variant: "link" }),
+                        "h-auto p-0 text-primary",
+                      )}
+                      onClick={() => void handleResendVerification()}
+                      disabled={resendLoading || isPending}
+                    >
+                      {resendLoading
+                        ? "Sending..."
+                        : "Resend verification email"}
+                    </Button>
+                    {resendStatus && <p className="text-sm">{resendStatus}</p>}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Login Button */}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading || isPending}
               >
-                Forgot Password?
-              </button>
-            </div>
+                {loading || isPending ? "Logging in..." : "Login"}
+              </Button>
 
-            {/* Error Messages */}
-            {(loginErrorMessage || error) && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {loginErrorMessage ?? "Login failed"}
-                </AlertDescription>
-              </Alert>
-            )}
+              {/* Switch to Signup */}
+              <Button
+                type="button"
+                className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                onClick={switchToSignup}
+              >
+                Need an account? Sign up
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-1">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="First Name"
+                    {...registerSignup("firstName")}
+                  />
+                  {signupErrors.firstName && (
+                    <p className="text-xs text-destructive">
+                      {signupErrors.firstName.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2 md:col-span-1">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Last Name"
+                    {...registerSignup("lastName")}
+                  />
+                  {signupErrors.lastName && (
+                    <p className="text-xs text-destructive">
+                      {signupErrors.lastName.message}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-            {/* Unverified Email Flow */}
-            {unverifiedEmail && (
-              <Alert>
-                <AlertDescription className="space-y-2">
-                  <p>
-                    Your email is not verified. Resend the verification email?
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">Email Address</Label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="Email Address"
+                  {...registerSignup("email")}
+                />
+                {signupErrors.email && (
+                  <p className="text-xs text-destructive">
+                    {signupErrors.email.message}
                   </p>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="h-auto p-0 text-primary"
-                    onClick={() => void handleResendVerification()}
-                    disabled={resendLoading || isPending}
-                  >
-                    {resendLoading ? "Sending..." : "Resend verification email"}
-                  </Button>
-                  {resendStatus && <p className="text-sm">{resendStatus}</p>}
-                </AlertDescription>
-              </Alert>
-            )}
+                )}
+              </div>
 
-            {/* Login Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading || isPending}
-            >
-              {loading || isPending ? "Logging in..." : "Login"}
-            </Button>
-          </form>
+              <div className="space-y-2">
+                <Label htmlFor="signup-password">Password</Label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  placeholder="Password"
+                  {...registerSignup("password")}
+                />
+                {signupErrors.password && (
+                  <p className="text-xs text-destructive">
+                    {signupErrors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm Password"
+                  {...registerSignup("confirmPassword")}
+                />
+                {signupErrors.confirmPassword && (
+                  <p className="text-xs text-destructive">
+                    {signupErrors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {signupSubmissionError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{signupSubmissionError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-2">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={signupLoading || isPending}
+                >
+                  {signupLoading || isPending
+                    ? "Creating account..."
+                    : "Sign up"}
+                </Button>
+                <Button
+                  type="button"
+                  className={cn(buttonVariants({ variant: "ghost" }), "w-full")}
+                  onClick={switchToLogin}
+                >
+                  Back to login
+                </Button>
+              </div>
+            </form>
+          )}
         </CardContent>
 
         <CardFooter className="flex-col">

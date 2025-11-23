@@ -1,0 +1,112 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateMemberInput {
+  firstName: String!
+  lastName: String!
+}
+
+input CreateRetreatInput {
+  endAt: DateTime!
+  name: String!
+  startAt: DateTime!
+}
+
+input CreateUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type LoginResponse {
+  message: String!
+}
+
+type Member {
+  createdAt: DateTime!
+  firstName: String!
+  joinDate: DateTime!
+  lastName: String!
+  updatedAt: DateTime!
+  user: User
+  uuid: ID!
+}
+
+type Mutation {
+  createMember(data: CreateMemberInput!): Member!
+  createRetreat(data: CreateRetreatInput!): Retreat!
+  createUser(data: CreateUserInput!): User!
+  deleteMember(uuid: String!): Member!
+  deleteRetreat(uuid: String!): Boolean!
+  deleteUser(uuid: String!): Boolean!
+  login(data: ValidateUserInput!): LoginResponse!
+  logout: Boolean!
+  refreshAccessToken: Boolean!
+  resendVerificationEmail(email: String!): Boolean!
+  updateMember(data: UpdateMemberInput!, uuid: String!): Member!
+  updateRetreat(data: UpdateRetreatInput!, uuid: String!): Retreat!
+  updateUser(data: UpdateUserInput!, uuid: String!): User!
+  verifyEmail(token: String!): Boolean!
+}
+
+type Query {
+  getUserByEmail(email: String!): User!
+  me: User!
+  member(uuid: String!): Member
+  members: [Member!]!
+  retreat(uuid: String!): Retreat!
+  retreats: [Retreat!]!
+  user(uuid: String!): User!
+  users: [User!]!
+}
+
+type Retreat {
+  createdAt: DateTime!
+  endAt: DateTime!
+  name: String!
+  startAt: DateTime!
+  updatedAt: DateTime!
+  uuid: ID!
+}
+
+input UpdateMemberInput {
+  firstName: String
+  lastName: String
+}
+
+input UpdateRetreatInput {
+  endAt: DateTime
+  name: String
+  startAt: DateTime
+}
+
+input UpdateUserInput {
+  email: String
+  firstName: String
+  lastName: String
+  password: String
+  verificationToken: String
+  verifiedEmail: Boolean
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  lastName: String!
+  updatedAt: DateTime!
+  uuid: ID!
+  verificationToken: String
+}
+
+input ValidateUserInput {
+  email: String!
+  password: String!
+}
