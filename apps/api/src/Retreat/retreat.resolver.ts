@@ -1,41 +1,30 @@
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { CreateRetreatCommand } from "./commands/create-retreat.command.js";
-import { DeleteRetreatCommand } from "./commands/delete-retreat.command.js";
-import { GetRetreatQuery } from "./commands/get-retreat.query.js";
-import { GetRetreatsQuery } from "./commands/get-retreats.query.js";
-import { UpdateRetreatCommand } from "./commands/update-retreat.command.js";
-import type { RetreatEntity } from "./retreat.entity.js";
+import type { RetreatRow } from "../db/types.js";
 import { CreateRetreatInput, UpdateRetreatInput } from "./retreat.input.js";
+import { RetreatService } from "./retreat.service.js";
 import { Retreat } from "./retreat.type.js";
 
 @Resolver(() => Retreat)
 export class RetreatResolver {
-  constructor(
-    private commandBus: CommandBus,
-    private queryBus: QueryBus,
-  ) {}
+  constructor(private readonly retreatService: RetreatService) {}
 
   @Query(() => Retreat)
   async retreat(@Args("uuid") uuid: string): Promise<Retreat | null> {
-    const entity = await this.queryBus.execute(new GetRetreatQuery(uuid));
-    return entity ? this.mapToGraphQL(entity) : null;
+    const row = await this.retreatService.get(uuid);
+    return row ? this.mapToGraphQL(row) : null;
   }
 
   @Query(() => [Retreat])
   async retreats(): Promise<Retreat[]> {
-    const result = await this.queryBus.execute(new GetRetreatsQuery());
-    return result.map((entity) => this.mapToGraphQL(entity));
+    const rows = await this.retreatService.list();
+    return rows.map((row) => this.mapToGraphQL(row));
   }
 
   @Mutation(() => Retreat)
   async createRetreat(
     @Args("data") data: CreateRetreatInput,
   ): Promise<Retreat> {
-    const entity = await this.commandBus.execute(
-      new CreateRetreatCommand(data),
-    );
-    return this.mapToGraphQL(entity);
+    return this.mapToGraphQL(await this.retreatService.create(data));
   }
 
   @Mutation(() => Retreat)
@@ -43,28 +32,22 @@ export class RetreatResolver {
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateRetreatInput,
   ): Promise<Retreat | null> {
-    const result = await this.commandBus.execute(
-      new UpdateRetreatCommand(uuid, data),
-    );
-    return result ? this.mapToGraphQL(result) : null;
+    return this.mapToGraphQL(await this.retreatService.update(uuid, data));
   }
 
   @Mutation(() => Boolean)
   async deleteRetreat(@Args("uuid") uuid: string): Promise<boolean> {
-    const result = await this.commandBus.execute(
-      new DeleteRetreatCommand({ uuid }),
-    );
-    return result;
+    return this.retreatService.remove(uuid);
   }
 
-  private mapToGraphQL(entity: RetreatEntity): Retreat {
+  private mapToGraphQL(row: RetreatRow): Retreat {
     return {
-      uuid: entity.uuid,
-      name: entity.name,
-      startAt: entity.startAt,
-      endAt: entity.endAt,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      uuid: row.uuid,
+      name: row.name,
+      startAt: row.startAt,
+      endAt: row.endAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     };
   }
 }

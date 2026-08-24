@@ -1,32 +1,23 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
 import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
 import { authConfig } from "../config/auth.config.js";
 import type { GraphQLContext } from "../graphql-context.type.js";
 import { getRefreshToken } from "./auth.cookies.js";
 import { LoginResponse } from "./auth.dto.js";
 import { ValidateUserInput } from "./auth.input.js";
-import { AuthLoginUserCommand } from "./command/auth-login-user.command.js";
-import { AuthRefreshAccessTokenCommand } from "./command/auth-refresh-access-token.command.js";
-import { AuthRevokeRefreshTokenCommand } from "./command/auth-revoke-refresh-token.command.js";
-import { ValidateUserCommand } from "./command/auth-validate-user.command.js";
+import { AuthService } from "./auth.service.js";
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Mutation(() => LoginResponse)
   async login(
     @Args("data") loginInput: ValidateUserInput,
     @Context() context: GraphQLContext,
   ): Promise<LoginResponse> {
-    const user = await this.commandBus.execute(
-      new ValidateUserCommand(loginInput),
-    );
-
-    const { access_token, refresh_token } = await this.commandBus.execute(
-      new AuthLoginUserCommand(user),
-    );
+    const user = await this.authService.validateUser(loginInput);
+    const { access_token, refresh_token } = await this.authService.login(user);
 
     if (context.res && typeof context.res.cookie === "function") {
       // set short-lived access token
@@ -36,7 +27,6 @@ export class AuthResolver {
         sameSite: "strict",
         maxAge: authConfig.cookie.accessTokenMaxAgeMs,
       });
-
       // set long-lived refresh token
       context.res.cookie("refresh_token", refresh_token, {
         httpOnly: true,
@@ -63,9 +53,9 @@ export class AuthResolver {
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token not found");
     }
-    const { access_token, refresh_token } = await this.commandBus.execute(
-      new AuthRefreshAccessTokenCommand(refreshToken),
-    );
+
+    const { access_token, refresh_token } =
+      await this.authService.refreshAccessToken(refreshToken);
 
     // Set new access token cookie
     context.res.cookie("access_token", access_token, {
@@ -90,10 +80,9 @@ export class AuthResolver {
   async logout(@Context() context: GraphQLContext): Promise<boolean> {
     const refreshToken = getRefreshToken(context.req);
     if (refreshToken) {
-      await this.commandBus.execute(
-        new AuthRevokeRefreshTokenCommand(refreshToken),
-      );
+      await this.authService.revokeRefreshToken(refreshToken);
     }
+
     if (context.res && typeof context.res.cookie === "function") {
       // clear short-lived access token
       context.res.cookie("access_token", "", {
@@ -102,7 +91,6 @@ export class AuthResolver {
         sameSite: "strict",
         maxAge: 0,
       });
-
       // clear long-lived refresh token
       context.res.cookie("refresh_token", "", {
         httpOnly: true,

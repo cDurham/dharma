@@ -21,7 +21,4 @@ export function applyTestEnv(): void {
 
   process.env.JWT_SECRET ||= "test-jwt-secret";
   process.env.COOKIE_SECRET ||= "test-cookie-secret";
-
-  // KafkaService connects at boot when this is set.
-  delete process.env.KAFKA_BROKERS;
 }
