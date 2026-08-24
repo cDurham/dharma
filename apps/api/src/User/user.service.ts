@@ -1,32 +1,38 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
+import type { z } from "zod";
+import { CrudService } from "../Domain/crud.service.js";
 import type { db as DbType } from "../db/data-source.js";
 import { DB_TOKEN } from "../db/database.module.js";
 import { user } from "../db/schema/index.js";
 import type { UserRow } from "../db/types.js";
 import { EmailService } from "../Email/email.service.js";
 import type { CreateUserInput, UpdateUserInput } from "./user.input.js";
-import type { UpdateUserData } from "./user.schema.js";
+import { CreateUserSchema, UpdateUserSchema } from "./user.schema.js";
+
+const PASSWORD_ROUNDS = 12;
 
 @Injectable()
-export class UserService {
+export class UserService extends CrudService<
+  UserRow,
+  z.input<typeof CreateUserSchema>,
+  z.input<typeof UpdateUserSchema>
+> {
+  protected readonly entityName = "User";
+  protected readonly table = user;
+  protected readonly createSchema = CreateUserSchema;
+  protected readonly updateSchema = UpdateUserSchema;
+
   private readonly logger = new Logger(UserService.name);
 
   constructor(
     @Inject(DB_TOKEN)
-    private readonly db: typeof DbType,
+    db: typeof DbType,
     private readonly emailService: EmailService,
-  ) {}
-
-  async list(): Promise<UserRow[]> {
-    return this.db.select().from(user);
-  }
-
-  async get(uuid: string): Promise<UserRow | null> {
-    const [row] = await this.db.select().from(user).where(eq(user.uuid, uuid));
-    return row ?? null;
+  ) {
+    super(db);
   }
 
   async getByEmail(email: string): Promise<UserRow | null> {
@@ -37,19 +43,15 @@ export class UserService {
     return row ?? null;
   }
 
-  async create(input: CreateUserInput): Promise<UserRow> {
-    const uuid = uuidv7();
+  override async create(input: CreateUserInput): Promise<UserRow> {
     const verificationToken = uuidv4();
-    const hashedPassword = await bcrypt.hash(input.password, 12);
-    await this.db.insert(user).values({
-      uuid,
+    const row = await super.create({
       firstName: input.firstName,
       lastName: input.lastName,
       email: input.email,
-      password: hashedPassword,
+      password: await bcrypt.hash(input.password, PASSWORD_ROUNDS),
       verificationToken,
     });
-    const [row] = await this.db.select().from(user).where(eq(user.uuid, uuid));
 
     // A failed send is not a failed registration; the token stays in the row
     // and resendVerificationEmail covers recovery.
@@ -69,46 +71,22 @@ export class UserService {
     return row;
   }
 
-  async update(uuid: string, data: UpdateUserInput): Promise<UserRow | null> {
-    const existing = await this.get(uuid);
-    if (!existing) {
-      return null;
-    }
-    const updateData: UpdateUserData = {};
-    if (data.email !== undefined) updateData.email = data.email;
-    if (data.password !== undefined) {
-      updateData.password = await bcrypt.hash(data.password, 12);
-    }
-    await this.db
-      .update(user)
-      .set({ ...updateData, updatedAt: new Date() })
-      .where(eq(user.uuid, uuid));
-    const [row] = await this.db.select().from(user).where(eq(user.uuid, uuid));
-    return row;
-  }
-
-  async remove(uuid: string): Promise<boolean> {
-    const existing = await this.get(uuid);
-    if (!existing) {
-      throw new Error("User not found");
-    }
-    await this.db.delete(user).where(eq(user.uuid, uuid));
-    return true;
+  override async update(uuid: string, data: UpdateUserInput): Promise<UserRow> {
+    return super.update(uuid, {
+      ...data,
+      ...(data.password === undefined
+        ? {}
+        : { password: await bcrypt.hash(data.password, PASSWORD_ROUNDS) }),
+    });
   }
 
   async verifyEmail(token: string): Promise<boolean> {
     const [row] = await this.db
-      .select()
-      .from(user)
-      .where(eq(user.verificationToken, token));
-    if (!row) {
-      return false;
-    }
-    await this.db
       .update(user)
-      .set({ verificationToken: null, updatedAt: new Date() })
-      .where(eq(user.uuid, row.uuid));
-    return true;
+      .set({ verificationToken: null })
+      .where(eq(user.verificationToken, token))
+      .returning();
+    return row !== undefined;
   }
 
   async resendVerificationEmail(email: string): Promise<boolean> {
@@ -128,7 +106,7 @@ export class UserService {
     const newVerificationToken = uuidv4();
     await this.db
       .update(user)
-      .set({ verificationToken: newVerificationToken, updatedAt: new Date() })
+      .set({ verificationToken: newVerificationToken })
       .where(eq(user.uuid, existing.uuid));
     await this.emailService.sendVerificationEmail(email, newVerificationToken);
     this.logger.log(`Resent verification email to: ${email}`);

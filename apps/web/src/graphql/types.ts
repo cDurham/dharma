@@ -26,7 +26,6 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
-  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: { input: unknown; output: unknown };
 };
 
@@ -69,7 +68,7 @@ export type Mutation = {
   createMember: Member;
   createRetreat: Retreat;
   createUser: User;
-  deleteMember: Member;
+  deleteMember: Scalars["Boolean"]["output"];
   deleteRetreat: Scalars["Boolean"]["output"];
   deleteUser: Scalars["Boolean"]["output"];
   login: LoginResponse;
@@ -135,13 +134,13 @@ export type MutationVerifyEmailArgs = {
 
 export type Query = {
   __typename: "Query";
-  getUserByEmail: User;
+  getUserByEmail: Maybe<User>;
   me: User;
   member: Maybe<Member>;
   members: Array<Member>;
-  retreat: Retreat;
+  retreat: Maybe<Retreat>;
   retreats: Array<Retreat>;
-  user: User;
+  user: Maybe<User>;
   users: Array<User>;
 };
 
@@ -325,7 +324,7 @@ export type GetUserQuery = {
     email: string;
     firstName: string;
     lastName: string;
-  };
+  } | null;
 };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never }>;
@@ -351,7 +350,7 @@ export type GetUserByEmailQuery = {
     email: string;
     firstName: string;
     lastName: string;
-  };
+  } | null;
 };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;

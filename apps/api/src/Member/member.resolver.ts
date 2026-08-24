@@ -46,9 +46,10 @@ export class MemberResolver {
     return toPublicMember(await this.memberService.update(uuid, data));
   }
 
-  @Mutation(() => Member)
-  async deleteMember(@Args("uuid") uuid: string): Promise<Member> {
-    return toPublicMember(await this.memberService.remove(uuid));
+  @Mutation(() => Boolean)
+  async deleteMember(@Args("uuid") uuid: string): Promise<boolean> {
+    await this.memberService.remove(uuid);
+    return true;
   }
 
   @ResolveField(() => User, { nullable: true })

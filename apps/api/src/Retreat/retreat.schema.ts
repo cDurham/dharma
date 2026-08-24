@@ -1,9 +1,14 @@
-import { createInsertSchema } from "drizzle-zod";
-import type { z } from "zod";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { retreat } from "../db/schema/index.js";
 
-export const UpdateRetreatSchema = createInsertSchema(retreat)
-  .pick({ name: true, startAt: true, endAt: true })
-  .partial();
+export const CreateRetreatSchema = createInsertSchema(retreat).pick({
+  name: true,
+  startAt: true,
+  endAt: true,
+});
 
-export type UpdateRetreatData = z.infer<typeof UpdateRetreatSchema>;
+export const UpdateRetreatSchema = createUpdateSchema(retreat).pick({
+  name: true,
+  startAt: true,
+  endAt: true,
+});

@@ -13,7 +13,9 @@ import { User } from "./user.type.js";
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => User)
+  // Queries by key are nullable. Mutations are non-null and raise
+  // NotFoundException when the row is missing.
+  @Query(() => User, { nullable: true })
   async user(@Args("uuid") uuid: string): Promise<User | null> {
     const row = await this.userService.get(uuid);
     return row ? toPublicUser(row) : null;
@@ -37,20 +39,20 @@ export class UserResolver {
     @CurrentUser() currentUser: AuthenticatedUser,
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateUserInput,
-  ): Promise<User | null> {
+  ): Promise<User> {
     if (currentUser.uuid !== uuid) {
       throw new ForbiddenException("Users may only update their own account");
     }
-    const row = await this.userService.update(uuid, data);
-    return row ? toPublicUser(row) : null;
+    return toPublicUser(await this.userService.update(uuid, data));
   }
 
   @Mutation(() => Boolean)
   async deleteUser(@Args("uuid") uuid: string): Promise<boolean> {
-    return this.userService.remove(uuid);
+    await this.userService.remove(uuid);
+    return true;
   }
 
-  @Query(() => User)
+  @Query(() => User, { nullable: true })
   async getUserByEmail(@Args("email") email: string): Promise<User | null> {
     const row = await this.userService.getByEmail(email);
     return row ? toPublicUser(row) : null;

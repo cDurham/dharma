@@ -1,13 +1,14 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ApolloDriver } from "@nestjs/apollo";
-import { Module } from "@nestjs/common";
+import { HttpStatus, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
 import type { Request, Response } from "express";
+import type { GraphQLFormattedError } from "graphql";
 
 import { AuthModule, GqlThrottlerGuard, JwtAuthGuard } from "./Auth/index.js";
 import { DatabaseModule } from "./db/database.module.js";
@@ -40,6 +41,17 @@ const isProduction = process.env.NODE_ENV === "production";
       cors: {
         origin: process.env.FRONTEND_URL || "http://localhost:4200",
         credentials: true,
+      },
+      // Apollo's driver codes 401 and 403 and leaves other HttpExceptions as
+      // INTERNAL_SERVER_ERROR with the status in extensions. 404 gets NOT_FOUND.
+      formatError: (error: GraphQLFormattedError) => {
+        if (error.extensions?.status !== HttpStatus.NOT_FOUND) {
+          return error;
+        }
+        return {
+          ...error,
+          extensions: { ...error.extensions, code: "NOT_FOUND" },
+        };
       },
     }),
     AuthModule,

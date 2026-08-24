@@ -126,18 +126,14 @@ describe("E2E - Member Resolver", () => {
     const createdMember = await createMember();
 
     const deleteMemberMutation = `mutation deleteMember($uuid: String!) {
-        deleteMember(uuid: $uuid) {
-          uuid
-          firstName
-          lastName
-        }
+        deleteMember(uuid: $uuid)
       }`;
     const variables = {
       uuid: createdMember.uuid,
     };
 
     const response = await graphql.mutation<
-      { deleteMember: Member },
+      { deleteMember: boolean },
       typeof variables
     >({
       query: deleteMemberMutation,
@@ -145,7 +141,18 @@ describe("E2E - Member Resolver", () => {
     });
 
     graphql.expectOk(response);
-    expect(response.data.deleteMember.uuid).toBe(createdMember.uuid);
+    expect(response.data.deleteMember).toBe(true);
+
+    const afterDelete = await graphql.query<
+      { member: Member | null },
+      typeof variables
+    >({
+      query: `query member($uuid: String!) { member(uuid: $uuid) { uuid } }`,
+      variables,
+    });
+
+    graphql.expectOk(afterDelete);
+    expect(afterDelete.data.member).toBeNull();
   });
 
   it("rejects member operations without a session", async () => {

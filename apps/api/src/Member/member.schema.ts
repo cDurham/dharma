@@ -1,9 +1,15 @@
-import { createInsertSchema } from "drizzle-zod";
-import type { z } from "zod";
+import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { member } from "../db/schema/index.js";
 
-export const UpdateMemberSchema = createInsertSchema(member)
-  .pick({ firstName: true, lastName: true, joinDate: true })
-  .partial();
+// joinDate is optional here; the column's default supplies it when omitted.
+export const CreateMemberSchema = createInsertSchema(member).pick({
+  firstName: true,
+  lastName: true,
+  joinDate: true,
+});
 
-export type UpdateMemberData = z.infer<typeof UpdateMemberSchema>;
+export const UpdateMemberSchema = createUpdateSchema(member).pick({
+  firstName: true,
+  lastName: true,
+  joinDate: true,
+});

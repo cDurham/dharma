@@ -8,7 +8,7 @@ import { Retreat } from "./retreat.type.js";
 export class RetreatResolver {
   constructor(private readonly retreatService: RetreatService) {}
 
-  @Query(() => Retreat)
+  @Query(() => Retreat, { nullable: true })
   async retreat(@Args("uuid") uuid: string): Promise<Retreat | null> {
     const row = await this.retreatService.get(uuid);
     return row ? toPublicRetreat(row) : null;
@@ -31,12 +31,13 @@ export class RetreatResolver {
   async updateRetreat(
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateRetreatInput,
-  ): Promise<Retreat | null> {
+  ): Promise<Retreat> {
     return toPublicRetreat(await this.retreatService.update(uuid, data));
   }
 
   @Mutation(() => Boolean)
   async deleteRetreat(@Args("uuid") uuid: string): Promise<boolean> {
-    return this.retreatService.remove(uuid);
+    await this.retreatService.remove(uuid);
+    return true;
   }
 }
