@@ -1,26 +1,40 @@
-# Authentication Configuration
+# App configuration
 
-This directory contains centralized configuration for authentication-related settings.
+`app.config.ts` is the app's one config module: every environment variable it
+reads is parsed and validated by a single zod schema at import time, and every
+consumer imports the resulting frozen `appConfig` object instead of reading
+`process.env` itself. A missing or malformed variable throws at boot, not as
+a `NaN` or `undefined` surfacing later in `jwt.sign` or the DB pool.
 
-## Environment Variables
+## Environment variables
 
-The following environment variables can be used to configure authentication timeouts:
+### General
 
-### JWT Configuration
+- `NODE_ENV`: `development` | `test` | `production` (default: `development`)
+- `FRONTEND_URL`: origin allowed by CORS, and the CSRF-relevant single origin
+  (default: `http://localhost:4200`)
 
-- `JWT_SECRET`: Secret key for JWT signing (required)
-- `JWT_ACCESS_TOKEN_EXPIRES_IN`: Access token expiration in seconds (default: 900)
-- `JWT_REFRESH_TOKEN_EXPIRES_IN_DAYS`: Refresh token expiration in days (default: 30)
+### JWT
 
-### Cookie Configuration
+- `JWT_SECRET`: secret key for JWT signing (required)
+- `JWT_ACCESS_TOKEN_EXPIRES_IN`: access token expiration in seconds (default: 900)
+- `JWT_REFRESH_TOKEN_EXPIRES_IN_DAYS`: refresh token expiration in days (default: 30)
 
-- `COOKIE_SECRET`: Secret key for cookie signing (required)
+### Cookies
 
-Cookie max-age is not configured directly. Each session cookie takes its max-age
-from the lifetime of the token it carries, so the cookie and the credential
-inside it expire together.
+- `COOKIE_SECRET`: secret key for cookie signing (required)
 
-## Default Values
+Cookie max-age is not configured directly. Each session cookie takes its
+max-age from the lifetime of the token it carries, so the cookie and the
+credential inside it expire together.
 
-- Access Token: 15 minutes
-- Refresh Token: 30 days
+### Database
+
+- `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE`: required, no fallback
+- `DB_PORT`: default `5432`
+
+## Default values
+
+- Access token: 15 minutes
+- Refresh token: 30 days
+- DB port: 5432

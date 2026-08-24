@@ -11,6 +11,7 @@ import type { Request, Response } from "express";
 import type { GraphQLFormattedError } from "graphql";
 
 import { AuthModule, GqlThrottlerGuard, JwtAuthGuard } from "./Auth/index.js";
+import { appConfig } from "./config/app.config.js";
 import { DatabaseModule } from "./db/database.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { MemberModule } from "./Member/member.module.js";
@@ -18,7 +19,7 @@ import { RetreatModule } from "./Retreat/index.js";
 import { UserModule } from "./User/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = appConfig.isProduction;
 @Module({
   imports: [
     ConfigModule.forRoot(), // This loads the .env file
@@ -39,7 +40,7 @@ const isProduction = process.env.NODE_ENV === "production";
         res,
       }),
       cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:4200",
+        origin: appConfig.frontendUrl,
         credentials: true,
       },
       // Apollo's driver codes 401 and 403 and leaves other HttpExceptions as
@@ -60,7 +61,7 @@ const isProduction = process.env.NODE_ENV === "production";
         limit: 100,
         ttl: 60000, // 60 seconds
         // The E2E suite drives hundreds of requests from one IP.
-        skipIf: () => process.env.NODE_ENV === "test",
+        skipIf: () => appConfig.nodeEnv === "test",
       },
     ]),
   ],

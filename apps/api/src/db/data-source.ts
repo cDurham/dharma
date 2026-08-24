@@ -1,17 +1,21 @@
 import "reflect-metadata";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { appConfig } from "../config/app.config.js";
 import * as schema from "./schema/index.js";
 
 const poolConfig = {
-  host: process.env.DB_HOST || "localhost",
-  port: Number.parseInt(process.env.DB_PORT || "5432", 10),
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "postgres",
-  database: process.env.DB_DATABASE || "dharma_db",
+  host: appConfig.db.host,
+  port: appConfig.db.port,
+  user: appConfig.db.user,
+  password: appConfig.db.password,
+  database: appConfig.db.database,
   max: 20, // Maximum pool size
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+  // Production points at a managed Postgres (RDS) over the network; dev and
+  // test point at a plaintext local container.
+  ssl: appConfig.isProduction,
 };
 
 export const pool = new Pool(poolConfig);

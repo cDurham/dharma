@@ -20,11 +20,15 @@ export const refreshToken = pgTable(
     userUuid: uuid("user_uuid")
       .notNull()
       .references(() => user.uuid, { onDelete: "cascade" }),
+    // Every row minted by the same rotation lineage shares this uuid. Replay
+    // of an already-rotated token revokes the whole family, not just itself.
+    family: uuid("family").notNull().defaultRandom(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     isRevoked: boolean("is_revoked").notNull().default(false),
     hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
   },
   (table) => ({
     tokenHashIdx: index("refresh_token_token_hash_idx").on(table.tokenHash),
+    familyIdx: index("refresh_token_family_idx").on(table.family),
   }),
 );

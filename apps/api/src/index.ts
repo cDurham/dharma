@@ -4,27 +4,21 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import "reflect-metadata";
 import { AppModule } from "./app.module.js";
+import { appConfig } from "./config/app.config.js";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Use cookie-parser middleware with signing secret
-  const cookieSecret = process.env.COOKIE_SECRET;
-  if (!cookieSecret) {
-    throw new Error(
-      "COOKIE_SECRET environment variable is required but not set",
-    );
-  }
-  app.use(cookieParser(cookieSecret));
+  app.use(cookieParser(appConfig.cookieSecret));
   const corsOptions = {
-    origin: process.env.FRONTEND_URL || "http://localhost:4200",
+    origin: appConfig.frontendUrl,
     credentials: true,
   };
   app.enableCors(corsOptions);
   app.use(
     helmet({
       contentSecurityPolicy:
-        process.env.NODE_ENV === "development"
+        appConfig.nodeEnv === "development"
           ? {
               directives: {
                 "script-src": [

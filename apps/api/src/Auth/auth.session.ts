@@ -1,12 +1,16 @@
 import type { CookieOptions, Request, Response } from "express";
 import { z } from "zod";
-import { authConfig } from "../config/auth.config.js";
+import { appConfig } from "../config/app.config.js";
 import type { TokenPair } from "./auth.service.js";
 
 // The wire names of the session cookies. The read schema and both write
 // paths derive from these, so a rename cannot half-apply.
 const ACCESS_TOKEN_COOKIE = "access_token";
 const REFRESH_TOKEN_COOKIE = "refresh_token";
+
+// The refresh cookie is scoped to the one path that ever reads it, so it
+// never rides along on requests that don't need it.
+const REFRESH_TOKEN_PATH = "/graphql";
 
 export const SessionCookiesSchema = z.object({
   [ACCESS_TOKEN_COOKIE]: z.string().optional(),
@@ -20,14 +24,14 @@ export interface Session {
   refreshToken?: string;
 }
 
-// Options shared by every session cookie. `secure` is read per call, so a
-// NODE_ENV assigned after this module is imported still applies.
-function sessionCookieOptions(maxAge: number): CookieOptions {
+// Options shared by every session cookie.
+function sessionCookieOptions(maxAge: number, path?: string): CookieOptions {
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV !== "development",
+    secure: appConfig.nodeEnv !== "development",
     sameSite: "strict",
     maxAge,
+    ...(path ? { path } : {}),
   };
 }
 
@@ -65,12 +69,15 @@ export function setSession(
   res.cookie(
     ACCESS_TOKEN_COOKIE,
     tokens.access_token,
-    sessionCookieOptions(authConfig.cookie.accessTokenMaxAgeMs),
+    sessionCookieOptions(appConfig.cookie.accessTokenMaxAgeMs),
   );
   res.cookie(
     REFRESH_TOKEN_COOKIE,
     tokens.refresh_token,
-    sessionCookieOptions(authConfig.cookie.refreshTokenMaxAgeMs),
+    sessionCookieOptions(
+      appConfig.cookie.refreshTokenMaxAgeMs,
+      REFRESH_TOKEN_PATH,
+    ),
   );
   return true;
 }
@@ -88,6 +95,10 @@ export function clearSession(res: Response | undefined): boolean {
   }
 
   res.cookie(ACCESS_TOKEN_COOKIE, "", sessionCookieOptions(0));
-  res.cookie(REFRESH_TOKEN_COOKIE, "", sessionCookieOptions(0));
+  res.cookie(
+    REFRESH_TOKEN_COOKIE,
+    "",
+    sessionCookieOptions(0, REFRESH_TOKEN_PATH),
+  );
   return true;
 }

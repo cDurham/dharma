@@ -1,8 +1,5 @@
 import type { Request, Response } from "express";
-import {
-  authConfig,
-  getRefreshTokenExpiresInMs,
-} from "../config/auth.config.js";
+import { appConfig, getRefreshTokenExpiresInMs } from "../config/app.config.js";
 import { clearSession, readSession, setSession } from "./auth.session.js";
 
 interface RecordedCookie {
@@ -58,23 +55,34 @@ describe("session module", () => {
       expect(options.secure).toBe(true);
     }
     expect(written[0].options.maxAge).toBe(
-      authConfig.cookie.accessTokenMaxAgeMs,
+      appConfig.cookie.accessTokenMaxAgeMs,
     );
     expect(written[1].options.maxAge).toBe(
-      authConfig.cookie.refreshTokenMaxAgeMs,
+      appConfig.cookie.refreshTokenMaxAgeMs,
     );
+  });
+
+  // Only /graphql ever reads these cookies; the refresh cookie is scoped to
+  // it so it never rides along on unrelated requests.
+  it("scopes the refresh cookie to /graphql, and leaves the access cookie unscoped", () => {
+    const { res, written } = recordingResponse();
+
+    setSession(res, tokens);
+
+    expect(written[0].options.path).toBeUndefined();
+    expect(written[1].options.path).toBe("/graphql");
   });
 
   // The refresh cookie and the refresh_token row expire together.
   it("expires the refresh cookie when the refresh token row expires", () => {
-    expect(authConfig.cookie.refreshTokenMaxAgeMs).toBe(
+    expect(appConfig.cookie.refreshTokenMaxAgeMs).toBe(
       getRefreshTokenExpiresInMs(),
     );
   });
 
   it("expires the access cookie when the access token expires", () => {
-    expect(authConfig.cookie.accessTokenMaxAgeMs).toBe(
-      authConfig.accessToken.expiresIn * 1000,
+    expect(appConfig.cookie.accessTokenMaxAgeMs).toBe(
+      appConfig.accessToken.expiresIn * 1000,
     );
   });
 
