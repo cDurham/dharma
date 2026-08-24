@@ -29,12 +29,10 @@ COPY . .
 EXPOSE 4200
 CMD ["pnpm", "run", "web:serve"]
 
-# ---------- build (build both apps together for maximal cache reuse)
+# ---------- build (build both apps)
 FROM deps AS build
 COPY . .
-# Persist Nx cache across Docker builds
-RUN --mount=type=cache,target=/workspace/.nx/cache \
-    pnpm nx run-many -t build --projects=api,web
+RUN pnpm run api:build && pnpm run web:build
 
 # ---------- prune (production-only dependencies)
 FROM deps AS prune

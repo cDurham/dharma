@@ -52,11 +52,6 @@
       "groupName": "nestjs"
     },
     {
-      "description": "Nx plugins must match the nx version exactly.",
-      "matchPackageNames": ["nx", "@nx/**"],
-      "groupName": "nx"
-    },
-    {
       "description": "codegen plugins are versioned against the cli.",
       "matchPackageNames": [
         "@graphql-codegen/**",
@@ -74,10 +69,6 @@
         "unplugin-swc"
       ],
       "groupName": "vite + vitest"
-    },
-    {
-      "matchPackageNames": ["jest", "ts-jest", "@types/jest", "@nx/jest"],
-      "groupName": "jest"
     },
     {
       "matchPackageNames": ["@testing-library/**"],

@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/apps/web-tests",
+    "rootDir": "./src",
     "types": [
       "vite/client",
       "vitest/globals",

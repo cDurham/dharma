@@ -3,6 +3,13 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
+  "scripts": {
+    "build": "vite build",
+    "serve": "vite",
+    "test": "vitest run",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch"
+  },
   "dependencies": {
     "@apollo/client": "^4.0.7",
     "@emotion/react": "^11.13.3",

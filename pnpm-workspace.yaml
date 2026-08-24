@@ -16,6 +16,6 @@ catalog:
   yaml: "^2.8.1"
 
   # Shared by the root workspace and tools/cli.
-  typescript: "^5.9.3"
+  typescript: "7.0.2"
   "@types/node": "^24.9.1"
   "@types/prompts": "^2.4.9"

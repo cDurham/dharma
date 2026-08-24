@@ -3,6 +3,11 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
+  "scripts": {
+    "build": "tsc -b tsconfig.app.json && find src -name '*.graphql' -exec sh -c 'mkdir -p ../../dist/apps/api/$(dirname {}) && cp {} ../../dist/apps/api/{}' \\;",
+    "serve": "pnpm run build && sh -c 'tsc -b tsconfig.app.json --watch --preserveWatchOutput & node --watch --enable-source-maps ../../dist/apps/api/src/index.js'",
+    "test": "vitest run"
+  },
   "dependencies": {
     "@apollo/server": "5.0.0",
     "@as-integrations/express5": "^1.0.0",

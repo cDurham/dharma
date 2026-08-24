@@ -1,6 +1,5 @@
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -9,7 +8,7 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: projectRoot,
   cacheDir: "../../node_modules/.vite/web",
-  plugins: [nxViteTsPaths(), react()],
+  plugins: [react()],
   server: {
     port: 4200,
     host: "0.0.0.0",
