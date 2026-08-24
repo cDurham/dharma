@@ -3,12 +3,13 @@ import { fileURLToPath } from "node:url";
 import { ApolloDriver } from "@nestjs/apollo";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 
-import { AuthModule } from "./Auth/index.js";
+import { AuthModule, GqlThrottlerGuard, JwtAuthGuard } from "./Auth/index.js";
 import { DatabaseModule } from "./db/database.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { MemberModule } from "./Member/member.module.js";
@@ -44,12 +45,18 @@ const isProduction = process.env.NODE_ENV === "production";
     AuthModule,
     ThrottlerModule.forRoot([
       {
-        limit: 10,
+        limit: 100,
         ttl: 60000, // 60 seconds
+        // The E2E suite drives hundreds of requests from one IP.
+        skipIf: () => process.env.NODE_ENV === "test",
       },
     ]),
   ],
   controllers: [HealthController],
-  providers: [],
+  // Guard order is registration order: throttle before credential checks.
+  providers: [
+    { provide: APP_GUARD, useClass: GqlThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+  ],
 })
 export class AppModule {}

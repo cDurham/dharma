@@ -4,5 +4,7 @@ export * from "./auth.input.js";
 export * from "./auth.module.js";
 export * from "./auth.service.js";
 export * from "./current-user.decorator.js";
+export * from "./gql-throttler.guard.js";
 export * from "./jwt.strategy.js";
 export * from "./jwt-auth.guard.js";
+export * from "./public.decorator.js";

@@ -73,3 +73,7 @@ query Me {
 mutation Logout {
   logout
 }
+
+mutation RefreshAccessToken {
+  refreshAccessToken
+}

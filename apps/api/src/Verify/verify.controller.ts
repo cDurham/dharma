@@ -1,7 +1,9 @@
 import { Controller, Get, Query, Redirect } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { Public } from "../Auth/public.decorator.js";
 import { UserService } from "../User/user.service.js";
 
+@Public()
 @Controller("verify")
 export class VerificationController {
   constructor(

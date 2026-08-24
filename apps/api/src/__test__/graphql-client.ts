@@ -31,6 +31,8 @@ export interface GraphQLClient {
   expectOk<TData>(
     response: GraphQLResponse<TData>,
   ): asserts response is GraphQLSuccess<TData>;
+  cookies(): Record<string, string>;
+  clearCookies(): void;
 }
 
 export interface GraphQLOperationOptions<TVariables> {
@@ -42,17 +44,50 @@ export interface GraphQLOperationOptions<TVariables> {
 export function createGraphQLClient(app: INestApplication): GraphQLClient {
   const agent = request(app.getHttpServer() as Parameters<typeof request>[0]);
 
+  // Manual jar instead of request.agent(): the API issues Secure cookies
+  // (NODE_ENV=test), which superagent's jar refuses to replay over plain http.
+  const jar = new Map<string, string>();
+
+  function storeCookies(setCookie: string | string[] | undefined) {
+    const entries = Array.isArray(setCookie)
+      ? setCookie
+      : setCookie
+        ? [setCookie]
+        : [];
+    for (const entry of entries) {
+      const [pair] = entry.split(";");
+      const separator = pair.indexOf("=");
+      if (separator < 1) {
+        continue;
+      }
+      const name = pair.slice(0, separator).trim();
+      const value = pair.slice(separator + 1).trim();
+      if (value === "") {
+        jar.delete(name);
+      } else {
+        jar.set(name, value);
+      }
+    }
+  }
+
   async function execute<TData, TVariables>({
     query,
     variables,
     headers = {},
   }: GraphQLOperationOptions<TVariables>): Promise<GraphQLResponse<TData>> {
-    const response = await agent
-      .post("/graphql")
+    const pending = agent.post("/graphql");
+    if (jar.size > 0) {
+      pending.set(
+        "Cookie",
+        [...jar].map(([name, value]) => `${name}=${value}`).join("; "),
+      );
+    }
+    const response = await pending
       .set(headers)
       .send({ query, variables })
       .expect(200);
 
+    storeCookies(response.headers["set-cookie"]);
     return response.body as GraphQLResponse<TData>;
   }
 
@@ -66,6 +101,12 @@ export function createGraphQLClient(app: INestApplication): GraphQLClient {
           .join("; ");
         throw new Error(`GraphQL responded with errors: ${summary}`);
       }
+    },
+    cookies() {
+      return Object.fromEntries(jar);
+    },
+    clearCookies() {
+      jar.clear();
     },
   };
 }

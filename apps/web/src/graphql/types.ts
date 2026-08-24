@@ -26,6 +26,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: { input: unknown; output: unknown };
 };
 
@@ -368,6 +369,12 @@ export type MeQuery = {
 export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
 
 export type LogoutMutation = { logout: boolean };
+
+export type RefreshAccessTokenMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type RefreshAccessTokenMutation = { refreshAccessToken: boolean };
 
 export const UserBasicFieldsFragmentDoc = {
   kind: "Document",
@@ -1096,3 +1103,25 @@ export const LogoutDocument = {
     },
   ],
 } as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
+export const RefreshAccessTokenDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "RefreshAccessToken" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "refreshAccessToken" },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RefreshAccessTokenMutation,
+  RefreshAccessTokenMutationVariables
+>;

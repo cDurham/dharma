@@ -1,7 +1,8 @@
-import { UseGuards } from "@nestjs/common";
+import { ForbiddenException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Throttle } from "@nestjs/throttler";
 import { CurrentUser } from "../Auth/current-user.decorator.js";
-import { JwtAuthGuard } from "../Auth/jwt-auth.guard.js";
+import { Public } from "../Auth/public.decorator.js";
 import { CreateUserInput, UpdateUserInput } from "./user.input.js";
 import { toPublicUser } from "./user.projection.js";
 import type { AuthenticatedUser } from "./user.schema.js";
@@ -24,6 +25,8 @@ export class UserResolver {
     return rows.map(toPublicUser);
   }
 
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Mutation(() => User)
   async createUser(@Args("data") data: CreateUserInput): Promise<User> {
     return toPublicUser(await this.userService.create(data));
@@ -31,9 +34,13 @@ export class UserResolver {
 
   @Mutation(() => User)
   async updateUser(
+    @CurrentUser() currentUser: AuthenticatedUser,
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateUserInput,
   ): Promise<User | null> {
+    if (currentUser.uuid !== uuid) {
+      throw new ForbiddenException("Users may only update their own account");
+    }
     const row = await this.userService.update(uuid, data);
     return row ? toPublicUser(row) : null;
   }
@@ -49,11 +56,14 @@ export class UserResolver {
     return row ? toPublicUser(row) : null;
   }
 
+  @Public()
   @Mutation(() => Boolean)
   async verifyEmail(@Args("token") token: string): Promise<boolean> {
     return this.userService.verifyEmail(token);
   }
 
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Mutation(() => Boolean)
   async resendVerificationEmail(
     @Args("email") email: string,
@@ -62,7 +72,6 @@ export class UserResolver {
   }
 
   @Query(() => User)
-  @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: AuthenticatedUser): User {
     return toPublicUser(user);
   }

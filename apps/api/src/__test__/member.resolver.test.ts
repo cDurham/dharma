@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import type { INestApplication } from "@nestjs/common";
-import { Test, type TestingModule } from "@nestjs/testing";
-import { AppModule } from "../app.module.js";
+import { expectUnauthenticated, signUpAndLogin } from "./auth-helper.js";
+import { createTestApp } from "./create-test-app.js";
 import { createGraphQLClient, type GraphQLClient } from "./graphql-client.js";
 
 interface Member {
@@ -16,13 +16,9 @@ describe("E2E - Member Resolver", () => {
   let graphql: GraphQLClient;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    app = await createTestApp();
     graphql = createGraphQLClient(app);
+    await signUpAndLogin(graphql);
   });
 
   afterAll(async () => {
@@ -150,5 +146,25 @@ describe("E2E - Member Resolver", () => {
 
     graphql.expectOk(response);
     expect(response.data.deleteMember.uuid).toBe(createdMember.uuid);
+  });
+
+  it("rejects member operations without a session", async () => {
+    const anonymous = createGraphQLClient(app);
+
+    expectUnauthenticated(
+      await anonymous.query({
+        query: `query members { members { uuid } }`,
+      }),
+    );
+    expectUnauthenticated(
+      await anonymous.mutation({
+        query: `mutation createMember($data: CreateMemberInput!) {
+            createMember(data: $data) {
+              uuid
+            }
+        }`,
+        variables: { data: { firstName: "Anon", lastName: "Anon" } },
+      }),
+    );
   });
 });

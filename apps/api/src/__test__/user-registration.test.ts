@@ -1,9 +1,8 @@
 import { faker } from "@faker-js/faker";
 import type { INestApplication } from "@nestjs/common";
-import { Test, type TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
-import { AppModule } from "../app.module.js";
 import { EmailService } from "../Email/index.js";
+import { createTestApp } from "./create-test-app.js";
 import { createGraphQLClient, type GraphQLClient } from "./graphql-client.js";
 
 describe("User Registration and Email Verification", () => {
@@ -12,17 +11,11 @@ describe("User Registration and Email Verification", () => {
   const sendVerificationEmailMock = vi.fn();
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(EmailService)
-      .useValue({
+    app = await createTestApp((builder) =>
+      builder.overrideProvider(EmailService).useValue({
         sendVerificationEmail: sendVerificationEmailMock,
-      })
-      .compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+      }),
+    );
     graphql = createGraphQLClient(app);
   });
 
@@ -30,6 +23,8 @@ describe("User Registration and Email Verification", () => {
     await app.close();
   });
 
+  // Deliberately anonymous: registration is on the @Public allowlist, and
+  // this test is the proof it stays reachable without a session.
   it("should register a new user and send a verification email", async () => {
     const createUserMutation = `
         mutation CreateUser($data: CreateUserInput!) {
