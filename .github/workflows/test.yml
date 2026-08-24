@@ -27,28 +27,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # No `version:` — pnpm/action-setup reads the `packageManager` field in
+      # package.json. That keeps the pnpm version in ONE place instead of three,
+      # so Renovate bumping it cannot leave CI on a different pnpm than Docker.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.15.0
           run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          # Single source of truth for the Node major; keep .nvmrc, the Dockerfile
+          # `node:<major>-slim` tags and package.json `engines` moving together.
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # `api:lint` / `web:lint` run `biome check --write`, which MUTATES files and
+      # therefore can never fail a runner. `biome ci` is the non-mutating gate.
       - name: Lint
-        run: |
-          pnpm run api:lint
-          pnpm run web:lint
+        run: pnpm run ci:check
+
+      # Typecheck and build are what make a dependency bump safe to automerge:
+      # a lint+test pass alone will happily green-light an upgrade that does not compile.
+      - name: Typecheck
+        run: pnpm run typecheck
 
       - name: Test
         run: |
           pnpm run api:test
           pnpm run web:test
+
+      - name: Build
+        run: |
+          pnpm run api:build
+          pnpm run web:build
+          pnpm run cli:build
+
+      # Runs after Build because it executes the freshly-compiled CLI.
+      # Fails the PR on error-severity invariants only (stray lockfiles, Node
+      # major disagreement); warnings are printed but do not block.
+      - name: Dependency policy
+        run: pnpm run dharma deps --ci

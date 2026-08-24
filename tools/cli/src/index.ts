@@ -1,10 +1,11 @@
 import { Command } from "commander";
 import { dbCommand } from "./commands/db.js";
+import { depsCommand } from "./commands/deps.js";
 import { devCommand } from "./commands/dev.js";
-import { prodCommand } from "./commands/prod.js";
 import { execCommand } from "./commands/exec.js";
 import { lintCommand } from "./commands/lint.js";
 import { logsCommand } from "./commands/logs.js";
+import { prodCommand } from "./commands/prod.js";
 import { statusCommand } from "./commands/status.js";
 import { testCommand } from "./commands/test.js";
 import { showBanner } from "./utils/banner.js";
@@ -31,5 +32,6 @@ program.addCommand(execCommand);
 program.addCommand(statusCommand);
 program.addCommand(lintCommand);
 program.addCommand(testCommand);
+program.addCommand(depsCommand);
 
 program.parse(process.argv);

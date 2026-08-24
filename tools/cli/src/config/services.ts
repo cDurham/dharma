@@ -1,12 +1,12 @@
-import { parseDockerCompose, ServiceConfig } from './docker-compose-parser.js';
+import { parseDockerCompose, ServiceConfig } from "./docker-compose-parser.js";
 
 /**
  * Service name aliases for convenience
  * Maps short names to full service names in dev mode
  */
 const SERVICE_ALIASES: Record<string, string> = {
-  'api': 'api-dev',
-  'web': 'web-dev',
+  api: "api-dev",
+  web: "web-dev",
 };
 
 /**
@@ -62,9 +62,11 @@ class ServiceRegistry {
   /**
    * Get services by profile
    */
-  public getServicesByProfile(profile: 'dev' | 'prod' | 'all'): ServiceConfig[] {
+  public getServicesByProfile(
+    profile: "dev" | "prod" | "all",
+  ): ServiceConfig[] {
     return this.getAllServices().filter(
-      s => s.profile === profile || s.profile === 'all'
+      (s) => s.profile === profile || s.profile === "all",
     );
   }
 
@@ -72,14 +74,14 @@ class ServiceRegistry {
    * Get services that can be executed into
    */
   public getExecableServices(): ServiceConfig[] {
-    return this.getAllServices().filter(s => s.capabilities.canExec);
+    return this.getAllServices().filter((s) => s.capabilities.canExec);
   }
 
   /**
    * Get services that can be rebuilt
    */
   public getRebuildableServices(): ServiceConfig[] {
-    return this.getAllServices().filter(s => s.capabilities.canRebuild);
+    return this.getAllServices().filter((s) => s.capabilities.canRebuild);
   }
 
   /**
@@ -107,7 +109,7 @@ class ServiceRegistry {
    * Resolve multiple service names, applying aliases if needed
    */
   public resolveServiceNames(names: string[]): string[] {
-    return names.map(name => this.resolveServiceName(name));
+    return names.map((name) => this.resolveServiceName(name));
   }
 
   /**
@@ -115,7 +117,9 @@ class ServiceRegistry {
    */
   public getDisplayName(requestedName: string): string {
     const resolvedName = this.resolveServiceName(requestedName);
-    return requestedName !== resolvedName ? `${requestedName} (${resolvedName})` : requestedName;
+    return requestedName !== resolvedName
+      ? `${requestedName} (${resolvedName})`
+      : requestedName;
   }
 }
 
@@ -126,5 +130,4 @@ export const serviceRegistry = ServiceRegistry.getInstance();
 export { SERVICE_ALIASES };
 
 // Export type for use in other files
-export type { ServiceConfig } from './docker-compose-parser.js';
-
+export type { ServiceConfig } from "./docker-compose-parser.js";

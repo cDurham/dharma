@@ -17,8 +17,5 @@
     "src/**/*.spec.tsx",
     "src/**/*.spec.ts"
   ],
-  "exclude": [
-    "vite.config.ts",
-    "vitest.config.ts"
-  ]
+  "exclude": ["vite.config.ts", "vitest.config.ts"]
 }

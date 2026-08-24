@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import ts from "typescript";
-import { globby } from "globby";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { globby } from "globby";
+import ts from "typescript";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,10 +32,18 @@ function normalizeDotLike(spec: string): string {
 // Return runtime specifier ending in .js if found; otherwise null.
 function resolveTarget(spec: string, basedir: string): string | null {
   // only relative
-  if (!(spec.startsWith("./") || spec.startsWith("../") || spec === "." || spec === "..")) return null;
+  if (
+    !(
+      spec.startsWith("./") ||
+      spec.startsWith("../") ||
+      spec === "." ||
+      spec === ".."
+    )
+  )
+    return null;
 
   // normalize ".", "..", "/.", "/.."
-  let rel = normalizeDotLike(spec);
+  const rel = normalizeDotLike(spec);
 
   // if it now has an explicit ext, we're done
   if (HAS_EXT_RE.test(rel)) return null;
@@ -73,7 +81,13 @@ function resolveTarget(spec: string, basedir: string): string | null {
 // Patch a single file by rewriting string literal module specifiers
 function processFile(file: string) {
   const sourceText = readFileSync(file, "utf8");
-  const sf = ts.createSourceFile(file, sourceText, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TS);
+  const sf = ts.createSourceFile(
+    file,
+    sourceText,
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TS,
+  );
 
   const patches: { start: number; end: number; text: string }[] = [];
   const warnings: string[] = [];
@@ -82,7 +96,11 @@ function processFile(file: string) {
   const patchStringLiteral = (lit: ts.StringLiteralLike) => {
     const original = lit.text;
     // Only relative (including "." / "..")
-    const isRelative = original === "." || original === ".." || original.startsWith("./") || original.startsWith("../");
+    const isRelative =
+      original === "." ||
+      original === ".." ||
+      original.startsWith("./") ||
+      original.startsWith("../");
     if (!isRelative) return;
 
     // Already extensioned?
@@ -103,20 +121,34 @@ function processFile(file: string) {
 
   const visit = (node: ts.Node): void => {
     // import ... from 'x'
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
       patchStringLiteral(node.moduleSpecifier);
     }
     // export ... from 'x' / export * from 'x'
-    else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+    else if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier)
+    ) {
       patchStringLiteral(node.moduleSpecifier);
     }
     // dynamic import('x')
-    else if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+    else if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword
+    ) {
       const [arg] = node.arguments;
       if (arg && ts.isStringLiteralLike(arg)) patchStringLiteral(arg);
     }
     // import foo = require('x')  (rare in ESM code, but harmless to support)
-    else if (ts.isImportEqualsDeclaration(node) && node.moduleReference && ts.isExternalModuleReference(node.moduleReference)) {
+    else if (
+      ts.isImportEqualsDeclaration(node) &&
+      node.moduleReference &&
+      ts.isExternalModuleReference(node.moduleReference)
+    ) {
       const exp = node.moduleReference.expression;
       if (exp && ts.isStringLiteral(exp)) patchStringLiteral(exp);
     }
@@ -165,4 +197,3 @@ function processFile(file: string) {
     for (const w of unresolved) console.warn(" - " + w);
   }
 })();
-

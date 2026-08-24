@@ -2,3 +2,20 @@ packages:
   - "apps/*"
   - "tools/*"
   - "packages/*"
+
+# Catalog — single-source every version used by more than one workspace package.
+# Members reference these as `"chalk": "catalog:"`, so a bump is one edit here and
+# two packages can never silently drift onto different majors of the same library.
+# Renovate updates the catalog entry directly; see renovate.json.
+catalog:
+  # Shared by apps/api and tools/cli (both ship a commander-based CLI surface).
+  chalk: "5.6.2"
+  commander: "14.0.1"
+  ora: "9.0.0"
+  prompts: "^2.4.2"
+  yaml: "^2.8.1"
+
+  # Shared by the root workspace and tools/cli.
+  typescript: "^5.9.3"
+  "@types/node": "^24.9.1"
+  "@types/prompts": "^2.4.9"

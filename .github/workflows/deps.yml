@@ -1,0 +1,46 @@
+name: Dependency drift
+
+# Renovate opens the upgrade PRs. This job answers the question Renovate cannot:
+# how far behind is trunk *right now*, and does the repo still satisfy its own
+# version-policy invariants. It reports; it never changes anything.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # No `version:` — pnpm/action-setup reads the `packageManager` field in
+      # package.json. That keeps the pnpm version in ONE place instead of three,
+      # so Renovate bumping it cannot leave CI on a different pnpm than Docker.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Dependency report
+        run: pnpm run dharma deps --majors | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on policy violation
+        run: pnpm run dharma deps --ci

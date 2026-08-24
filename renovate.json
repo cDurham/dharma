@@ -1,0 +1,159 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits", ":dependencyDashboard"],
+  "timezone": "Europe/London",
+  "schedule": ["* 0-6 * * 1,4"],
+  "prConcurrentLimit": 12,
+  "prHourlyLimit": 0,
+  "rangeStrategy": "bump",
+  "postUpdateOptions": ["pnpmDedupe"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* 0-6 * * 1"],
+    "automerge": true
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"],
+    "schedule": null,
+    "automerge": false
+  },
+  "major": {
+    "automerge": false,
+    "labels": ["dependencies", "major"],
+    "minimumReleaseAge": "3 days"
+  },
+  "packageRules": [
+    {
+      "description": "Patch + minor devDependencies automerge once CI is green. These cannot reach production.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "minimumReleaseAge": "2 days"
+    },
+    {
+      "description": "Patch runtime deps automerge; minor runtime deps get a human. Both wait out an unpublish window.",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "@types/* track their runtime package's shape, not a release train. Group and automerge.",
+      "matchPackageNames": ["@types/**"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "groupName": "type definitions",
+      "automerge": true,
+      "minimumReleaseAge": "2 days"
+    },
+    {
+      "description": "NestJS ships its packages in lockstep; a partial bump is a broken DI container.",
+      "matchPackageNames": ["@nestjs/**", "@nestjs-modules/**"],
+      "groupName": "nestjs"
+    },
+    {
+      "description": "Nx plugins must match the nx version exactly.",
+      "matchPackageNames": ["nx", "@nx/**"],
+      "groupName": "nx"
+    },
+    {
+      "description": "codegen plugins are versioned against the cli.",
+      "matchPackageNames": [
+        "@graphql-codegen/**",
+        "@graphql-typed-document-node/**"
+      ],
+      "groupName": "graphql-codegen"
+    },
+    {
+      "description": "vite/vitest/coverage share a plugin ABI.",
+      "matchPackageNames": [
+        "vite",
+        "vitest",
+        "@vitest/**",
+        "@vitejs/**",
+        "unplugin-swc"
+      ],
+      "groupName": "vite + vitest"
+    },
+    {
+      "matchPackageNames": ["jest", "ts-jest", "@types/jest", "@nx/jest"],
+      "groupName": "jest"
+    },
+    {
+      "matchPackageNames": ["@testing-library/**"],
+      "groupName": "testing-library"
+    },
+    {
+      "matchPackageNames": ["@swc/**"],
+      "groupName": "swc"
+    },
+    {
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ],
+      "groupName": "react"
+    },
+    {
+      "matchPackageNames": ["drizzle-orm", "drizzle-kit", "drizzle-zod"],
+      "groupName": "drizzle"
+    },
+    {
+      "description": "biome.json carries a $schema URL pinned to the binary version. A bump that skips the schema is silent drift \u2014 never automerge it.",
+      "matchPackageNames": ["@biomejs/biome"],
+      "automerge": false,
+      "labels": ["dependencies", "needs-schema-bump"]
+    },
+    {
+      "description": "TypeScript majors move the whole repo's type-check surface. Never automerge, even from a devDependency slot.",
+      "matchPackageNames": ["typescript"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "Node engine + @types/node must not outrun the runtime the Dockerfile and CI actually use.",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<25"
+    },
+    {
+      "description": "Keep the pnpm packageManager field moving with the pinned CI version.",
+      "matchDepTypes": ["packageManager"],
+      "automerge": false,
+      "labels": ["dependencies", "toolchain"]
+    },
+    {
+      "description": "CI actions drift silently \u2014 nothing fails when checkout is 3 majors old. Group them into one PR and automerge once the suite passes; the suite IS the test for an action bump.",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "groupName": "github actions",
+      "automerge": true,
+      "minimumReleaseAge": "5 days"
+    },
+    {
+      "description": "Actions pinned to a commit SHA (appleboy/ssh-action) are pinned deliberately \u2014 supply-chain surface on a deploy job. Renovate may bump them, but a human reviews.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["appleboy/ssh-action"],
+      "automerge": false,
+      "labels": ["dependencies", "supply-chain"]
+    },
+    {
+      "description": "Dockerfile base image. A Node major bump here must move .nvmrc and engines with it \u2014 `dharma deps` fails CI if they disagree, so this cannot automerge alone.",
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["node"],
+      "automerge": false,
+      "labels": ["dependencies", "toolchain"]
+    },
+    {
+      "description": "Everything else in the Dockerfile / compose (postgres et al).",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "container images",
+      "automerge": true,
+      "minimumReleaseAge": "5 days"
+    }
+  ],
+  "enabledManagers": ["npm", "github-actions", "dockerfile", "docker-compose"]
+}

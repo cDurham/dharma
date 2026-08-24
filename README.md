@@ -454,6 +454,25 @@ npm run d:dev:rebuild:api  # Rebuild only API service
 
 ---
 
+## 📌 Dependency Currency
+
+```bash
+pnpm run deps          # drift + advisories + version-policy invariants
+pnpm run deps:majors   # also list every package behind a major
+pnpm run deps:ci       # invariants only — no network, <1s, exits 1 on violations
+```
+
+Renovate (`renovate.json`) opens the upgrade PRs, grouped by release train and
+automerging only patch/minor devDependencies and `@types/*`. **It is inert until
+enabled on the repository.**
+
+`pnpm run deps` additionally checks invariants no dependency bot covers: a single
+root lockfile, Node major agreement across `.nvmrc` / `engines` / `Dockerfile`,
+`biome.json`'s `$schema` matching the installed Biome, pnpm catalog coverage for
+anything shared between workspace packages, and workflow action pinning.
+
+See `docs/adr/0002-dependency-currency.md` for the rationale.
+
 ## 🚢 Production Deployment
 
 ### Build & Run with Docker
