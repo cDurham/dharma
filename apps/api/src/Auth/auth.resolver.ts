@@ -1,12 +1,11 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
 import { Throttle } from "@nestjs/throttler";
-import { authConfig } from "../config/auth.config.js";
 import type { GraphQLContext } from "../graphql-context.type.js";
-import { getRefreshToken } from "./auth.cookies.js";
 import { LoginResponse } from "./auth.dto.js";
 import { ValidateUserInput } from "./auth.input.js";
 import { AuthService } from "./auth.service.js";
+import { clearSession, readSession, setSession } from "./auth.session.js";
 import { Public } from "./public.decorator.js";
 
 @Resolver()
@@ -21,28 +20,9 @@ export class AuthResolver {
     @Context() context: GraphQLContext,
   ): Promise<LoginResponse> {
     const user = await this.authService.validateUser(loginInput);
-    const { access_token, refresh_token } = await this.authService.login(user);
+    const tokens = await this.authService.login(user);
 
-    if (context.res && typeof context.res.cookie === "function") {
-      // set short-lived access token
-      context.res.cookie("access_token", access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        maxAge: authConfig.cookie.accessTokenMaxAgeMs,
-      });
-      // set long-lived refresh token
-      context.res.cookie("refresh_token", refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        maxAge: authConfig.cookie.refreshTokenMaxAgeMs,
-      });
-    } else {
-      console.warn(
-        "Unable to set cookie: Response object not available in context",
-      );
-    }
+    setSession(context.res, tokens);
 
     return {
       message: "Login successful",
@@ -55,29 +35,14 @@ export class AuthResolver {
   async refreshAccessToken(
     @Context() context: GraphQLContext,
   ): Promise<boolean> {
-    const refreshToken = getRefreshToken(context.req);
+    const { refreshToken } = readSession(context.req);
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token not found");
     }
 
-    const { access_token, refresh_token } =
-      await this.authService.refreshAccessToken(refreshToken);
-
-    // Set new access token cookie
-    context.res.cookie("access_token", access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: "strict",
-      maxAge: authConfig.cookie.accessTokenMaxAgeMs,
-    });
-
-    // Set new refresh token cookie (rotation)
-    context.res.cookie("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: "strict",
-      maxAge: authConfig.cookie.refreshTokenMaxAgeMs,
-    });
+    // Rotation: the refresh cookie is replaced along with the access cookie.
+    const tokens = await this.authService.refreshAccessToken(refreshToken);
+    setSession(context.res, tokens);
 
     return true;
   }
@@ -87,32 +52,11 @@ export class AuthResolver {
   @Public()
   @Mutation(() => Boolean)
   async logout(@Context() context: GraphQLContext): Promise<boolean> {
-    const refreshToken = getRefreshToken(context.req);
+    const { refreshToken } = readSession(context.req);
     if (refreshToken) {
       await this.authService.revokeRefreshToken(refreshToken);
     }
 
-    if (context.res && typeof context.res.cookie === "function") {
-      // clear short-lived access token
-      context.res.cookie("access_token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        maxAge: 0,
-      });
-      // clear long-lived refresh token
-      context.res.cookie("refresh_token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        maxAge: 0,
-      });
-      return true;
-    } else {
-      console.warn(
-        "Unable to clear cookie: Response object not available in context",
-      );
-      return false;
-    }
+    return clearSession(context.res);
   }
 }

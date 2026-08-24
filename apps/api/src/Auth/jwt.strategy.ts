@@ -5,7 +5,7 @@ import type { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import type { AuthenticatedUser } from "../User/user.schema.js";
 import { UserService } from "../User/user.service.js";
-import { getAccessToken } from "./auth.cookies.js";
+import { readSession } from "./auth.session.js";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request): string | null => {
-          return getAccessToken(request) ?? null;
+          return readSession(request).accessToken ?? null;
         },
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
