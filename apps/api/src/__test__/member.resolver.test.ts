@@ -11,7 +11,7 @@ interface Member {
   joinDate?: string;
 }
 
-describe.skip("E2E - Member Resolver", () => {
+describe("E2E - Member Resolver", () => {
   let app: INestApplication;
   let graphql: GraphQLClient;
 

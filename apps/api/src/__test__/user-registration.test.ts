@@ -6,10 +6,10 @@ import { AppModule } from "../app.module.js";
 import { EmailService } from "../Email/index.js";
 import { createGraphQLClient, type GraphQLClient } from "./graphql-client.js";
 
-describe.skip("User Registration and Email Verification", () => {
+describe("User Registration and Email Verification", () => {
   let app: INestApplication;
   let graphql: GraphQLClient;
-  let sendVerificationEmailMock: ReturnType<typeof vi.spyOn>;
+  const sendVerificationEmailMock = vi.fn();
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -17,16 +17,13 @@ describe.skip("User Registration and Email Verification", () => {
     })
       .overrideProvider(EmailService)
       .useValue({
-        sendVerificationEmail: vi.fn(),
+        sendVerificationEmail: sendVerificationEmailMock,
       })
       .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
     graphql = createGraphQLClient(app);
-
-    const emailService = moduleFixture.get<EmailService>(EmailService);
-    sendVerificationEmailMock = vi.spyOn(emailService, "sendVerificationEmail");
   });
 
   afterAll(async () => {

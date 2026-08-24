@@ -11,7 +11,7 @@ interface Retreat {
   endAt: string;
 }
 
-describe.skip("E2E - Retreat Resolver", () => {
+describe("E2E - Retreat Resolver", () => {
   let app: INestApplication;
   let graphql: GraphQLClient;
 

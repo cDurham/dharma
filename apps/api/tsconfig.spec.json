@@ -4,7 +4,9 @@
     "outDir": "../../dist/out-tsc/apps/api-tests",
     "types": ["vitest/globals", "node"],
     "module": "ESNext",
-    "target": "ES2022"
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*.spec.ts", "src/**/*.test.ts", "src/**/__test__/**/*.ts"]
 }
