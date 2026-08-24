@@ -6,7 +6,7 @@ import { DB_TOKEN } from "../db/database.module.js";
 import { member } from "../db/schema/index.js";
 import type { MemberRow } from "../db/types.js";
 import type { CreateMemberInput, UpdateMemberInput } from "./member.input.js";
-import type { UpdateMemberData } from "./member.schema.js";
+import { UpdateMemberSchema } from "./member.schema.js";
 
 @Injectable()
 export class MemberService {
@@ -47,7 +47,7 @@ export class MemberService {
     if (!existing) {
       throw new Error("Member not found");
     }
-    const updateData: UpdateMemberData = data;
+    const updateData = UpdateMemberSchema.parse(data);
     await this.db
       .update(member)
       .set({ ...updateData, updatedAt: new Date() })

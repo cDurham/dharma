@@ -1,4 +1,3 @@
-import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import {
   Button,
@@ -11,21 +10,13 @@ import {
 } from "@mui/material";
 import { useState, useTransition } from "react";
 
-import { CreateUserDocument } from "../graphql/types";
+import {
+  CreateUserDocument,
+  ResendVerificationEmailDocument,
+} from "../graphql/types";
 import useLogin from "../graphql/useLogin";
 
-const RESEND_VERIFICATION_EMAIL = gql`
-  mutation ResendVerificationEmail($email: String!) {
-    resendVerificationEmail(email: $email)
-  }
-`;
-
 const LoginForm = () => {
-  type ResendVerificationEmailResponse = {
-    resendVerificationEmail: boolean;
-  };
-  type ResendVerificationEmailVars = { email: string };
-
   type ApolloLikeError = {
     message?: string;
     graphQLErrors?: Array<{ message?: string }>;
@@ -73,10 +64,9 @@ const LoginForm = () => {
   const [handleLogin, { loading, error }] = useLogin();
   const [createUser, { loading: signupLoading, error: signupError }] =
     useMutation(CreateUserDocument);
-  const [resendVerificationEmail, { loading: resendLoading }] = useMutation<
-    ResendVerificationEmailResponse,
-    ResendVerificationEmailVars
-  >(RESEND_VERIFICATION_EMAIL);
+  const [resendVerificationEmail, { loading: resendLoading }] = useMutation(
+    ResendVerificationEmailDocument,
+  );
   const [open, setOpen] = useState(false);
   const [loginErrorMessage, setLoginErrorMessage] = useState<string | null>(
     null,

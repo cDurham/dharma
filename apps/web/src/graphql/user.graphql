@@ -10,7 +10,6 @@ mutation CreateUser($data: CreateUserInput!) {
     email
     firstName
     lastName
-    verificationToken
   }
 }
 
@@ -20,7 +19,6 @@ mutation UpdateUser($uuid: String!, $data: UpdateUserInput!) {
     email
     firstName
     lastName
-    verificationToken
   }
 }
 
@@ -42,7 +40,6 @@ query GetUser($uuid: String!) {
     email
     firstName
     lastName
-    verificationToken
   }
 }
 
@@ -52,7 +49,6 @@ query GetUsers {
     email
     firstName
     lastName
-    verificationToken
   }
 }
 
@@ -62,7 +58,6 @@ query GetUserByEmail($email: String!) {
     email
     firstName
     lastName
-    verificationToken
   }
 }
 
@@ -72,6 +67,9 @@ query Me {
     email
     firstName
     lastName
-    verificationToken
   }
+}
+
+mutation Logout {
+  logout
 }

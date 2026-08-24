@@ -35,7 +35,6 @@ describe("User Registration and Email Verification", () => {
         mutation CreateUser($data: CreateUserInput!) {
             createUser(data: $data) {
                 email
-                verificationToken
             }
         }
     `;
@@ -50,7 +49,7 @@ describe("User Registration and Email Verification", () => {
     };
 
     const response = await graphql.mutation<
-      { createUser: { email: string; verificationToken: string } },
+      { createUser: { email: string } },
       typeof variables
     >({
       query: createUserMutation,
@@ -60,11 +59,12 @@ describe("User Registration and Email Verification", () => {
     graphql.expectOk(response);
     const { createUser } = response.data;
     expect(createUser.email).toBe(variables.data.email);
-    expect(createUser.verificationToken).toBeDefined();
 
+    // The token never crosses the GraphQL interface; the email send is
+    // where it surfaces.
     expect(sendVerificationEmailMock).toHaveBeenCalledWith(
       variables.data.email,
-      createUser.verificationToken,
+      expect.any(String),
     );
   });
 });

@@ -9,7 +9,7 @@ import type {
   CreateRetreatInput,
   UpdateRetreatInput,
 } from "./retreat.input.js";
-import type { UpdateRetreatData } from "./retreat.schema.js";
+import { UpdateRetreatSchema } from "./retreat.schema.js";
 
 @Injectable()
 export class RetreatService {
@@ -50,7 +50,7 @@ export class RetreatService {
     if (!existing) {
       throw new Error("Retreat not found");
     }
-    const updateData: UpdateRetreatData = data;
+    const updateData = UpdateRetreatSchema.parse(data);
     await this.db
       .update(retreat)
       .set({ ...updateData, updatedAt: new Date() })
