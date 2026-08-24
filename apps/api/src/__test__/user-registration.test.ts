@@ -1,44 +1,35 @@
 import { faker } from "@faker-js/faker";
 import type { INestApplication } from "@nestjs/common";
-import { Test, type TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
-import { AppModule } from "../app.module.js";
 import { EmailService } from "../Email/index.js";
+import { createTestApp } from "./create-test-app.js";
 import { createGraphQLClient, type GraphQLClient } from "./graphql-client.js";
 
-describe.skip("User Registration and Email Verification", () => {
+describe("User Registration and Email Verification", () => {
   let app: INestApplication;
   let graphql: GraphQLClient;
-  let sendVerificationEmailMock: ReturnType<typeof vi.spyOn>;
+  const sendVerificationEmailMock = vi.fn();
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(EmailService)
-      .useValue({
-        sendVerificationEmail: vi.fn(),
-      })
-      .compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    app = await createTestApp((builder) =>
+      builder.overrideProvider(EmailService).useValue({
+        sendVerificationEmail: sendVerificationEmailMock,
+      }),
+    );
     graphql = createGraphQLClient(app);
-
-    const emailService = moduleFixture.get<EmailService>(EmailService);
-    sendVerificationEmailMock = vi.spyOn(emailService, "sendVerificationEmail");
   });
 
   afterAll(async () => {
     await app.close();
   });
 
+  // Deliberately anonymous: registration is on the @Public allowlist, and
+  // this test is the proof it stays reachable without a session.
   it("should register a new user and send a verification email", async () => {
     const createUserMutation = `
         mutation CreateUser($data: CreateUserInput!) {
             createUser(data: $data) {
                 email
-                verificationToken
             }
         }
     `;
@@ -53,7 +44,7 @@ describe.skip("User Registration and Email Verification", () => {
     };
 
     const response = await graphql.mutation<
-      { createUser: { email: string; verificationToken: string } },
+      { createUser: { email: string } },
       typeof variables
     >({
       query: createUserMutation,
@@ -63,11 +54,12 @@ describe.skip("User Registration and Email Verification", () => {
     graphql.expectOk(response);
     const { createUser } = response.data;
     expect(createUser.email).toBe(variables.data.email);
-    expect(createUser.verificationToken).toBeDefined();
 
+    // The token never crosses the GraphQL interface; the email send is
+    // where it surfaces.
     expect(sendVerificationEmailMock).toHaveBeenCalledWith(
       variables.data.email,
-      createUser.verificationToken,
+      expect.any(String),
     );
   });
 });

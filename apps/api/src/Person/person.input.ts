@@ -1,8 +1,7 @@
 import { Field, InputType } from "@nestjs/graphql";
-import type { Person } from "./person.entity.js";
 
 @InputType({ isAbstract: true })
-export class PersonInput implements Partial<Person> {
+export class PersonInput {
   @Field()
   firstName!: string;
 
@@ -11,7 +10,7 @@ export class PersonInput implements Partial<Person> {
 }
 
 @InputType({ isAbstract: true })
-export class UpdatePersonInput implements Partial<Person> {
+export class UpdatePersonInput {
   @Field({ nullable: true })
   firstName?: string;
 

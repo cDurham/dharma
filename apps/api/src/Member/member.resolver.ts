@@ -1,5 +1,3 @@
-// resolver/MemberResolver.ts
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import {
   Args,
   Mutation,
@@ -8,41 +6,36 @@ import {
   ResolveField,
   Resolver,
 } from "@nestjs/graphql";
-import { GetUserQuery } from "../User/command/get-user.query.js";
-import type { UserEntity } from "../User/user.entity.js";
+import { toPublicUser } from "../User/user.projection.js";
+import { UserService } from "../User/user.service.js";
 import { User } from "../User/user.type.js";
-import { CreateMemberCommand } from "./commands/create-member.command.js";
-import { DeleteMemberCommand } from "./commands/delete-member.command.js";
-import { GetMemberQuery } from "./commands/get-member.query.js";
-import { GetMembersQuery } from "./commands/get-members.query.js";
-import { UpdateMemberCommand } from "./commands/update-member.command.js";
-import { MemberEntity } from "./member.entity.js";
 import { CreateMemberInput, UpdateMemberInput } from "./member.input.js";
+import { toPublicMember } from "./member.projection.js";
+import { MemberService } from "./member.service.js";
 import { Member } from "./member.type.js";
 
 @Resolver(() => Member)
 export class MemberResolver {
   constructor(
-    private commandBus: CommandBus,
-    private queryBus: QueryBus,
+    private readonly memberService: MemberService,
+    private readonly userService: UserService,
   ) {}
 
   @Query(() => Member, { nullable: true })
   async member(@Args("uuid") uuid: string): Promise<Member | null> {
-    const entity = await this.queryBus.execute(new GetMemberQuery(uuid));
-    return entity ? this.mapToGraphQL(entity) : null;
+    const row = await this.memberService.get(uuid);
+    return row ? toPublicMember(row) : null;
   }
 
   @Query(() => [Member])
   async members(): Promise<Member[]> {
-    const entities = await this.queryBus.execute(new GetMembersQuery());
-    return entities.map((entity) => this.mapToGraphQL(entity));
+    const rows = await this.memberService.list();
+    return rows.map(toPublicMember);
   }
 
   @Mutation(() => Member)
   async createMember(@Args("data") data: CreateMemberInput): Promise<Member> {
-    const entity = await this.commandBus.execute(new CreateMemberCommand(data));
-    return this.mapToGraphQL(entity);
+    return toPublicMember(await this.memberService.create(data));
   }
 
   @Mutation(() => Member)
@@ -50,16 +43,12 @@ export class MemberResolver {
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateMemberInput,
   ): Promise<Member> {
-    const entity = await this.commandBus.execute(
-      new UpdateMemberCommand(uuid, data),
-    );
-    return this.mapToGraphQL(entity);
+    return toPublicMember(await this.memberService.update(uuid, data));
   }
 
   @Mutation(() => Member)
   async deleteMember(@Args("uuid") uuid: string): Promise<Member> {
-    const entity = await this.commandBus.execute(new DeleteMemberCommand(uuid));
-    return this.mapToGraphQL(entity);
+    return toPublicMember(await this.memberService.remove(uuid));
   }
 
   @ResolveField(() => User, { nullable: true })
@@ -67,35 +56,7 @@ export class MemberResolver {
     if (!member.userUuid) {
       return null;
     }
-
-    const userEntity = await this.queryBus.execute(
-      new GetUserQuery(member.userUuid),
-    );
-
-    return userEntity ? this.mapUserToGraphQL(userEntity) : null;
-  }
-
-  private mapToGraphQL(entity: MemberEntity): Member {
-    return {
-      uuid: entity.uuid,
-      firstName: entity.firstName,
-      lastName: entity.lastName,
-      joinDate: entity.joinDate,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      userUuid: entity.userUuid ?? null,
-    };
-  }
-
-  private mapUserToGraphQL(user: UserEntity): User {
-    return {
-      uuid: user.uuid,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      verificationToken: user.verificationToken ?? null,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    const row = await this.userService.get(member.userUuid);
+    return row ? toPublicUser(row) : null;
   }
 }

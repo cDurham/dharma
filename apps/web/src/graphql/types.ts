@@ -1,4 +1,4 @@
-import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -26,6 +26,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: { input: unknown; output: unknown };
 };
 
@@ -52,7 +53,6 @@ export type LoginResponse = {
   message: Scalars["String"]["output"];
 };
 
-/** Member */
 export type Member = {
   __typename: "Member";
   createdAt: Scalars["DateTime"]["output"];
@@ -61,7 +61,7 @@ export type Member = {
   lastName: Scalars["String"]["output"];
   updatedAt: Scalars["DateTime"]["output"];
   user: Maybe<User>;
-  uuid: Scalars["String"]["output"];
+  uuid: Scalars["ID"]["output"];
 };
 
 export type Mutation = {
@@ -75,6 +75,7 @@ export type Mutation = {
   login: LoginResponse;
   logout: Scalars["Boolean"]["output"];
   refreshAccessToken: Scalars["Boolean"]["output"];
+  resendVerificationEmail: Scalars["Boolean"]["output"];
   updateMember: Member;
   updateRetreat: Retreat;
   updateUser: User;
@@ -107,6 +108,10 @@ export type MutationDeleteUserArgs = {
 
 export type MutationLoginArgs = {
   data: ValidateUserInput;
+};
+
+export type MutationResendVerificationEmailArgs = {
+  email: Scalars["String"]["input"];
 };
 
 export type MutationUpdateMemberArgs = {
@@ -156,7 +161,6 @@ export type QueryUserArgs = {
   uuid: Scalars["String"]["input"];
 };
 
-/** Retreat */
 export type Retreat = {
   __typename: "Retreat";
   createdAt: Scalars["DateTime"]["output"];
@@ -183,8 +187,6 @@ export type UpdateUserInput = {
   firstName?: InputMaybe<Scalars["String"]["input"]>;
   lastName?: InputMaybe<Scalars["String"]["input"]>;
   password?: InputMaybe<Scalars["String"]["input"]>;
-  verificationToken?: InputMaybe<Scalars["String"]["input"]>;
-  verifiedEmail?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type User = {
@@ -195,7 +197,6 @@ export type User = {
   lastName: Scalars["String"]["output"];
   updatedAt: Scalars["DateTime"]["output"];
   uuid: Scalars["ID"]["output"];
-  verificationToken: Maybe<Scalars["String"]["output"]>;
 };
 
 export type ValidateUserInput = {
@@ -256,10 +257,6 @@ export type CreateMemberMutation = {
   };
 };
 
-export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
-
-export type LogoutMutation = { logout: boolean };
-
 export type LoginMutationVariables = Exact<{
   data: ValidateUserInput;
 }>;
@@ -279,7 +276,6 @@ export type CreateUserMutation = {
     email: string;
     firstName: string;
     lastName: string;
-    verificationToken: string | null;
   };
 };
 
@@ -295,7 +291,6 @@ export type UpdateUserMutation = {
     email: string;
     firstName: string;
     lastName: string;
-    verificationToken: string | null;
   };
 };
 
@@ -311,6 +306,14 @@ export type VerifyEmailMutationVariables = Exact<{
 
 export type VerifyEmailMutation = { verifyEmail: boolean };
 
+export type ResendVerificationEmailMutationVariables = Exact<{
+  email: Scalars["String"]["input"];
+}>;
+
+export type ResendVerificationEmailMutation = {
+  resendVerificationEmail: boolean;
+};
+
 export type GetUserQueryVariables = Exact<{
   uuid: Scalars["String"]["input"];
 }>;
@@ -322,7 +325,6 @@ export type GetUserQuery = {
     email: string;
     firstName: string;
     lastName: string;
-    verificationToken: string | null;
   };
 };
 
@@ -335,7 +337,6 @@ export type GetUsersQuery = {
     email: string;
     firstName: string;
     lastName: string;
-    verificationToken: string | null;
   }>;
 };
 
@@ -350,7 +351,6 @@ export type GetUserByEmailQuery = {
     email: string;
     firstName: string;
     lastName: string;
-    verificationToken: string | null;
   };
 };
 
@@ -363,9 +363,18 @@ export type MeQuery = {
     email: string;
     firstName: string;
     lastName: string;
-    verificationToken: string | null;
   };
 };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never }>;
+
+export type LogoutMutation = { logout: boolean };
+
+export type RefreshAccessTokenMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type RefreshAccessTokenMutation = { refreshAccessToken: boolean };
 
 export const UserBasicFieldsFragmentDoc = {
   kind: "Document",
@@ -613,22 +622,6 @@ export const CreateMemberDocument = {
   CreateMemberMutation,
   CreateMemberMutationVariables
 >;
-export const LogoutDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "logout" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "logout" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
 export const LoginDocument = {
   kind: "Document",
   definitions: [
@@ -720,10 +713,6 @@ export const CreateUserDocument = {
                 { kind: "Field", name: { kind: "Name", value: "email" } },
                 { kind: "Field", name: { kind: "Name", value: "firstName" } },
                 { kind: "Field", name: { kind: "Name", value: "lastName" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "verificationToken" },
-                },
               ],
             },
           },
@@ -794,10 +783,6 @@ export const UpdateUserDocument = {
                 { kind: "Field", name: { kind: "Name", value: "email" } },
                 { kind: "Field", name: { kind: "Name", value: "firstName" } },
                 { kind: "Field", name: { kind: "Name", value: "lastName" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "verificationToken" },
-                },
               ],
             },
           },
@@ -893,6 +878,54 @@ export const VerifyEmailDocument = {
     },
   ],
 } as unknown as DocumentNode<VerifyEmailMutation, VerifyEmailMutationVariables>;
+export const ResendVerificationEmailDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "ResendVerificationEmail" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: {
+            kind: "Variable",
+            name: { kind: "Name", value: "email" },
+          },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "String" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "resendVerificationEmail" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "email" },
+                value: {
+                  kind: "Variable",
+                  name: { kind: "Name", value: "email" },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  ResendVerificationEmailMutation,
+  ResendVerificationEmailMutationVariables
+>;
 export const GetUserDocument = {
   kind: "Document",
   definitions: [
@@ -936,10 +969,6 @@ export const GetUserDocument = {
                 { kind: "Field", name: { kind: "Name", value: "email" } },
                 { kind: "Field", name: { kind: "Name", value: "firstName" } },
                 { kind: "Field", name: { kind: "Name", value: "lastName" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "verificationToken" },
-                },
               ],
             },
           },
@@ -968,10 +997,6 @@ export const GetUsersDocument = {
                 { kind: "Field", name: { kind: "Name", value: "email" } },
                 { kind: "Field", name: { kind: "Name", value: "firstName" } },
                 { kind: "Field", name: { kind: "Name", value: "lastName" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "verificationToken" },
-                },
               ],
             },
           },
@@ -1026,10 +1051,6 @@ export const GetUserByEmailDocument = {
                 { kind: "Field", name: { kind: "Name", value: "email" } },
                 { kind: "Field", name: { kind: "Name", value: "firstName" } },
                 { kind: "Field", name: { kind: "Name", value: "lastName" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "verificationToken" },
-                },
               ],
             },
           },
@@ -1058,10 +1079,6 @@ export const MeDocument = {
                 { kind: "Field", name: { kind: "Name", value: "email" } },
                 { kind: "Field", name: { kind: "Name", value: "firstName" } },
                 { kind: "Field", name: { kind: "Name", value: "lastName" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "verificationToken" },
-                },
               ],
             },
           },
@@ -1070,3 +1087,41 @@ export const MeDocument = {
     },
   ],
 } as unknown as DocumentNode<MeQuery, MeQueryVariables>;
+export const LogoutDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "Logout" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          { kind: "Field", name: { kind: "Name", value: "logout" } },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<LogoutMutation, LogoutMutationVariables>;
+export const RefreshAccessTokenDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "RefreshAccessToken" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "refreshAccessToken" },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  RefreshAccessTokenMutation,
+  RefreshAccessTokenMutationVariables
+>;

@@ -1,97 +1,78 @@
-import { UseGuards } from "@nestjs/common";
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { ForbiddenException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Throttle } from "@nestjs/throttler";
 import { CurrentUser } from "../Auth/current-user.decorator.js";
-import { JwtAuthGuard } from "../Auth/jwt-auth.guard.js";
-import { CreateUserCommand } from "./command/create-user.command.js";
-import { DeleteUserCommand } from "./command/delete-user.command.js";
-import { GetUserQuery } from "./command/get-user.query.js";
-import { GetUserByEmailQuery } from "./command/get-user-by-email.query.js";
-import { GetUsersQuery } from "./command/get-users.query.js";
-import { ResendVerificationEmailCommand } from "./command/resend-verification-email.command.js";
-import { UpdateUserCommand } from "./command/update-user.command.js";
-import { VerifyEmailCommand } from "./command/verify-email.command.js";
-import type { UserEntity } from "./user.entity.js";
+import { Public } from "../Auth/public.decorator.js";
 import { CreateUserInput, UpdateUserInput } from "./user.input.js";
+import { toPublicUser } from "./user.projection.js";
 import type { AuthenticatedUser } from "./user.schema.js";
+import { UserService } from "./user.service.js";
 import { User } from "./user.type.js";
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(
-    private commandBus: CommandBus,
-    private queryBus: QueryBus,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Query(() => User)
   async user(@Args("uuid") uuid: string): Promise<User | null> {
-    const entity = await this.queryBus.execute(new GetUserQuery(uuid));
-    return entity ? this.mapToGraphQL(entity) : null;
+    const row = await this.userService.get(uuid);
+    return row ? toPublicUser(row) : null;
   }
 
   @Query(() => [User])
   async users(): Promise<User[]> {
-    const result = await this.queryBus.execute(new GetUsersQuery());
-    return result.map((entity) => this.mapToGraphQL(entity));
+    const rows = await this.userService.list();
+    return rows.map(toPublicUser);
   }
 
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Mutation(() => User)
   async createUser(@Args("data") data: CreateUserInput): Promise<User> {
-    const entity = await this.commandBus.execute(new CreateUserCommand(data));
-    return this.mapToGraphQL(entity);
+    return toPublicUser(await this.userService.create(data));
   }
 
   @Mutation(() => User)
   async updateUser(
+    @CurrentUser() currentUser: AuthenticatedUser,
     @Args("uuid") uuid: string,
     @Args("data") data: UpdateUserInput,
   ): Promise<User | null> {
-    const entity = await this.commandBus.execute(
-      new UpdateUserCommand(uuid, data),
-    );
-    return entity ? this.mapToGraphQL(entity) : null;
+    if (currentUser.uuid !== uuid) {
+      throw new ForbiddenException("Users may only update their own account");
+    }
+    const row = await this.userService.update(uuid, data);
+    return row ? toPublicUser(row) : null;
   }
 
   @Mutation(() => Boolean)
   async deleteUser(@Args("uuid") uuid: string): Promise<boolean> {
-    const result = await this.commandBus.execute(new DeleteUserCommand(uuid));
-    return result;
+    return this.userService.remove(uuid);
   }
 
   @Query(() => User)
   async getUserByEmail(@Args("email") email: string): Promise<User | null> {
-    const entity = await this.queryBus.execute(new GetUserByEmailQuery(email));
-    return entity ? this.mapToGraphQL(entity) : null;
+    const row = await this.userService.getByEmail(email);
+    return row ? toPublicUser(row) : null;
   }
 
+  @Public()
   @Mutation(() => Boolean)
   async verifyEmail(@Args("token") token: string): Promise<boolean> {
-    const result = await this.commandBus.execute(new VerifyEmailCommand(token));
-    return result;
+    return this.userService.verifyEmail(token);
   }
 
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Mutation(() => Boolean)
   async resendVerificationEmail(
     @Args("email") email: string,
   ): Promise<boolean> {
-    return this.commandBus.execute(new ResendVerificationEmailCommand(email));
+    return this.userService.resendVerificationEmail(email);
   }
 
   @Query(() => User)
-  @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: AuthenticatedUser): User {
-    return this.mapToGraphQL(user as unknown as UserEntity);
-  }
-
-  private mapToGraphQL(entity: UserEntity): User {
-    return {
-      uuid: entity.uuid,
-      firstName: entity.firstName,
-      lastName: entity.lastName,
-      email: entity.email,
-      verificationToken: entity.verificationToken ?? null,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-    };
+    return toPublicUser(user);
   }
 }

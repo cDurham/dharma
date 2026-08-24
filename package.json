@@ -44,8 +44,6 @@
     "typescript",
     "fullstack"
   ],
-  "dependencies": {
-  },
   "devDependencies": {
     "@biomejs/biome": "^2.3.5",
     "@faker-js/faker": "10.1.0",
@@ -93,6 +91,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
     "typescript": "^5.8.3",
+    "unplugin-swc": "^1.5.11",
     "vite": "7.1.11",
     "vitest": "^2.1.5"
   }

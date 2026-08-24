@@ -1,4 +1,4 @@
-import { Field, HideField, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from "@nestjs/graphql";
 import { BaseEntity } from "../BaseEntity/base.entity.js";
 
 @ObjectType("User")
@@ -11,10 +11,4 @@ export class User extends BaseEntity {
 
   @Field()
   email!: string;
-
-  @Field(() => String, { nullable: true })
-  verificationToken?: string | null;
-
-  @HideField()
-  password?: string;
 }

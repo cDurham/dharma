@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "outDir": "../../dist/out-tsc/apps/web-tests",
     "types": [
+      "vite/client",
       "vitest/globals",
       "vitest/importMeta",
       "@testing-library/jest-dom"
@@ -15,5 +17,8 @@
     "src/**/*.spec.tsx",
     "src/**/*.spec.ts"
   ],
-  "exclude": ["vite.config.ts", "vitest.config.ts"]
+  "exclude": [
+    "vite.config.ts",
+    "vitest.config.ts"
+  ]
 }

@@ -1,19 +1,17 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { QueryBus } from "@nestjs/cqrs";
 import { PassportStrategy } from "@nestjs/passport";
 import type { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { GetUserQuery } from "../User/command/get-user.query.js";
-import type { UserEntity } from "../User/user.entity.js";
 import type { AuthenticatedUser } from "../User/user.schema.js";
+import { UserService } from "../User/user.service.js";
 import { getAccessToken } from "./auth.cookies.js";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
-    private readonly queryBus: QueryBus,
+    private readonly userService: UserService,
   ) {
     const secret = configService.get<string>("JWT_SECRET");
     if (!secret) {
@@ -38,16 +36,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     sub: string;
     email: string;
   }): Promise<AuthenticatedUser> {
-    const user = await this.queryBus.execute<UserEntity | null>(
-      new GetUserQuery(payload.sub),
-    );
+    const user = await this.userService.get(payload.sub);
 
     if (!user) {
       throw new UnauthorizedException("User not found");
     }
 
-    // Exclude password from the returned user object
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...result } = user;
     return result;
   }
