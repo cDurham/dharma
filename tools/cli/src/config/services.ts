@@ -126,8 +126,7 @@ class ServiceRegistry {
 // Export singleton instance
 export const serviceRegistry = ServiceRegistry.getInstance();
 
-// Export aliases for reference
-export { SERVICE_ALIASES };
-
 // Export type for use in other files
 export type { ServiceConfig } from "./docker-compose-parser.js";
+// Export aliases for reference
+export { SERVICE_ALIASES };
